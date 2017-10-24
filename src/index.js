@@ -6,7 +6,7 @@
  * @license MIT
  */
 
- /* eslint no-console: 0 */
+/* eslint no-console: 0 */
 import express from 'express'
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
