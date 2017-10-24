@@ -1,0 +1,48 @@
+{
+  "name": "expressio",
+  "version": "0.0.0",
+  "description": "",
+  "author": "Hugo W. <me@hugw.io>",
+  "repository": "https://github.com/hugw/expressio",
+  "license": "MIT",
+  "main": "./dist",
+  "scripts": {
+    "build": "babel ./src -s -D -d dist",
+    "demo": "nodemon -w ./demo -w ./src --inspect --exec \"babel-node ./demo\"",
+    "lint": "eslint .",
+    "postinstall": "npm run build",
+    "test": "jest . --verbose --colors --forceExit",
+    "test:watch": "npm run test -- --watch "
+  },
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "body-parser": "^1.18.2",
+    "colors": "^1.1.2",
+    "compression": "^1.7.1",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.4",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.1",
+    "express-validator": "^4.2.1",
+    "express-winston": "^2.4.0",
+    "helmet": "^3.8.2",
+    "http-status": "^1.0.1",
+    "mongoose": "^4.12.0",
+    "morgan": "^1.9.0",
+    "path": "^0.12.7",
+    "winston": "^2.4.0"
+  },
+  "devDependencies": {
+    "jest": "^21.2.1",
+    "nodemon": "^1.12.1",
+    "supertest": "^3.0.0",
+    "eslint": "^4.8.0",
+    "eslint-config-airbnb-base": "^12.0.2",
+    "eslint-plugin-import": "^2.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
