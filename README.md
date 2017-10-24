@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/hugw/expressio/tree/master.svg?style=svg&circle-token=73d118d816ff8e8ab100ced37bc7c4b6515db025)](https://circleci.com/gh/hugw/expressio/tree/master)
+
 # Expressio
 
 ***
