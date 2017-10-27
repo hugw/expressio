@@ -29,7 +29,7 @@ describe('Expressio', () => {
     expect(spyTerminate).toHaveBeenCalled()
   })
 
-  it('should stop the server node minimum version is not met', () => {
+  it('should stop the server when node minimum version is not met', () => {
     expressio({
       publicDir: path.join(__dirname, 'public'),
       reqNode: { minor: 3, major: 3 }
