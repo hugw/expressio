@@ -17,6 +17,7 @@ import HTTPStatus from 'http-status'
 import chalk from 'chalk'
 import winstonExp from 'express-winston'
 import winston from 'winston'
+import mongoose from 'mongoose'
 import { IS_DEV, CURRENT_ENV } from 'isenv'
 
 import { isNodeSupported, isDir, terminate } from './utils'
@@ -41,6 +42,13 @@ export default function expressio(appSettings) {
     rootPath: null,
     publicDirName: 'public',
     modelsDirName: 'models',
+    mongo: true,
+    db: {
+      development: null,
+      staging: null,
+      test: null,
+      production: null
+    }
   }
 
   const settings = Object.assign({}, defaultSettings, appSettings)
@@ -54,6 +62,9 @@ export default function expressio(appSettings) {
   // Check if current settings
   // paths are valid directories
   ['publicDirName', 'modelsDirName'].forEach((name) => {
+    // Check if models directly is first necessary
+    if (name === 'modelsDirName' && !settings.mongo) return false
+
     const dirPath = path.join(settings.rootPath, settings[name])
     const msg = `"${dirPath}" does not exist.\n` +
     `Please check your "${name}" settings.`
@@ -137,11 +148,25 @@ export default function expressio(appSettings) {
     })
 
     // Server start
-    server = app.listen(settings.port, settings.address, () => {
-      const { address, port } = server.address()
-      const msg = `Server running → ${address}:${port} @ ${settings.env}`
-      console.log(chalk.green(msg))
-    })
+    const startExpress = () => {
+      server = app.listen(settings.port, settings.address, () => {
+        const { address, port } = server.address()
+        const msg = `Server running → ${address}:${port} @ ${settings.env}`
+        console.log(chalk.green(msg))
+      })
+    }
+
+    // Mongo initialization
+    if (settings.mongo) {
+      mongoose.connect(settings.db[settings.env], { useMongoClient: true })
+      mongoose.Promise = global.Promise
+      mongoose.connection.on('error', err => terminate(chalk.red(err.message)))
+      mongoose.connection.once('open', () => {
+        const msg = `Mongo connected @ ${settings.env}`
+        console.log(chalk.green(msg))
+        startExpress()
+      })
+    } else startExpress()
   }
 
   /**
