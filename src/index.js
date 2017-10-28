@@ -122,6 +122,7 @@ export default function expressio(appSettings) {
   app.use((req, res, next) => {
     const modelsPath = path.join(settings.rootPath, settings.modelsDirName)
     const models = settings.mongo ? getModels(modelsPath) : {}
+
     req.expressio = {
       settings,
       models
@@ -210,3 +211,11 @@ export { express }
  */
 mongoose.Promise = global.Promise
 export { mongoose }
+
+/**
+ * asyncRoute
+ */
+export const asyncRoute = fn => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next)
+}
+
