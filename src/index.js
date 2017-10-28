@@ -7,6 +7,7 @@
  */
 
 /* eslint no-console: 0 */
+import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
@@ -18,7 +19,7 @@ import winstonExp from 'express-winston'
 import winston from 'winston'
 import { IS_DEV, CURRENT_ENV } from 'isenv'
 
-import { isNodeSupported, hasPublicDir, terminate } from './utils'
+import { isNodeSupported, isDir, terminate } from './utils'
 
 /**
  * expressio
@@ -37,7 +38,9 @@ export default function expressio(appSettings) {
     port: 4000,
     address: '127.0.0.1',
     reqNode: { minor: 6, major: 8 },
-    publicDir: null,
+    rootPath: null,
+    publicDirName: 'public',
+    modelsDirName: 'models',
   }
 
   const settings = Object.assign({}, defaultSettings, appSettings)
@@ -49,14 +52,20 @@ export default function expressio(appSettings) {
   }
 
   // Check if current settings
-  // has a valid public directory path set
-  if (!hasPublicDir(settings.publicDir)) {
-    return terminate(chalk.red('"publicDir" path is not valid.'))
-  }
+  // paths are valid directories
+  ['publicDirName', 'modelsDirName'].forEach((name) => {
+    const dirPath = path.join(settings.rootPath, settings[name])
+    const msg = `"${dirPath}" does not exist.\n` +
+    `Please check your "${name}" settings.`
 
-  // Define a public folder for
+    if (!isDir(dirPath)) return terminate(chalk.red(msg))
+
+    return false
+  })
+
+  // Define a public Dir for
   // static content
-  app.use(express.static(settings.publicDir))
+  app.use(express.static(path.join(settings.rootPath, settings.publicDirName)))
 
   // Parse incomming requests to
   // JSON format
@@ -116,7 +125,7 @@ export default function expressio(appSettings) {
     // General error handler. It will
     // show throw errors based on
     // current environment set
-    app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    app.use((err, req, res, next) => { // eslint-disable-line
       const stack = err.stack && err.stack.split('\n')
 
       res.status(err.status || 500)
