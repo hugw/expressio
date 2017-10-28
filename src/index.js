@@ -20,7 +20,7 @@ import winston from 'winston'
 import mongoose from 'mongoose'
 import { IS_DEV, CURRENT_ENV } from 'isenv'
 
-import { isNodeSupported, isDir, terminate } from './utils'
+import { isNodeSupported, isDir, terminate, getModels } from './utils'
 
 /**
  * expressio
@@ -117,6 +117,19 @@ export default function expressio(appSettings) {
     }))
   }
 
+  // Attach common settings
+  // to req object
+  app.use((req, res, next) => {
+    const modelsPath = path.join(settings.rootPath, settings.modelsDirName)
+    const models = settings.mongo ? getModels(modelsPath) : {}
+    req.expressio = {
+      settings,
+      models
+    }
+
+    next()
+  })
+
 
   /**
    * startServer
@@ -159,7 +172,6 @@ export default function expressio(appSettings) {
     // Mongo initialization
     if (settings.mongo) {
       mongoose.connect(settings.db[settings.env], { useMongoClient: true })
-      mongoose.Promise = global.Promise
       mongoose.connection.on('error', err => terminate(chalk.red(err.message)))
       mongoose.connection.once('open', () => {
         const msg = `Mongo connected @ ${settings.env}`
@@ -196,4 +208,5 @@ export { express }
  * to be used without the need
  * to setup dependecies twice
  */
+mongoose.Promise = global.Promise
 export { mongoose }
