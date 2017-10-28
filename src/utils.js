@@ -7,6 +7,7 @@
  */
 
 /* eslint no-console: 0 */
+import fs from 'fs'
 
 /**
  * isNodeSupported
@@ -23,13 +24,16 @@ export function isNodeSupported(app) {
 }
 
 /**
- * hasPublicDir
+ * isDir
  *
  * Check if current path
- * is a valid "publicDir" path.
+ * is a valid directory.
  */
-export function hasPublicDir(dir) {
-  return !!dir
+export function isDir(dir) {
+  try {
+    const stats = fs.statSync(dir)
+    return stats.isDirectory()
+  } catch (e) { return false }
 }
 
 /**
