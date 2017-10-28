@@ -8,6 +8,7 @@
 
 /* eslint no-console: 0 */
 import fs from 'fs'
+import path from 'path'
 
 /**
  * isNodeSupported
@@ -34,6 +35,27 @@ export function isDir(dir) {
     const stats = fs.statSync(dir)
     return stats.isDirectory()
   } catch (e) { return false }
+}
+
+/**
+ * getModels
+ *
+ * Auto load models
+ * and return all into
+ * a single object.
+ */
+export function getModels(dir) {
+  const models = {}
+
+  fs.readdirSync(dir).forEach((file) => {
+    if (file !== 'index.js') {
+      const moduleName = file.split('.')[0]
+      const modulePath = path.join(dir, moduleName)
+      models[moduleName] = require(modulePath) // eslint-disable-line
+    }
+  })
+
+  return models
 }
 
 /**
