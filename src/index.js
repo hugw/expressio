@@ -184,7 +184,16 @@ export default function expressio(appSettings) {
  * express
  *
  * Expose Express object
- * to be used without having
+ * to be used without the need
  * to setup dependecies twice
  */
 export { express }
+
+/**
+ * Mongoose
+ *
+ * Expose Mongoose object
+ * to be used without the need
+ * to setup dependecies twice
+ */
+export { mongoose }
