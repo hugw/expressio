@@ -19,6 +19,7 @@ import winstonExp from 'express-winston'
 import winston from 'winston'
 import mongoose from 'mongoose'
 import joi from 'joi'
+import beautifyUnique from 'mongoose-beautiful-unique-validation'
 import { IS_DEV } from 'isenv'
 
 import defaultSettings from './settings'
@@ -176,6 +177,7 @@ export default function expressio(appSettings) {
  * to setup dependecies twice
  */
 mongoose.Promise = global.Promise
+mongoose.plugin(beautifyUnique)
 export { express, mongoose, joi, HTTPStatus }
 
 /**

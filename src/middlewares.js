@@ -85,7 +85,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
     }
   }
 
-  next(error)
+  next(error || err)
 }
 
 /**
