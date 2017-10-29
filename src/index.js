@@ -148,6 +148,27 @@ export default function expressio(appSettings) {
       next(err)
     })
 
+    app.use((err, req, res, next) => {
+      let error
+
+      if ( err && err.name === 'ValidationError') {
+        error = new Error(HTTPStatus[400])
+        error.status = 400
+
+        error.data = {
+          validation: Object.keys(err.errors).map(i => ({
+            path: err.errors[i].path,
+            type: err.errors[i].kind,
+            key: i,
+            message: err.errors[i].message,
+            label: ''
+          }))
+        }
+      }
+
+      next(error)
+    })
+
     // General error handler. It
     // shows errors based on
     // current environment set

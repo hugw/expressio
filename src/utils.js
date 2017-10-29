@@ -51,7 +51,7 @@ export function getModels(dir) {
     if (file !== 'index.js') {
       const moduleName = file.split('.')[0]
       const modulePath = path.join(dir, moduleName)
-      models[moduleName] = require(modulePath) // eslint-disable-line
+      models[moduleName] = require(modulePath).default // eslint-disable-line
     }
   })
 
