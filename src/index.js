@@ -19,9 +19,24 @@ import winstonExp from 'express-winston'
 import winston from 'winston'
 import mongoose from 'mongoose'
 import joi from 'joi'
-import { IS_DEV, CURRENT_ENV } from 'isenv'
+import { IS_DEV } from 'isenv'
 
-import { isNodeSupported, isDir, terminate, getModels } from './utils'
+import defaultSettings from './settings'
+
+import {
+  isNodeSupported,
+  isDir,
+  terminate,
+  getModels
+} from './utils'
+
+import {
+  asyncRoute,
+  validate,
+  notFoundHandler,
+  generalErrorhandler,
+  mongooseErrorHandler
+} from './middlewares'
 
 /**
  * expressio
@@ -33,24 +48,6 @@ import { isNodeSupported, isDir, terminate, getModels } from './utils'
 export default function expressio(appSettings) {
   let server
   const app = express()
-
-  // Setup settings
-  const defaultSettings = {
-    env: CURRENT_ENV,
-    port: 4000,
-    address: '127.0.0.1',
-    reqNode: { minor: 6, major: 8 },
-    rootPath: null,
-    publicDirName: 'public',
-    modelsDirName: 'models',
-    mongo: true,
-    db: {
-      development: null,
-      staging: null,
-      test: null,
-      production: null
-    }
-  }
 
   const settings = Object.assign({}, defaultSettings, appSettings)
 
@@ -124,14 +121,9 @@ export default function expressio(appSettings) {
     const modelsPath = path.join(settings.rootPath, settings.modelsDirName)
     const models = settings.mongo ? getModels(modelsPath) : {}
 
-    req.expressio = {
-      settings,
-      models
-    }
-
+    req.expressio = { settings, models }
     next()
   })
-
 
   /**
    * startServer
@@ -140,49 +132,14 @@ export default function expressio(appSettings) {
    * error handlers
    */
   app.startServer = () => {
-    // Not found
-    // error handler
-    app.use((req, res, next) => {
-      const err = new Error(HTTPStatus[404])
-      err.status = 404
-      next(err)
-    })
+    // Not found error handler
+    app.use(notFoundHandler)
 
-    app.use((err, req, res, next) => {
-      let error
+    // Mongoose error handler
+    app.use(mongooseErrorHandler)
 
-      if ( err && err.name === 'ValidationError') {
-        error = new Error(HTTPStatus[400])
-        error.status = 400
-
-        error.data = {
-          validation: Object.keys(err.errors).map(i => ({
-            path: err.errors[i].path,
-            type: err.errors[i].kind,
-            key: i,
-            message: err.errors[i].message,
-            label: ''
-          }))
-        }
-      }
-
-      next(error)
-    })
-
-    // General error handler. It
-    // shows errors based on
-    // current environment set
-    app.use((err, req, res, next) => { // eslint-disable-line
-      const stack = err.stack && err.stack.split('\n')
-      res.status(err.status || 500)
-
-      res.json({
-        error: err.message,
-        statusCode: err.status,
-        ...err.data,
-        stack: (IS_DEV && stack) || ''
-      })
-    })
+    // General error handler
+    app.use(generalErrorhandler)
 
     // Server start
     const startExpress = () => {
@@ -207,9 +164,6 @@ export default function expressio(appSettings) {
 
   /**
    * stopServer
-   *
-   * Kill current server
-   * instance.
    */
   app.stopServer = () => server.close()
 
@@ -217,61 +171,14 @@ export default function expressio(appSettings) {
 }
 
 /**
- * express
- *
- * Expose Express object
- * to be used without the need
- * to setup dependecies twice
- */
-export { express }
-
-/**
- * Mongoose
- *
- * Expose Mongoose object
+ * Expose common object
  * to be used without the need
  * to setup dependecies twice
  */
 mongoose.Promise = global.Promise
-export { mongoose }
+export { express, mongoose, joi, HTTPStatus }
 
 /**
- * Joi
- *
- * Expose Joi object
- * to be used without the need
- * to setup dependecies twice
+ * Expose middlewares
  */
-export { joi }
-
-/**
- * asyncRoute
- */
-export const asyncRoute = fn => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next)
-}
-
-export const validate = schema => (req, res, next) => {
-  const options = {
-    abortEarly: false
-  }
-
-  joi.validate(req.body, schema, options, (err, value) => {
-    const error = new Error(HTTPStatus[400])
-
-    error.status = 400
-    error.data = {
-      validation: err && err.details.map(i => ({
-        path: i.path.join('.'),
-        type: i.type,
-        key: i.context.key,
-        message: i.message.replace(/"/g, ''),
-        label: (i.context.label !== i.context.key) ? i.context.label : ''
-      }))
-    }
-
-    if (!err) req.body = value
-
-    next(err && error)
-  })
-}
+export { asyncRoute, validate }
