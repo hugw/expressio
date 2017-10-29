@@ -5,9 +5,9 @@
   "author": "Hugo W. <me@hugw.io>",
   "repository": "https://github.com/hugw/expressio",
   "license": "MIT",
-  "main": "./dist",
+  "main": "./src",
   "scripts": {
-    "build": "babel ./src -s -D -d dist",
+    "build": "babel ./src --ignore '__test__/' -s -D -d dist",
     "demo": "nodemon -w ./demo -w ./src --inspect --exec \"babel-node ./demo\"",
     "lint": "eslint .",
     "postinstall": "npm run build",

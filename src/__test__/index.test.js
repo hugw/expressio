@@ -6,8 +6,8 @@
  * @license MIT
  */
 
-import path from 'path'
-import expressio from '../'
+// import path from 'path'
+import expressio, { express } from '../'
 import * as utils from '../utils'
 
 describe('Expressio', () => {
@@ -18,21 +18,30 @@ describe('Expressio', () => {
     spyTerminate.mockRestore()
   })
 
+  it('should expose an Express instance', () => {
+    expect(express).toBeDefined()
+  })
+
   it('should return a valid expressio instance', () => {
-    const server = expressio({ publicDir: path.join(__dirname, 'public') })
+    const server = expressio({
+      rootPath: __dirname,
+      mongo: false
+    })
+
     expect(spyTerminate).not.toHaveBeenCalled()
     expect(server.startServer).toBeDefined()
   })
 
-  it('should stop the server when no public dir is provided', () => {
-    expressio()
-    expect(spyTerminate).toHaveBeenCalled()
-  })
+  // it('should stop the server when no public dir is provided', () => {
+  //   expressio()
+  //   expect(spyTerminate).toHaveBeenCalled()
+  // })
 
   it('should stop the server when node minimum version is not met', () => {
     expressio({
-      publicDir: path.join(__dirname, 'public'),
-      reqNode: { minor: 3, major: 3 }
+      rootPath: __dirname,
+      mongo: false,
+      reqNode: { minor: 20, major: 20 }
     })
 
     expect(spyTerminate).toHaveBeenCalled()

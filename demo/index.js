@@ -6,12 +6,12 @@
  * @license MIT
  */
 
-import path from 'path'
 import expressio from '../src/index'
 import routes from './routes'
+import settings from './config/settings'
 
 // Create new server instance
-const demo = expressio({ publicDir: path.join(__dirname, 'public') })
+const demo = expressio(settings)
 
 // Add routes
 demo.use(routes)

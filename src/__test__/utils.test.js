@@ -6,7 +6,7 @@
  * @license MIT
  */
 
-import { isNodeSupported, hasPublicDir } from '../utils'
+import { isNodeSupported } from '../utils'
 
 describe('Expressio / Utils', () => {
   describe('#isNodeSupported', () => {
@@ -42,17 +42,17 @@ describe('Expressio / Utils', () => {
     })
   })
 
-  describe('#hasPublicDir', () => {
-    it('should return TRUE for a valid public directory', () => {
-      expect(hasPublicDir('../')).toBeTruthy()
-    })
+  // describe('#hasPublicDir', () => {
+  //   it('should return TRUE for a valid public directory', () => {
+  //     expect(hasPublicDir('../')).toBeTruthy()
+  //   })
 
-    it('should return FALSE for an invalid public directory', () => {
-      expect(hasPublicDir('')).toBeFalsy()
-      expect(hasPublicDir()).toBeFalsy()
-      expect(hasPublicDir(null)).toBeFalsy()
-      expect(hasPublicDir(false)).toBeFalsy()
-      expect(hasPublicDir(undefined)).toBeFalsy()
-    })
-  })
+  //   it('should return FALSE for an invalid public directory', () => {
+  //     expect(hasPublicDir('')).toBeFalsy()
+  //     expect(hasPublicDir()).toBeFalsy()
+  //     expect(hasPublicDir(null)).toBeFalsy()
+  //     expect(hasPublicDir(false)).toBeFalsy()
+  //     expect(hasPublicDir(undefined)).toBeFalsy()
+  //   })
+  // })
 })
