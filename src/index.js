@@ -18,6 +18,7 @@ import chalk from 'chalk'
 import winstonExp from 'express-winston'
 import winston from 'winston'
 import mongoose from 'mongoose'
+import joi from 'joi'
 import { IS_DEV, CURRENT_ENV } from 'isenv'
 
 import { isNodeSupported, isDir, terminate, getModels } from './utils'
@@ -147,16 +148,17 @@ export default function expressio(appSettings) {
       next(err)
     })
 
-    // General error handler. It will
-    // show throw errors based on
+    // General error handler. It
+    // shows errors based on
     // current environment set
     app.use((err, req, res, next) => { // eslint-disable-line
       const stack = err.stack && err.stack.split('\n')
-
       res.status(err.status || 500)
+
       res.json({
-        message: err.message,
-        status: err.status,
+        error: err.message,
+        statusCode: err.status,
+        ...err.data,
         stack: (IS_DEV && stack) || ''
       })
     })
@@ -213,9 +215,42 @@ mongoose.Promise = global.Promise
 export { mongoose }
 
 /**
+ * Joi
+ *
+ * Expose Joi object
+ * to be used without the need
+ * to setup dependecies twice
+ */
+export { joi }
+
+/**
  * asyncRoute
  */
 export const asyncRoute = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next)
 }
 
+export const validate = schema => (req, res, next) => {
+  const options = {
+    abortEarly: false
+  }
+
+  joi.validate(req.body, schema, options, (err, value) => {
+    const error = new Error(HTTPStatus[400])
+
+    error.status = 400
+    error.data = {
+      validation: err && err.details.map(i => ({
+        path: i.path.join('.'),
+        type: i.type,
+        key: i.context.key,
+        message: i.message.replace(/"/g, ''),
+        label: (i.context.label !== i.context.key) ? i.context.label : ''
+      }))
+    }
+
+    if (!err) req.body = value
+
+    next(err && error)
+  })
+}
