@@ -20,6 +20,7 @@ import winston from 'winston'
 import mongoose from 'mongoose'
 import joi from 'joi'
 import beautifyUnique from 'mongoose-beautiful-unique-validation'
+import jwt from 'jsonwebtoken'
 import { IS_DEV } from 'isenv'
 
 import defaultSettings from './settings'
@@ -34,6 +35,7 @@ import {
 import {
   asyncRoute,
   validate,
+  authorize,
   notFoundHandler,
   generalErrorhandler,
   mongooseErrorHandler
@@ -60,9 +62,9 @@ export default function expressio(appSettings) {
 
   // Check if current settings
   // paths are valid directories
-  ['publicDirName', 'modelsDirName'].forEach((name) => {
-    // Check if models directly is first necessary
-    if (name === 'modelsDirName' && !settings.mongo) return false
+  ['publicFolder', 'modelsFolder'].forEach((name) => {
+    // Check if models dir is first necessary
+    if (name === 'modelsFolder' && !settings.db) return false
 
     const dirPath = path.join(settings.rootPath, settings[name])
     const msg = `"${dirPath}" does not exist.\n` +
@@ -75,7 +77,7 @@ export default function expressio(appSettings) {
 
   // Define a public Dir for
   // static content
-  app.use(express.static(path.join(settings.rootPath, settings.publicDirName)))
+  app.use(express.static(path.join(settings.rootPath, settings.publicFolder)))
 
   // Parse incomming requests to
   // JSON format
@@ -89,7 +91,7 @@ export default function expressio(appSettings) {
   // Security
   // (CORS & HTTP Headers)
   app.use(helmet())
-  app.use(cors())
+  app.use(cors(settings.cors))
 
   // Logging
   if (IS_DEV) {
@@ -119,10 +121,11 @@ export default function expressio(appSettings) {
   // Attach common settings
   // to req object
   app.use((req, res, next) => {
-    const modelsPath = path.join(settings.rootPath, settings.modelsDirName)
-    const models = settings.mongo ? getModels(modelsPath) : {}
+    const modelsPath = path.join(settings.rootPath, settings.modelsFolder)
+    const models = settings.db && getModels(modelsPath)
 
-    req.expressio = { settings, models }
+    req.settings = settings
+    req.models = models
     next()
   })
 
@@ -146,18 +149,16 @@ export default function expressio(appSettings) {
     const startExpress = () => {
       server = app.listen(settings.port, settings.address, () => {
         const { address, port } = server.address()
-        const msg = `Server running → ${address}:${port} @ ${settings.env}`
-        console.log(chalk.green(msg))
+        console.log(chalk.green(`Server running → ${address}:${port} @ ${settings.env}`))
       })
     }
 
     // Mongo initialization
-    if (settings.mongo) {
+    if (settings.db) {
       mongoose.connect(settings.db[settings.env], { useMongoClient: true })
       mongoose.connection.on('error', err => terminate(chalk.red(err.message)))
       mongoose.connection.once('open', () => {
-        const msg = `Mongo connected @ ${settings.env}`
-        console.log(chalk.green(msg))
+        console.log(chalk.green(`Mongo connected @ ${settings.env}`))
         startExpress()
       })
     } else startExpress()
@@ -172,13 +173,14 @@ export default function expressio(appSettings) {
 }
 
 /**
- * Expose common object
+ * Expose common objects
  * to be used without the need
  * to setup dependecies twice
  */
 mongoose.Promise = global.Promise
 mongoose.plugin(beautifyUnique)
-export { express, mongoose, joi, HTTPStatus }
+
+export { express, mongoose, joi, HTTPStatus, jwt, authorize }
 
 /**
  * Expose middlewares

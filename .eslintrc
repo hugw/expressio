@@ -9,6 +9,6 @@
   "rules": {
     "semi": ["error", "never"],
     "comma-dangle": "off",
-    "max-len": ["error", { "ignoreComments": true }]
+    "max-len": ["error", { "ignoreComments": true, "code": 120 }]
   }
 }

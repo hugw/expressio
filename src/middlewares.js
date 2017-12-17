@@ -9,6 +9,7 @@
 import HTTPStatus from 'http-status'
 import joi from 'joi'
 import { IS_DEV } from 'isenv'
+import ejwt from 'express-jwt'
 
 /**
  * asyncRoute
@@ -35,7 +36,7 @@ export const validate = schema => (req, res, next) => {
 
     error.status = 400
     error.data = {
-      validation: err && err.details.map(i => ({
+      errors: err && err.details.map(i => ({
         path: i.path.join('.'),
         type: i.type,
         key: i.context.key,
@@ -75,7 +76,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
     error.status = 400
 
     error.data = {
-      validation: Object.keys(err.errors).map(i => ({
+      errors: Object.keys(err.errors).map(i => ({
         path: err.errors[i].path,
         type: err.errors[i].kind,
         key: i,
@@ -100,9 +101,21 @@ export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-
   res.status(err.status || 500)
 
   res.json({
-    error: err.message,
+    message: err.message,
     statusCode: err.status,
     ...err.data,
     stack: (IS_DEV && stack) || ''
   })
+}
+
+/**
+ * authorize
+ *
+ * Authorize requests based
+ * on JWT Tokens
+ */
+export const authorize = ({ ignorePath }) => (req, res, next) => {
+  const { secret } = req.settings
+  const fn = ejwt({ secret }).unless(ignorePath && { path: ignorePath })
+  fn(req, res, next)
 }

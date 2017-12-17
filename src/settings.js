@@ -14,13 +14,19 @@ export default {
   address: '127.0.0.1',
   reqNode: { minor: 6, major: 8 },
   rootPath: null,
-  publicDirName: 'public',
-  modelsDirName: 'models',
-  mongo: true,
+  publicFolder: 'public',
+  modelsFolder: 'models',
+  cors: {
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  },
   db: {
     development: null,
     staging: null,
     test: null,
     production: null
-  }
+  },
+  secret: 'Default secret key'
 }
