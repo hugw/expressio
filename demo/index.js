@@ -6,17 +6,54 @@
  * @license MIT
  */
 
-import expressio from '../src/index'
+import expressio from '../src'
 import routes from './routes'
-import settings from './config/settings'
 
-// Create new server instance
-const demo = expressio(settings)
+const app = expressio({
+  rootPath: __dirname,
+  authorization: {
+    ignorePaths: [
+      '/',
+      '/public',
+      '/notfound',
+      '/article',
+      '/settings',
+    ]
+  }
+})
 
-// Add routes
-demo.use(routes)
+app.use(routes)
+
+// app.use(authorize({ ignorePath: ['/auth/sign-up', '/auth/sign-in'] }))
+
+// app.post('/auth/sign-up', asyncRoute(async (req, res) => {
+//   const { User } = req.models
+//   const user = await User.create(req.body)
+//   res.json(user)
+// }))
+
+// app.post('/auth/sign-in', asyncRoute(async (req, res) => {
+//   const { User } = req.models
+//   const { password, email } = req.body
+
+//   const user = await User.findOne({ email }).exec()
+//   const valid = await user.comparePassword(password)
+
+//   res.json({ user, valid })
+// }))
+
+// app.post('/auth/sign-in', (req, res) => {
+//   const token = jwt.sign({ foo: 'bar' }, key)
+
+//   res.json({ token })
+// })
+
+// app.get('/auth', jwte({ secret: key }), (req, res) => {
+//   if (!req.user.foo) res.status(401).json({ error: 'not today' })
+//   else res.status(200).json({ today: 'champs' })
+// })
 
 // Start server
-demo.startServer()
+app.startServer()
 
-export default demo
+export default app

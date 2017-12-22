@@ -17,11 +17,10 @@ import HTTPStatus from 'http-status'
 import chalk from 'chalk'
 import winstonExp from 'express-winston'
 import winston from 'winston'
-import mongoose from 'mongoose'
-import joi from 'joi'
-import beautifyUnique from 'mongoose-beautiful-unique-validation'
 import jwt from 'jsonwebtoken'
+import joi from 'joi'
 import { IS_DEV } from 'isenv'
+import merge from 'lodash/merge'
 
 import defaultSettings from './settings'
 
@@ -29,16 +28,13 @@ import {
   isNodeSupported,
   isDir,
   terminate,
-  getModels
 } from './utils'
 
 import {
-  asyncRoute,
-  validate,
   authorize,
+  validate,
   notFoundHandler,
   generalErrorhandler,
-  mongooseErrorHandler
 } from './middlewares'
 
 /**
@@ -52,7 +48,26 @@ export default function expressio(appSettings) {
   let server
   const app = express()
 
-  const settings = Object.assign({}, defaultSettings, appSettings)
+  const defaults = {
+    folders: {
+      public: 'public',
+      models: 'models',
+    },
+    logger: {
+      response: ['statusCode', 'body'],
+      request: [
+        'url',
+        'headers',
+        'method',
+        'httpVersion',
+        'originalUrl',
+        'query',
+        'body'
+      ]
+    }
+  }
+
+  const settings = merge({}, defaultSettings, appSettings)
 
   // Check if current Node version
   // installed is supported
@@ -60,27 +75,30 @@ export default function expressio(appSettings) {
     return terminate(chalk.red('Current Node version is not supported.'))
   }
 
-  // Check if current settings
-  // paths are valid directories
-  ['publicFolder', 'modelsFolder'].forEach((name) => {
-    // Check if models dir is first necessary
-    if (name === 'modelsFolder' && !settings.db) return false
+  // Check if rootPath settings
+  // was provided
+  if (!isDir(settings.rootPath)) return terminate(chalk.red('"rootPath" is not valid.'))
 
-    const dirPath = path.join(settings.rootPath, settings[name])
-    const msg = `"${dirPath}" does not exist.\n` +
-    `Please check your "${name}" settings.`
+  // Check if current default
+  // paths are valid directories
+  Object.keys(defaults.folders).forEach((name) => {
+    // Make sure we check models folder only
+    // if database is set
+    if (name === 'models' && !settings.db) return false
+
+    const dirPath = path.join(settings.rootPath, defaults.folders[name])
+    const msg = `"${name}" folder does not exist.`
 
     if (!isDir(dirPath)) return terminate(chalk.red(msg))
 
     return false
   })
 
-  // Define a public Dir for
-  // static content
-  app.use(express.static(path.join(settings.rootPath, settings.publicFolder)))
+  // Define a public Dir for static content
+  app.use(express.static(path.join(settings.rootPath, defaults.folders.public)))
 
-  // Parse incomming requests to
-  // JSON format
+  // Parse incomming requests
+  // to JSON format
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: true }))
 
@@ -98,36 +116,34 @@ export default function expressio(appSettings) {
     // Setup console logging
     app.use(winstonExp.logger({
       transports: [
-        new winston.transports.Console({
-          colorize: true,
-          prettyPrint: true,
-        })
+        new winston.transports.Console({ colorize: true, prettyPrint: true, })
       ],
       expressFormat: true,
       colorize: true,
-      responseWhitelist: ['statusCode', 'body'],
-      requestWhitelist: [
-        'url',
-        'headers',
-        'method',
-        'httpVersion',
-        'originalUrl',
-        'query',
-        'body'
-      ]
+      responseWhitelist: defaults.logger.response,
+      requestWhitelist: defaults.logger.request
     }))
   }
 
-  // Attach common settings
-  // to req object
-  app.use((req, res, next) => {
-    const modelsPath = path.join(settings.rootPath, settings.modelsFolder)
-    const models = settings.db && getModels(modelsPath)
+  // TODO LOAD OUTSIDE
+  // const modelsPath = path.join(settings.rootPath, settings.modelsFolder)
+  // const models = settings.db && getModels(modelsPath, mongoose)
 
-    req.settings = settings
-    req.models = models
+  // Add common settings / objects
+  // to request object and make
+  // then available to other routes
+  app.use((req, res, next) => {
+    req.xp = {
+      settings,
+      statusCode: HTTPStatus,
+      jwt
+    }
+
     next()
   })
+
+  // Add authorization
+  app.use(authorize)
 
   /**
    * startServer
@@ -139,29 +155,13 @@ export default function expressio(appSettings) {
     // Not found error handler
     app.use(notFoundHandler)
 
-    // Mongoose error handler
-    app.use(mongooseErrorHandler)
-
     // General error handler
     app.use(generalErrorhandler)
 
-    // Server start
-    const startExpress = () => {
-      server = app.listen(settings.port, settings.address, () => {
-        const { address, port } = server.address()
-        console.log(chalk.green(`Server running → ${address}:${port} @ ${settings.env}`))
-      })
-    }
-
-    // Mongo initialization
-    if (settings.db) {
-      mongoose.connect(settings.db[settings.env], { useMongoClient: true })
-      mongoose.connection.on('error', err => terminate(chalk.red(err.message)))
-      mongoose.connection.once('open', () => {
-        console.log(chalk.green(`Mongo connected @ ${settings.env}`))
-        startExpress()
-      })
-    } else startExpress()
+    server = app.listen(settings.port, settings.address, () => {
+      const { address, port } = server.address()
+      console.log(chalk.green(`Server running → ${address}:${port} @ ${settings.env}`))
+    })
   }
 
   /**
@@ -173,16 +173,17 @@ export default function expressio(appSettings) {
 }
 
 /**
- * Expose common objects
- * to be used without the need
- * to setup dependecies twice
+ * Expose Express
+ * Object
  */
-mongoose.Promise = global.Promise
-mongoose.plugin(beautifyUnique)
+export { express }
 
-export { express, mongoose, joi, HTTPStatus, jwt, authorize }
+/**
+ * Expose Joi
+ */
+export { joi }
 
 /**
  * Expose middlewares
  */
-export { asyncRoute, validate }
+export { validate }

@@ -12,36 +12,24 @@ import { IS_DEV } from 'isenv'
 import ejwt from 'express-jwt'
 
 /**
- * asyncRoute
- *
- * Add async/await support
- * for app routes
- */
-export const asyncRoute = fn => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next)
-}
-
-/**
  * validate
  *
  * Body validator/Sanitizer
  */
 export const validate = schema => (req, res, next) => {
+  const { statusCode } = req.xp
+
   const options = {
     abortEarly: false
   }
 
   joi.validate(req.body, schema, options, (err, value) => {
-    const error = new Error(HTTPStatus[400])
+    const error = new Error(statusCode[400])
 
     error.status = 400
     error.data = {
       errors: err && err.details.map(i => ({
-        path: i.path.join('.'),
-        type: i.type,
-        key: i.context.key,
-        message: i.message.replace(/"/g, ''),
-        label: (i.context.label !== i.context.key) ? i.context.label : ''
+        [i.context.key]: i.message.replace(/"/g, ''),
       }))
     }
 
@@ -63,33 +51,6 @@ export const notFoundHandler = (req, res, next) => {
 }
 
 /**
- * mongooseErrorHandler
- *
- * Format mongoose validation
- * error objects
- */
-export const mongooseErrorHandler = (err, req, res, next) => {
-  let error
-
-  if (err && err.name === 'ValidationError') {
-    error = new Error(HTTPStatus[400])
-    error.status = 400
-
-    error.data = {
-      errors: Object.keys(err.errors).map(i => ({
-        path: err.errors[i].path,
-        type: err.errors[i].kind,
-        key: i,
-        message: err.errors[i].message,
-        label: ''
-      }))
-    }
-  }
-
-  next(error || err)
-}
-
-/**
  * generalErrorHandler
  *
  * Format all caught errors
@@ -97,14 +58,14 @@ export const mongooseErrorHandler = (err, req, res, next) => {
  * on current environment
  */
 export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-line
-  const stack = err.stack && err.stack.split('\n')
+  const stack = IS_DEV && err.stack && err.stack.split('\n')
   res.status(err.status || 500)
 
   res.json({
     message: err.message,
     statusCode: err.status,
     ...err.data,
-    stack: (IS_DEV && stack) || ''
+    ...stack || {}
   })
 }
 
@@ -114,8 +75,16 @@ export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-
  * Authorize requests based
  * on JWT Tokens
  */
-export const authorize = ({ ignorePath }) => (req, res, next) => {
-  const { secret } = req.settings
-  const fn = ejwt({ secret }).unless(ignorePath && { path: ignorePath })
-  fn(req, res, next)
+export const authorize = (req, res, next) => {
+  const {
+    settings: {
+      secret,
+      authorization: { ignorePaths, enabled }
+    }
+  } = req.xp
+
+  if (!enabled) return next()
+
+  const fn = ejwt({ secret }).unless(ignorePaths.length && { path: ignorePaths })
+  return fn(req, res, next)
 }

@@ -19,6 +19,7 @@
     "babel-core": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.0",
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "chalk": "^2.3.0",
     "compression": "^1.7.1",
@@ -32,8 +33,7 @@
     "isenv": "^0.1.0",
     "joi": "^13.0.1",
     "jsonwebtoken": "^8.1.0",
-    "mongoose": "^4.12.4",
-    "mongoose-beautiful-unique-validation": "^7.0.0",
+    "lodash": "^4.17.4",
     "path": "^0.12.7",
     "winston": "^2.4.0"
   },

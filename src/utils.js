@@ -8,7 +8,8 @@
 
 /* eslint no-console: 0 */
 import fs from 'fs'
-import path from 'path'
+// import path from 'path'
+// import joi from 'joi'
 
 /**
  * isNodeSupported
@@ -44,28 +45,32 @@ export function isDir(dir) {
  * and return all into
  * a single object.
  */
-export function getModels(dir) {
-  const models = {}
+// export function getModels(dir, mongoose) {
+//   const models = {}
 
-  fs.readdirSync(dir).forEach((file) => {
-    if (file !== 'index.js') {
-      const moduleName = file.split('.')[0]
-      const modulePath = path.join(dir, moduleName)
-      models[moduleName] = require(modulePath).default // eslint-disable-line
-    }
-  })
+//   fs.readdirSync(dir).forEach((file) => {
+//     if (file !== 'index.js') {
+//       const moduleName = file.split('.')[0]
+//       const modulePath = path.join(dir, moduleName)
+//       const model = require(modulePath) // eslint-disable-line
 
-  return models
-}
+//       models[moduleName] = {
+//         schema: model.default(mongoose),
+//         validations: model.validations(joi)
+//       }
+//     }
+//   })
+
+//   return models
+// }
 
 /**
  * terminate
  *
  * Used when a requirement wasn't met
- * and the process had to be closed.
+ * and the process had to be terminated.
  */
 export function terminate(msg) {
   console.error(msg)
-  process.exit()
-  return true
+  process.exit(1)
 }
