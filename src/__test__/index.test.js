@@ -54,7 +54,7 @@ describe('Expressio', () => {
     expect(spyTerminate).toBeCalledWith(chalk.red('Current Node version is not supported.'))
   })
 
-  it('should stop the server when no valid "rootPath" is provided', () => {
+  it('should stop the server when no valid "rootPath" folder is provided', () => {
     expressio({
       rootPath: null,
     })
@@ -63,12 +63,45 @@ describe('Expressio', () => {
     expect(spyTerminate).toBeCalledWith(chalk.red('"rootPath" is not valid.'))
   })
 
-  it('should stop the server when "public" does not exist', () => {
+  it('should stop the server when no "public" folder is provided', () => {
     expressio({
-      rootPath: path.resolve(__dirname, '../'),
+      rootPath: path.resolve(__dirname, './fixtures/no-public-folder'),
     })
 
     expect(spyTerminate).toHaveBeenCalled()
     expect(spyTerminate).toBeCalledWith(chalk.red('"public" folder does not exist.'))
+  })
+
+  it('should stop the server when no "db" folder is provided', () => {
+    expressio({
+      rootPath: path.resolve(__dirname, './fixtures/no-db-folder'),
+      db: { enabled: true }
+    })
+
+    expect(spyTerminate).toHaveBeenCalled()
+    expect(spyTerminate).toBeCalledWith(chalk.red('"db" folder does not exist.'))
+  })
+
+  it('should stop the server when no "models" folder is provided', () => {
+    expressio({
+      rootPath: path.resolve(__dirname, './fixtures/no-models-folder'),
+      db: { enabled: true }
+    })
+
+    expect(spyTerminate).toHaveBeenCalled()
+    expect(spyTerminate).toBeCalledWith(chalk.red('"models" folder does not exist.'))
+  })
+
+  it('should stop the server when no database settings is provided', () => {
+    expressio({
+      rootPath: __dirname,
+      db: {
+        enabled: true,
+        test: null
+      }
+    })
+
+    expect(spyTerminate).toHaveBeenCalled()
+    expect(spyTerminate).toBeCalledWith(chalk.red('Database settings for "test" env does not exist.'))
   })
 })

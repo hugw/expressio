@@ -120,8 +120,16 @@ describe('Demo routes', () => {
   it('(GET /settings) should respond with a settings object', async () => {
     const response = await request(app).get('/settings')
     expect(response.statusCode).toBe(200)
-    expect(response.body.statusCode).toBeTruthy()
-    expect(response.body.settings).toBeTruthy()
-    expect(response.body.jwt).toBeTruthy()
+    expect(response.body.settings).toEqual(['settings', 'statusCode', 'jwt', 'models', 'db'])
+  })
+
+  it('(POST /user) with valid params should return an user payload', async () => {
+    const payload = { name: 'John Doe', email: 'john@doe.com' }
+    const response = await request(app).post('/user')
+      .send(payload)
+    expect(response.statusCode).toBe(200)
+    expect(response.body.page).toEqual('User')
+    expect(response.body.user.name).toBe('John Doe')
+    expect(response.body.user.email).toBe('john@doe.com')
   })
 })

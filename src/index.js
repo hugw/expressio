@@ -20,11 +20,13 @@ import winston from 'winston'
 import jwt from 'jsonwebtoken'
 import joi from 'joi'
 import { IS_DEV } from 'isenv'
+import Sequelize from 'sequelize'
 import merge from 'lodash/merge'
 
 import defaultSettings from './settings'
 
 import {
+  getModels,
   isNodeSupported,
   isDir,
   terminate,
@@ -46,12 +48,15 @@ import {
  */
 export default function expressio(appSettings) {
   let server
+  let sequelize
+  let models
   const app = express()
 
   const defaults = {
     folders: {
       public: 'public',
       models: 'models',
+      db: 'db',
     },
     logger: {
       response: ['statusCode', 'body'],
@@ -84,14 +89,13 @@ export default function expressio(appSettings) {
   Object.keys(defaults.folders).forEach((name) => {
     // Make sure we check models folder only
     // if database is set
-    if (name === 'models' && !settings.db) return false
+    if (name === 'models' && !settings.db.enabled) return false
+    if (name === 'db' && !settings.db.enabled) return false
 
     const dirPath = path.join(settings.rootPath, defaults.folders[name])
     const msg = `"${name}" folder does not exist.`
 
     if (!isDir(dirPath)) return terminate(chalk.red(msg))
-
-    return false
   })
 
   // Define a public Dir for static content
@@ -125,9 +129,26 @@ export default function expressio(appSettings) {
     }))
   }
 
-  // TODO LOAD OUTSIDE
-  // const modelsPath = path.join(settings.rootPath, settings.modelsFolder)
-  // const models = settings.db && getModels(modelsPath, mongoose)
+  // Set database connection
+  if (settings.db.enabled) {
+    const db = settings.db[settings.env]
+    const msg = `Database settings for "${settings.env}" env does not exist.`
+
+    if (!db) return terminate(chalk.red(msg))
+
+    const dbPath = path.join(settings.rootPath, defaults.folders.db)
+    const storage = (db.dialect === 'sqlite') ? { storage: path.join(dbPath, db.storage) } : {}
+
+    // Estabilish a new connection
+    // with the database
+    sequelize = new Sequelize({
+      ...db,
+      ...storage
+    })
+
+    const modelsPath = path.join(settings.rootPath, defaults.folders.models)
+    models = getModels(modelsPath, sequelize, Sequelize)
+  }
 
   // Add common settings / objects
   // to request object and make
@@ -136,7 +157,9 @@ export default function expressio(appSettings) {
     req.xp = {
       settings,
       statusCode: HTTPStatus,
-      jwt
+      jwt,
+      ...models ? { models } : {},
+      ...sequelize ? { db: sequelize } : {}
     }
 
     next()
@@ -162,12 +185,21 @@ export default function expressio(appSettings) {
       const { address, port } = server.address()
       console.log(chalk.green(`Server running → ${address}:${port} @ ${settings.env}`))
     })
+
+    if (sequelize) {
+      const success = chalk.green(`Database connected → ${sequelize.getDialect()} @ ${settings.env}`)
+      const error = chalk.red('Something went wrong while connection to the database.')
+      sequelize.sync().then(() => console.log(success)).catch(() => terminate(error))
+    }
   }
 
   /**
    * stopServer
    */
-  app.stopServer = () => server.close()
+  app.stopServer = () => {
+    server.close()
+    sequelize.close()
+  }
 
   return app
 }

@@ -37,7 +37,17 @@ routes.post('/article', validate(article), (req, res) => {
 })
 
 routes.get('/settings', (req, res) => {
-  res.json({ page: 'Settings', ...req.xp })
+  const settings = Object.keys(req.xp)
+  res.json({ page: 'Settings', settings })
+})
+
+routes.post('/user', (req, res) => {
+  const { models: { User } } = req.xp
+
+  User.create({ ...req.body })
+    .then((user) => {
+      res.json({ page: 'User', user })
+    })
 })
 
 export default routes

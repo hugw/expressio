@@ -8,8 +8,7 @@
 
 /* eslint no-console: 0 */
 import fs from 'fs'
-// import path from 'path'
-// import joi from 'joi'
+import path from 'path'
 
 /**
  * isNodeSupported
@@ -45,24 +44,28 @@ export function isDir(dir) {
  * and return all into
  * a single object.
  */
-// export function getModels(dir, mongoose) {
-//   const models = {}
+export function getModels(dir, sequelize, dataTypes) {
+  const models = {}
 
-//   fs.readdirSync(dir).forEach((file) => {
-//     if (file !== 'index.js') {
-//       const moduleName = file.split('.')[0]
-//       const modulePath = path.join(dir, moduleName)
-//       const model = require(modulePath) // eslint-disable-line
+  try {
+    fs.readdirSync(dir)
+      .filter(file => ((file.indexOf('.') !== 0) && (file !== 'index.js')))
+      .forEach((file) => {
+        const genModel = require(path.join(dir, file)).default // eslint-disable-line
+        const model = genModel(sequelize, dataTypes)
+        models[model.name] = model
+      })
 
-//       models[moduleName] = {
-//         schema: model.default(mongoose),
-//         validations: model.validations(joi)
-//       }
-//     }
-//   })
+    // We must first load all models
+    // before assigning associations
+    Object.keys(models).forEach((name) => {
+      const model = models[name]
+      if ('associate' in model) model.associate(models)
+    })
 
-//   return models
-// }
+    return models
+  } catch (e) { return false }
+}
 
 /**
  * terminate

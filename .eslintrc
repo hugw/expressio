@@ -9,6 +9,7 @@
   "rules": {
     "semi": ["error", "never"],
     "comma-dangle": "off",
-    "max-len": "off"
+    "max-len": "off",
+    "consistent-return": "off"
   }
 }

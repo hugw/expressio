@@ -18,7 +18,11 @@ const app = expressio({
       '/notfound',
       '/article',
       '/settings',
+      '/user',
     ]
+  },
+  db: {
+    enabled: true
   }
 })
 
