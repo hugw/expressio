@@ -22,20 +22,8 @@ export default {
   },
   db: {
     enabled: false,
-    development: {
-      dialect: 'sqlite',
-      storage: 'development.sqlite',
-    },
-    test: {
-      dialect: 'sqlite',
-      storage: 'test.sqlite',
-      logging: false
-    },
-    production: {
-      dialect: 'sqlite',
-      storage: 'production.sqlite',
-      logging: false
-    }
+    dialect: 'sqlite',
+    storage: 'default.sqlite'
   },
   env: CURRENT_ENV,
   port: 4000,

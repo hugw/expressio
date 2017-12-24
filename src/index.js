@@ -21,12 +21,10 @@ import jwt from 'jsonwebtoken'
 import joi from 'joi'
 import { IS_DEV } from 'isenv'
 import Sequelize from 'sequelize'
-import merge from 'lodash/merge'
-
-import defaultSettings from './settings'
 
 import {
   getModels,
+  getConfig,
   isNodeSupported,
   isDir,
   terminate,
@@ -57,6 +55,7 @@ export default function expressio(appSettings) {
       public: 'public',
       models: 'models',
       db: 'db',
+      config: 'config'
     },
     logger: {
       response: ['statusCode', 'body'],
@@ -72,17 +71,18 @@ export default function expressio(appSettings) {
     }
   }
 
-  const settings = merge({}, defaultSettings, appSettings)
+  // Check if rootPath settings
+  // was provided
+  if (!isDir(appSettings.rootPath)) return terminate(chalk.red('"rootPath" is not valid.'))
+
+  const configPath = path.join(appSettings.rootPath, defaults.folders.config)
+  const settings = getConfig(configPath, appSettings)
 
   // Check if current Node version
   // installed is supported
   if (!isNodeSupported(settings.reqNode)) {
     return terminate(chalk.red('Current Node version is not supported.'))
   }
-
-  // Check if rootPath settings
-  // was provided
-  if (!isDir(settings.rootPath)) return terminate(chalk.red('"rootPath" is not valid.'))
 
   // Check if current default
   // paths are valid directories
@@ -131,10 +131,10 @@ export default function expressio(appSettings) {
 
   // Set database connection
   if (settings.db.enabled) {
-    const db = settings.db[settings.env]
+    const { db } = settings
     const msg = `Database settings for "${settings.env}" env does not exist.`
 
-    if (!db) return terminate(chalk.red(msg))
+    if (!db.dialect) return terminate(chalk.red(msg))
 
     const dbPath = path.join(settings.rootPath, defaults.folders.db)
     const storage = (db.dialect === 'sqlite') ? { storage: path.join(dbPath, db.storage) } : {}

@@ -10,6 +10,8 @@
     "semi": ["error", "never"],
     "comma-dangle": "off",
     "max-len": "off",
-    "consistent-return": "off"
+    "consistent-return": "off",
+    "global-require": "off",
+    "import/no-dynamic-require": "off"
   }
 }

@@ -92,12 +92,22 @@ describe('Expressio', () => {
     expect(spyTerminate).toBeCalledWith(chalk.red('"models" folder does not exist.'))
   })
 
+  it('should stop the server when no "config" folder is provided', () => {
+    expressio({
+      rootPath: path.resolve(__dirname, './fixtures/no-config-folder'),
+      db: { enabled: true }
+    })
+
+    expect(spyTerminate).toHaveBeenCalled()
+    expect(spyTerminate).toBeCalledWith(chalk.red('"config" folder does not exist.'))
+  })
+
   it('should stop the server when no database settings is provided', () => {
     expressio({
       rootPath: __dirname,
       db: {
         enabled: true,
-        test: null
+        dialect: null
       }
     })
 

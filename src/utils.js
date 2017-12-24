@@ -9,6 +9,9 @@
 /* eslint no-console: 0 */
 import fs from 'fs'
 import path from 'path'
+import merge from 'lodash/merge'
+import optional from 'optional'
+import { CURRENT_ENV } from 'isenv'
 
 /**
  * isNodeSupported
@@ -51,7 +54,7 @@ export function getModels(dir, sequelize, dataTypes) {
     fs.readdirSync(dir)
       .filter(file => ((file.indexOf('.') !== 0) && (file !== 'index.js')))
       .forEach((file) => {
-        const genModel = require(path.join(dir, file)).default // eslint-disable-line
+        const genModel = require(path.join(dir, file)).default
         const model = genModel(sequelize, dataTypes)
         models[model.name] = model
       })
@@ -76,4 +79,29 @@ export function getModels(dir, sequelize, dataTypes) {
 export function terminate(msg) {
   console.error(msg)
   process.exit(1)
+}
+
+/**
+ * getConfig
+ *
+ * Load config variables based on
+ * current environment.
+ */
+export function getConfig(dir, settings = {}) {
+  const defaults = require('./config/default').default
+  const config = require(`./config/${CURRENT_ENV}`).default
+
+  // Make sure we don't break anything
+  // if config files doesn't exist
+  const appDefaults = optional(path.join(dir, 'default'))
+  const appConfig = optional(path.join(dir, CURRENT_ENV))
+
+  return merge(
+    {},
+    defaults,
+    config,
+    appDefaults && appDefaults.default,
+    appConfig && appConfig.default,
+    settings
+  )
 }

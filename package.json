@@ -34,6 +34,7 @@
     "joi": "^13.0.1",
     "jsonwebtoken": "^8.1.0",
     "lodash": "^4.17.4",
+    "optional": "^0.1.4",
     "path": "^0.12.7",
     "sequelize": "^4.28.6",
     "sqlite3": "^3.1.13",
@@ -48,6 +49,7 @@
     "eslint-plugin-import": "^2.7.0"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns" : ["/config"]
   }
 }
