@@ -103,9 +103,7 @@ describe('Demo routes', () => {
       .send(payload)
     expect(response.statusCode).toBe(400)
     expect(response.body.message).toEqual('Bad Request')
-    expect(response.body.errors).toEqual([
-      { extra: 'extra is not allowed' }
-    ])
+    expect(response.body.errors).toEqual({ extra: 'extra is not allowed' })
   })
 
   it('(POST /article) with invalid params should return a 400 error', async () => {
@@ -114,11 +112,11 @@ describe('Demo routes', () => {
       .send(payload)
     expect(response.statusCode).toBe(400)
     expect(response.body.message).toEqual('Bad Request')
-    expect(response.body.errors).toEqual([
-      { title: 'title length must be at least 3 characters long' },
-      { description: 'description is not allowed to be empty' },
-      { extra: 'extra is not allowed' }
-    ])
+    expect(response.body.errors).toEqual({
+      title: 'title length must be at least 3 characters long',
+      description: 'description is not allowed to be empty',
+      extra: 'extra is not allowed'
+    })
   })
 
   it('(GET /config) should respond with a config object', async () => {

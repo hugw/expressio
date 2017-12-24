@@ -28,9 +28,10 @@ export const validate = schema => (req, res, next) => {
 
     error.status = 400
     error.data = {
-      errors: err && err.details.map(i => ({
-        [i.context.key]: i.message.replace(/"/g, ''),
-      }))
+      errors: err && err.details.reduce((obj, i) => {
+        const item = { [i.context.key]: i.message.replace(/"/g, '') }
+        return Object.assign({}, obj, item)
+      }, {})
     }
 
     if (!err) req.body = value
@@ -48,9 +49,10 @@ export const mongooseErrorHandler = (err, req, res, next) => {
 
     error.status = 400
     error.data = {
-      errors: Object.keys(err.errors).map(i => ({
-        [i]: err.errors[i].message
-      }))
+      errors: Object.keys(err.errors).reduce((obj, i) => {
+        const item = { [i]: err.errors[i].message }
+        return Object.assign({}, obj, item)
+      }, {})
     }
   }
 
