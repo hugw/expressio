@@ -45,7 +45,7 @@ import {
  * to be loaded with a predefined
  * configuration.
  */
-export default function expressio(appSettings) {
+export default function expressio(appConfig) {
   let server
   let sequelize
   let models
@@ -72,19 +72,19 @@ export default function expressio(appSettings) {
     }
   }
 
-  // Check if rootPath settings
+  // Check if rootPath config
   // was provided
-  if (!isDir(appSettings.rootPath)) return terminate(chalk.red('"rootPath" is not valid.'))
+  if (!isDir(appConfig.rootPath)) return terminate(chalk.red('"rootPath" is not valid.'))
 
   // Load environment variables
-  dotenv.config({ path: path.join(appSettings.rootPath, '.env') })
+  dotenv.config({ path: path.join(appConfig.rootPath, '.env') })
 
-  const configPath = path.join(appSettings.rootPath, defaults.folders.config)
-  const settings = getConfig(configPath, appSettings)
+  const configPath = path.join(appConfig.rootPath, defaults.folders.config)
+  const config = getConfig(configPath, appConfig)
 
   // Check if current Node version
   // installed is supported
-  if (!isNodeSupported(settings.reqNode)) {
+  if (!isNodeSupported(config.reqNode)) {
     return terminate(chalk.red('Current Node version is not supported.'))
   }
 
@@ -93,17 +93,17 @@ export default function expressio(appSettings) {
   Object.keys(defaults.folders).forEach((name) => {
     // Make sure we check models folder only
     // if database is set
-    if (name === 'models' && !settings.db.enabled) return false
-    if (name === 'db' && !settings.db.enabled) return false
+    if (name === 'models' && !config.db.enabled) return false
+    if (name === 'db' && !config.db.enabled) return false
 
-    const dirPath = path.join(settings.rootPath, defaults.folders[name])
+    const dirPath = path.join(config.rootPath, defaults.folders[name])
     const msg = `"${name}" folder does not exist.`
 
     if (!isDir(dirPath)) return terminate(chalk.red(msg))
   })
 
   // Define a public Dir for static content
-  app.use(express.static(path.join(settings.rootPath, defaults.folders.public)))
+  app.use(express.static(path.join(config.rootPath, defaults.folders.public)))
 
   // Parse incomming requests
   // to JSON format
@@ -117,7 +117,7 @@ export default function expressio(appSettings) {
   // Security
   // (CORS & HTTP Headers)
   app.use(helmet())
-  app.use(cors(settings.cors))
+  app.use(cors(config.cors))
 
   // Logging
   if (IS_DEV) {
@@ -134,13 +134,13 @@ export default function expressio(appSettings) {
   }
 
   // Set database connection
-  if (settings.db.enabled) {
-    const { db } = settings
-    const msg = `Database settings for "${settings.env}" env does not exist.`
+  if (config.db.enabled) {
+    const { db } = config
+    const msg = `Database settings for "${config.env}" env does not exist.`
 
     if (!db.dialect) return terminate(chalk.red(msg))
 
-    const dbPath = path.join(settings.rootPath, defaults.folders.db)
+    const dbPath = path.join(config.rootPath, defaults.folders.db)
     const storage = (db.dialect === 'sqlite') ? { storage: path.join(dbPath, db.storage) } : {}
 
     // Estabilish a new connection
@@ -150,16 +150,16 @@ export default function expressio(appSettings) {
       ...storage
     })
 
-    const modelsPath = path.join(settings.rootPath, defaults.folders.models)
+    const modelsPath = path.join(config.rootPath, defaults.folders.models)
     models = getModels(modelsPath, sequelize, Sequelize)
   }
 
-  // Add common settings / objects
+  // Add common config / objects
   // to request object and make
   // then available to other routes
   app.use((req, res, next) => {
     req.xp = {
-      settings,
+      config,
       statusCode: HTTPStatus,
       jwt,
       ...models ? { models } : {},
@@ -185,13 +185,13 @@ export default function expressio(appSettings) {
     // General error handler
     app.use(generalErrorhandler)
 
-    server = app.listen(settings.port, settings.address, () => {
+    server = app.listen(config.port, config.address, () => {
       const { address, port } = server.address()
-      console.log(chalk.green(`Server running → ${address}:${port} @ ${settings.env}`))
+      console.log(chalk.green(`Server running → ${address}:${port} @ ${config.env}`))
     })
 
     if (sequelize) {
-      const success = chalk.green(`Database connected → ${sequelize.getDialect()} @ ${settings.env}`)
+      const success = chalk.green(`Database connected → ${sequelize.getDialect()} @ ${config.env}`)
       const error = chalk.red('Something went wrong while connection to the database.')
       sequelize.sync().then(() => console.log(success)).catch(() => terminate(error))
     }

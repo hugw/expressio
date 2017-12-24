@@ -6,7 +6,7 @@ export default {
       '/public',
       '/notfound',
       '/article',
-      '/settings',
+      '/config',
       '/user',
     ]
   },

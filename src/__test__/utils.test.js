@@ -90,7 +90,7 @@ describe('Expressio / Utils', () => {
       })
     })
 
-    it('should return a settings object with overwritten values from a second param passed', () => {
+    it('should return a config object with overwritten values from a second param passed', () => {
       const config = { secret: 'my secret', db: { enabled: true } }
       const configs = getConfig(configPath, config)
       expect(configs.secret).toBe('my secret')

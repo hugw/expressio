@@ -12,7 +12,7 @@ import { validate, joi } from '../src'
 const routes = express()
 
 routes.get('/', (req, res) => {
-  res.json({ page: 'Home', appName: req.xp.settings.appName })
+  res.json({ page: 'Home', appName: req.xp.config.appName })
 })
 
 routes.get('/public', (req, res) => {
@@ -36,9 +36,9 @@ routes.post('/article', validate(article), (req, res) => {
   res.json({ page: 'Article', ...req.body })
 })
 
-routes.get('/settings', (req, res) => {
-  const settings = Object.keys(req.xp)
-  res.json({ page: 'Settings', settings })
+routes.get('/config', (req, res) => {
+  const config = Object.keys(req.xp)
+  res.json({ page: 'Config', config })
 })
 
 routes.post('/user', (req, res) => {

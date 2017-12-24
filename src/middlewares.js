@@ -77,7 +77,7 @@ export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-
  */
 export const authorize = (req, res, next) => {
   const {
-    settings: {
+    config: {
       secret,
       authorization: { ignorePaths, enabled }
     }

@@ -87,7 +87,7 @@ export function terminate(msg) {
  * Load config variables based on
  * current environment.
  */
-export function getConfig(dir, settings = {}) {
+export function getConfig(dir, optionalConfig = {}) {
   const defaults = require('./config/default').default
   const config = require(`./config/${CURRENT_ENV}`).default
 
@@ -101,6 +101,6 @@ export function getConfig(dir, settings = {}) {
     config,
     appDefaults && appDefaults.default,
     appConfig && appConfig.default,
-    settings
+    optionalConfig
   )
 }
