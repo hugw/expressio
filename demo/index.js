@@ -6,14 +6,8 @@
  * @license MIT
  */
 
-import expressio from '../src'
-import routes from './routes'
+import app from './app'
 
-const app = expressio({
-  rootPath: __dirname,
-})
-
-app.use(routes)
 app.startServer()
 
 export default app

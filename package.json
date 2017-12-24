@@ -5,10 +5,11 @@
   "author": "Hugo W. <me@hugw.io>",
   "repository": "https://github.com/hugw/expressio",
   "license": "MIT",
-  "main": "./src",
+  "main": "./dist",
   "scripts": {
     "build": "babel ./src --ignore '__test__/' -s -D -d dist",
     "demo": "nodemon -w ./demo -w ./src --inspect --exec \"babel-node ./demo\"",
+    "demo:db": "babel-node ./demo/tasks/db",
     "lint": "eslint .",
     "postinstall": "npm run build",
     "test": "jest . --verbose --colors --forceExit",
@@ -38,7 +39,8 @@
     "path": "^0.12.7",
     "sequelize": "^4.28.6",
     "sqlite3": "^3.1.13",
-    "winston": "^2.4.0"
+    "winston": "^2.4.0",
+    "yargs": "^10.0.3"
   },
   "devDependencies": {
     "jest": "^21.2.1",

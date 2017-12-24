@@ -20,6 +20,7 @@ import joi from 'joi'
 import { IS_DEV } from 'isenv'
 import Sequelize from 'sequelize'
 import dotenv from 'dotenv'
+import optional from 'optional'
 
 import {
   getModels,
@@ -179,7 +180,7 @@ export default function expressio(appConfig) {
    * Bootstrap server and
    * error handlers
    */
-  app.startServer = () => {
+  app.startServer = (options = { resetDB: false, seedDB: false }) => {
     // Not found error handler
     app.use(notFoundHandler)
 
@@ -191,11 +192,7 @@ export default function expressio(appConfig) {
       logEvent(`Server running → ${address}:${port} @ ${config.env}`)
     })
 
-    if (sequelize) {
-      const success = `Database connected → ${sequelize.getDialect()} @ ${config.env}`
-      const error = 'Something went wrong while connection to the database.'
-      sequelize.sync().then(() => logEvent(success)).catch(() => terminate(error))
-    }
+    app.syncDB(options)
   }
 
   /**
@@ -204,6 +201,43 @@ export default function expressio(appConfig) {
   app.stopServer = () => {
     server.close()
     sequelize.close()
+  }
+
+  /**
+   * syncDB
+   *
+   * Sync database models
+   */
+  app.syncDB = (options = { resetDB: false, seedDB: false }) => {
+    if (!sequelize) return false
+
+    const seeds = options.seedDB && optional(path.join(config.rootPath, 'seeds'))
+
+    sequelize.sync({ force: options.resetDB })
+      .then(() => {
+        if (options.resetDB) logEvent('Resetting database...')
+        logEvent(`Database running → ${sequelize.getDialect()} @ ${config.env}`)
+
+        if (seeds && seeds.default) {
+          seeds.default(models)
+          logEvent('Adding seed data...')
+        }
+      })
+      .catch(() => terminate('Something went wrong while starting the database.'))
+  }
+
+  /**
+   * resetDB
+   */
+  app.resetDB = () => {
+    app.syncDB({ resetDB: true })
+  }
+
+  /**
+   * seedDB
+   */
+  app.seedDB = () => {
+    app.syncDB({ seedDB: true })
   }
 
   return app
