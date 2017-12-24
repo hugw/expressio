@@ -147,7 +147,9 @@ export default function expressio(appConfig) {
     // with the database
     sequelize = new Sequelize({
       ...db,
-      ...storage
+      ...storage,
+      logging: IS_DEV && console.log,
+      operatorsAliases: false
     })
 
     const modelsPath = path.join(config.rootPath, defaults.folders.models)
@@ -187,13 +189,13 @@ export default function expressio(appConfig) {
 
     server = app.listen(config.port, config.address, () => {
       const { address, port } = server.address()
-      console.log(chalk.green(`Server running → ${address}:${port} @ ${config.env}`))
+      if (IS_DEV) console.log(chalk.green(`Server running → ${address}:${port} @ ${config.env}`))
     })
 
     if (sequelize) {
       const success = chalk.green(`Database connected → ${sequelize.getDialect()} @ ${config.env}`)
       const error = chalk.red('Something went wrong while connection to the database.')
-      sequelize.sync().then(() => console.log(success)).catch(() => terminate(error))
+      sequelize.sync().then(() => (IS_DEV && console.log(success))).catch(() => terminate(error))
     }
   }
 
