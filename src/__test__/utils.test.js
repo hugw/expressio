@@ -81,7 +81,7 @@ describe('Expressio / Utils', () => {
           storage: 'test.sqlite'
         },
         env: 'test',
-        port: 4000,
+        port: '4000',
         reqNode: { minor: 6, major: 8 },
         rootPath: null,
         secret: 'Default secret key',

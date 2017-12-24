@@ -44,6 +44,14 @@ describe('Expressio', () => {
     expect(server.startServer).toBeDefined()
   })
 
+  it('should load environment variables', () => {
+    expressio({
+      rootPath: __dirname,
+    })
+
+    expect(process.env.FOO).toBe('BAR')
+  })
+
   it('should stop the process when node minimum version is not met', () => {
     expressio({
       rootPath: __dirname,

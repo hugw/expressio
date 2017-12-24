@@ -21,6 +21,7 @@ import jwt from 'jsonwebtoken'
 import joi from 'joi'
 import { IS_DEV } from 'isenv'
 import Sequelize from 'sequelize'
+import dotenv from 'dotenv'
 
 import {
   getModels,
@@ -74,6 +75,9 @@ export default function expressio(appSettings) {
   // Check if rootPath settings
   // was provided
   if (!isDir(appSettings.rootPath)) return terminate(chalk.red('"rootPath" is not valid.'))
+
+  // Load environment variables
+  dotenv.config({ path: path.join(appSettings.rootPath, '.env') })
 
   const configPath = path.join(appSettings.rootPath, defaults.folders.config)
   const settings = getConfig(configPath, appSettings)

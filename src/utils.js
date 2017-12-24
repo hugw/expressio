@@ -95,7 +95,6 @@ export function getConfig(dir, settings = {}) {
   // if config files doesn't exist
   const appDefaults = optional(path.join(dir, 'default'))
   const appConfig = optional(path.join(dir, CURRENT_ENV))
-
   return merge(
     {},
     defaults,

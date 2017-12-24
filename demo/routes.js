@@ -12,7 +12,7 @@ import { validate, joi } from '../src'
 const routes = express()
 
 routes.get('/', (req, res) => {
-  res.json({ page: 'Home' })
+  res.json({ page: 'Home', appName: req.xp.settings.appName })
 })
 
 routes.get('/public', (req, res) => {

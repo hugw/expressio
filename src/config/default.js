@@ -9,7 +9,7 @@
 import { CURRENT_ENV } from 'isenv'
 
 export default {
-  address: '127.0.0.1',
+  address: process.env.SERVER_ADDRESS || '127.0.0.1',
   authorization: {
     enabled: true,
     ignorePaths: []
@@ -26,8 +26,8 @@ export default {
     storage: 'default.sqlite'
   },
   env: CURRENT_ENV,
-  port: 4000,
+  port: process.env.PORT || '4000',
   reqNode: { minor: 6, major: 8 },
   rootPath: null,
-  secret: 'Default secret key'
+  secret: process.env.SECRET || 'Default secret key'
 }

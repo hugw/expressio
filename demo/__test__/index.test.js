@@ -22,7 +22,7 @@ describe('Demo routes', () => {
   it('(GET /) should respond with a success payload', async () => {
     const response = await request(app).get('/')
     expect(response.statusCode).toBe(200)
-    expect(response.body).toEqual({ page: 'Home' })
+    expect(response.body).toEqual({ page: 'Home', appName: 'Demo' })
   })
 
   it('(GET /public) should respond with a success payload', async () => {
