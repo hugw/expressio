@@ -1,14 +1,13 @@
 version: 2
 jobs:
   build:
-    environment:
-      - FOO: "BAR"
-      - APP_NAME: "Demo"
     docker:
       - image: circleci/node:8.6
 
     environment:
-    - NODE_ENV: development
+      - NODE_ENV: test
+      - FOO: BAR
+      - APP_NAME: Demo
 
     steps:
       - checkout

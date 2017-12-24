@@ -11,7 +11,7 @@
     "demo": "nodemon -w ./demo -w ./src --inspect --exec \"babel-node ./demo\"",
     "lint": "eslint .",
     "postinstall": "npm run build",
-    "test": "NODE_ENV=test jest . --verbose --colors --forceExit",
+    "test": "jest . --verbose --colors --forceExit",
     "test:watch": "npm run test -- --watch "
   },
   "dependencies": {
