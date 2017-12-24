@@ -8,6 +8,6 @@
 
 export default {
   db: {
-    storage: 'production.sqlite'
+    connection: 'mongodb://localhost:27017/production',
   }
 }

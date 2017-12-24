@@ -77,8 +77,7 @@ describe('Expressio / Utils', () => {
         },
         db: {
           enabled: false,
-          dialect: 'sqlite',
-          storage: 'test.sqlite'
+          connection: 'mongodb://localhost:27017/test'
         },
         env: 'test',
         port: '4000',

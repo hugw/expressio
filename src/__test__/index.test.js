@@ -82,16 +82,6 @@ describe('Expressio', () => {
     expect(spyTerminate).toBeCalledWith('"public" folder does not exist.')
   })
 
-  it('should stop the server when no "db" folder is provided', () => {
-    expressio({
-      rootPath: path.resolve(__dirname, './fixtures/no-db-folder'),
-      db: { enabled: true }
-    })
-
-    expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('"db" folder does not exist.')
-  })
-
   it('should stop the server when no "models" folder is provided', () => {
     expressio({
       rootPath: path.resolve(__dirname, './fixtures/no-models-folder'),
@@ -117,11 +107,11 @@ describe('Expressio', () => {
       rootPath: __dirname,
       db: {
         enabled: true,
-        dialect: null
+        connection: null
       }
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('Database settings for "test" env does not exist.')
+    expect(spyTerminate).toBeCalledWith('Database connection for "test" env does not exist.')
   })
 })

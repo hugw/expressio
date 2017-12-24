@@ -41,13 +41,13 @@ routes.get('/config', (req, res) => {
   res.json({ page: 'Config', config })
 })
 
-routes.post('/user', (req, res) => {
+routes.post('/user', (req, res, next) => {
   const { models: { User } } = req.xp
 
-  User.create({ ...req.body })
-    .then((user) => {
-      res.json({ page: 'User', user })
-    })
+  User.create({ ...req.body }, (err, user) => {
+    if (err) return next(err)
+    res.json({ page: 'User', user })
+  })
 })
 
 export default routes

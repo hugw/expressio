@@ -48,7 +48,7 @@ export function isDir(dir) {
  * and return all into
  * a single object.
  */
-export function getModels(dir, sequelize, dataTypes) {
+export function getModels(dir, mongoose) {
   const models = {}
 
   try {
@@ -56,16 +56,10 @@ export function getModels(dir, sequelize, dataTypes) {
       .filter(file => ((file.indexOf('.') !== 0) && (file !== 'index.js')))
       .forEach((file) => {
         const genModel = require(path.join(dir, file)).default
-        const model = genModel(sequelize, dataTypes)
-        models[model.name] = model
-      })
+        const model = genModel(mongoose, mongoose.Schema)
 
-    // We must first load all models
-    // before assigning associations
-    Object.keys(models).forEach((name) => {
-      const model = models[name]
-      if ('associate' in model) model.associate(models)
-    })
+        models[model.modelName] = model
+      })
 
     return models
   } catch (e) { return false }

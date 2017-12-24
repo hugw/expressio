@@ -39,6 +39,24 @@ export const validate = schema => (req, res, next) => {
   })
 }
 
+export const mongooseErrorHandler = (err, req, res, next) => {
+  const { statusCode } = req.xp
+  let error
+
+  if (err && err.name === 'ValidationError') {
+    error = new Error(statusCode[400])
+
+    error.status = 400
+    error.data = {
+      errors: Object.keys(err.errors).map(i => ({
+        [i]: err.errors[i].message
+      }))
+    }
+  }
+
+  next(error || err)
+}
+
 /**
  * notFoundHandler
  *

@@ -15,6 +15,10 @@ const validToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSld
 const invalidToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1MTM4OTk0MDUsImV4cCI6MTkyNDEyNjYwNSwiYXVkIjoiRXhwcmVzc2lvIiwic3ViIjoiIiwiTmFtZSI6IkpvaG4gRG9lIiwiSWQiOiIxIn0.qC9sUsSzrfBZbcHOEemRmbi2t5k4mkVFq3h7Ox0TPmQ'
 
 describe('Demo routes', () => {
+  beforeAll(() => {
+    app.resetDB()
+  })
+
   afterAll(() => {
     app.stopServer()
   })
@@ -120,7 +124,7 @@ describe('Demo routes', () => {
   it('(GET /config) should respond with a config object', async () => {
     const response = await request(app).get('/config')
     expect(response.statusCode).toBe(200)
-    expect(response.body.config).toEqual(['config', 'statusCode', 'jwt', 'models', 'db'])
+    expect(response.body.config).toEqual(['config', 'statusCode', 'jwt', 'models'])
   })
 
   it('(POST /user) with valid params should return an user payload', async () => {

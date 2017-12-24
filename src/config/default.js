@@ -22,8 +22,7 @@ export default {
   },
   db: {
     enabled: false,
-    dialect: 'sqlite',
-    storage: 'default.sqlite'
+    connection: 'mongodb://localhost:27017/development',
   },
   env: CURRENT_ENV,
   port: process.env.PORT || '4000',

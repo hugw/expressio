@@ -1,19 +1,18 @@
-export default (sequelize, dataTypes) => (
-  sequelize.define('User', {
-    id: {
-      autoIncrement: true,
-      primaryKey: true,
-      type: dataTypes.INTEGER
-    },
+export default (mongoose, Schema) => {
+  const User = new Schema({
     name: {
-      type: dataTypes.STRING,
-      notEmpty: true
+      type: String,
+      required: true,
+      trim: true,
     },
     email: {
-      type: dataTypes.STRING,
-      validate: {
-        isEmail: true
-      }
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+      lowercase: true,
     },
   })
-)
+
+  return mongoose.model('User', User)
+}

@@ -18,9 +18,10 @@ import winston from 'winston'
 import jwt from 'jsonwebtoken'
 import joi from 'joi'
 import { IS_DEV } from 'isenv'
-import Sequelize from 'sequelize'
 import dotenv from 'dotenv'
 import optional from 'optional'
+import mongoose from 'mongoose'
+import beautifyUnique from 'mongoose-beautiful-unique-validation'
 
 import {
   getModels,
@@ -36,6 +37,7 @@ import {
   validate,
   notFoundHandler,
   generalErrorhandler,
+  mongooseErrorHandler
 } from './middlewares'
 
 /**
@@ -47,15 +49,14 @@ import {
  */
 export default function expressio(appConfig) {
   let server
-  let sequelize
   let models
+
   const app = express()
 
   const defaults = {
     folders: {
       public: 'public',
       models: 'models',
-      db: 'db',
       config: 'config'
     },
     logger: {
@@ -133,27 +134,34 @@ export default function expressio(appConfig) {
     }))
   }
 
-  // Set database connection
+  // Set database related
+  // information
   if (config.db.enabled) {
     const { db } = config
-    const msg = `Database settings for "${config.env}" env does not exist.`
+    if (!db.connection) return terminate(`Database connection for "${config.env}" env does not exist.`)
 
-    if (!db.dialect) return terminate(msg)
+    // Setup mongoose specifics
+    mongoose.set('debug', IS_DEV)
+    mongoose.Promise = global.Promise
+    mongoose.plugin(beautifyUnique)
+    mongoose.plugin((schema) => {
+      const toOpts = {
+        virtuals: true,
+        transform: (doc, ret) => {
+          delete ret._id // eslint-disable-line
+          delete ret.__v // eslint-disable-line
+        }
+      }
 
-    const dbPath = path.join(config.rootPath, defaults.folders.db)
-    const storage = (db.dialect === 'sqlite') ? { storage: path.join(dbPath, db.storage) } : {}
-
-    // Estabilish a new connection
-    // with the database
-    sequelize = new Sequelize({
-      ...db,
-      ...storage,
-      logging: IS_DEV && console.log, // eslint-disable-line
-      operatorsAliases: false
+      schema.set('timestamps', true)
+      schema.set('minimize', false)
+      schema.set('toJSON', toOpts)
+      schema.set('toObject', toOpts)
     })
 
+    // Load models
     const modelsPath = path.join(config.rootPath, defaults.folders.models)
-    models = getModels(modelsPath, sequelize, Sequelize)
+    models = getModels(modelsPath, mongoose)
   }
 
   // Add common config / objects
@@ -164,8 +172,7 @@ export default function expressio(appConfig) {
       config,
       statusCode: HTTPStatus,
       jwt,
-      ...models ? { models } : {},
-      ...sequelize ? { db: sequelize } : {}
+      ...models ? { models } : {}
     }
 
     next()
@@ -184,6 +191,9 @@ export default function expressio(appConfig) {
     // Not found error handler
     app.use(notFoundHandler)
 
+    // Mongoose error handler
+    app.use(mongooseErrorHandler)
+
     // General error handler
     app.use(generalErrorhandler)
 
@@ -200,7 +210,7 @@ export default function expressio(appConfig) {
    */
   app.stopServer = () => {
     server.close()
-    sequelize.close()
+    mongoose.connection.close()
   }
 
   /**
@@ -209,21 +219,31 @@ export default function expressio(appConfig) {
    * Sync database models
    */
   app.syncDB = (options = { resetDB: false, seedDB: false }) => {
-    if (!sequelize) return false
+    if (!config.db.enabled) return false
 
-    const seeds = options.seedDB && optional(path.join(config.rootPath, 'seeds'))
+    if ([1, 2].indexOf(mongoose.connection.readyState) === -1) {
+      mongoose.connect(config.db.connection, { useMongoClient: true })
+      mongoose.connection.once('connected', () => logEvent(`Database running → MongoDB @ ${config.env}`))
+      mongoose.connection.once('error', () => terminate('Something went wrong while starting the database.'))
+    }
 
-    sequelize.sync({ force: options.resetDB })
-      .then(() => {
-        if (options.resetDB) logEvent('Resetting database...')
-        logEvent(`Database running → ${sequelize.getDialect()} @ ${config.env}`)
+    mongoose.connection.once('open', () => {
+      // Reset database
+      if (options.resetDB) {
+        logEvent('Resetting database...')
+        Object.keys(models).forEach(model => models[model].collection.remove())
+      }
+
+      // Seed data
+      if (options.seedDB) {
+        const seeds = optional(path.join(config.rootPath, 'seeds'))
 
         if (seeds && seeds.default) {
           seeds.default(models)
           logEvent('Adding seed data...')
         }
-      })
-      .catch(() => terminate('Something went wrong while starting the database.'))
+      }
+    })
   }
 
   /**
