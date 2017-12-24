@@ -11,7 +11,8 @@ import fs from 'fs'
 import path from 'path'
 import merge from 'lodash/merge'
 import optional from 'optional'
-import { CURRENT_ENV } from 'isenv'
+import { CURRENT_ENV, IS_DEV } from 'isenv'
+import chalk from 'chalk'
 
 /**
  * isNodeSupported
@@ -77,9 +78,14 @@ export function getModels(dir, sequelize, dataTypes) {
  * and the process had to be terminated.
  */
 export function terminate(msg) {
-  console.error(msg)
+  console.error(chalk.red(msg))
   process.exit(1)
 }
+
+/**
+ * logEvent
+ */
+export const logEvent = msg => (IS_DEV && console.log(chalk.green(msg)))
 
 /**
  * getConfig

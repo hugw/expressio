@@ -6,7 +6,6 @@
  * @license MIT
  */
 
-import chalk from 'chalk'
 import path from 'path'
 import expressio, { express, joi, validate } from '../'
 import * as utils from '../utils'
@@ -59,7 +58,7 @@ describe('Expressio', () => {
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith(chalk.red('Current Node version is not supported.'))
+    expect(spyTerminate).toBeCalledWith('Current Node version is not supported.')
   })
 
   it('should stop the server when no valid "rootPath" folder is provided', () => {
@@ -68,7 +67,7 @@ describe('Expressio', () => {
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith(chalk.red('"rootPath" is not valid.'))
+    expect(spyTerminate).toBeCalledWith('"rootPath" is not valid.')
   })
 
   it('should stop the server when no "public" folder is provided', () => {
@@ -77,7 +76,7 @@ describe('Expressio', () => {
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith(chalk.red('"public" folder does not exist.'))
+    expect(spyTerminate).toBeCalledWith('"public" folder does not exist.')
   })
 
   it('should stop the server when no "db" folder is provided', () => {
@@ -87,7 +86,7 @@ describe('Expressio', () => {
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith(chalk.red('"db" folder does not exist.'))
+    expect(spyTerminate).toBeCalledWith('"db" folder does not exist.')
   })
 
   it('should stop the server when no "models" folder is provided', () => {
@@ -97,7 +96,7 @@ describe('Expressio', () => {
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith(chalk.red('"models" folder does not exist.'))
+    expect(spyTerminate).toBeCalledWith('"models" folder does not exist.')
   })
 
   it('should stop the server when no "config" folder is provided', () => {
@@ -107,7 +106,7 @@ describe('Expressio', () => {
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith(chalk.red('"config" folder does not exist.'))
+    expect(spyTerminate).toBeCalledWith('"config" folder does not exist.')
   })
 
   it('should stop the server when no database settings is provided', () => {
@@ -120,6 +119,6 @@ describe('Expressio', () => {
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith(chalk.red('Database settings for "test" env does not exist.'))
+    expect(spyTerminate).toBeCalledWith('Database settings for "test" env does not exist.')
   })
 })

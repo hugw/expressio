@@ -6,7 +6,6 @@
  * @license MIT
  */
 
-/* eslint no-console: 0 */
 import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
@@ -14,7 +13,6 @@ import helmet from 'helmet'
 import cors from 'cors'
 import compress from 'compression'
 import HTTPStatus from 'http-status'
-import chalk from 'chalk'
 import winstonExp from 'express-winston'
 import winston from 'winston'
 import jwt from 'jsonwebtoken'
@@ -28,6 +26,7 @@ import {
   getConfig,
   isNodeSupported,
   isDir,
+  logEvent,
   terminate,
 } from './utils'
 
@@ -74,7 +73,7 @@ export default function expressio(appConfig) {
 
   // Check if rootPath config
   // was provided
-  if (!isDir(appConfig.rootPath)) return terminate(chalk.red('"rootPath" is not valid.'))
+  if (!isDir(appConfig.rootPath)) return terminate('"rootPath" is not valid.')
 
   // Load environment variables
   dotenv.config({ path: path.join(appConfig.rootPath, '.env') })
@@ -85,7 +84,7 @@ export default function expressio(appConfig) {
   // Check if current Node version
   // installed is supported
   if (!isNodeSupported(config.reqNode)) {
-    return terminate(chalk.red('Current Node version is not supported.'))
+    return terminate('Current Node version is not supported.')
   }
 
   // Check if current default
@@ -99,7 +98,7 @@ export default function expressio(appConfig) {
     const dirPath = path.join(config.rootPath, defaults.folders[name])
     const msg = `"${name}" folder does not exist.`
 
-    if (!isDir(dirPath)) return terminate(chalk.red(msg))
+    if (!isDir(dirPath)) return terminate(msg)
   })
 
   // Define a public Dir for static content
@@ -138,7 +137,7 @@ export default function expressio(appConfig) {
     const { db } = config
     const msg = `Database settings for "${config.env}" env does not exist.`
 
-    if (!db.dialect) return terminate(chalk.red(msg))
+    if (!db.dialect) return terminate(msg)
 
     const dbPath = path.join(config.rootPath, defaults.folders.db)
     const storage = (db.dialect === 'sqlite') ? { storage: path.join(dbPath, db.storage) } : {}
@@ -148,7 +147,7 @@ export default function expressio(appConfig) {
     sequelize = new Sequelize({
       ...db,
       ...storage,
-      logging: IS_DEV && console.log,
+      logging: IS_DEV && console.log, // eslint-disable-line
       operatorsAliases: false
     })
 
@@ -189,13 +188,13 @@ export default function expressio(appConfig) {
 
     server = app.listen(config.port, config.address, () => {
       const { address, port } = server.address()
-      if (IS_DEV) console.log(chalk.green(`Server running → ${address}:${port} @ ${config.env}`))
+      logEvent(`Server running → ${address}:${port} @ ${config.env}`)
     })
 
     if (sequelize) {
-      const success = chalk.green(`Database connected → ${sequelize.getDialect()} @ ${config.env}`)
-      const error = chalk.red('Something went wrong while connection to the database.')
-      sequelize.sync().then(() => (IS_DEV && console.log(success))).catch(() => terminate(error))
+      const success = `Database connected → ${sequelize.getDialect()} @ ${config.env}`
+      const error = 'Something went wrong while connection to the database.'
+      sequelize.sync().then(() => logEvent(success)).catch(() => terminate(error))
     }
   }
 
