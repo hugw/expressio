@@ -202,63 +202,61 @@ export default function expressio(appConfig) {
       logEvent(`Server running → ${address}:${port} @ ${config.env}`)
     })
 
-    app.syncDB(options)
+    app.startDB(options)
   }
 
   /**
    * stopServer
    */
   app.stopServer = () => {
-    server.close()
-    mongoose.connection.close()
+    if (server) server.close()
+    app.stopDatabase()
   }
 
   /**
-   * syncDB
-   *
-   * Sync database models
+   * stopDatabase
    */
-  app.syncDB = (options = { resetDB: false, seedDB: false }) => {
-    if (!config.db.enabled) return false
+  app.stopDB = () => {
+    if (config.db) mongoose.disconnect()
+  }
 
-    if ([1, 2].indexOf(mongoose.connection.readyState) === -1) {
-      mongoose.connect(config.db.connection, { useMongoClient: true })
-      mongoose.connection.once('connected', () => logEvent(`Database running → MongoDB @ ${config.env}`))
-      mongoose.connection.once('error', () => terminate('Something went wrong while starting the database.'))
-    }
+  /**
+   * startDB
+   */
+  app.startDB = () => {
+    if (!config.db.enabled) return Promise.reject()
 
-    mongoose.connection.once('open', () => {
-      // Reset database
-      if (options.resetDB) {
-        logEvent('Resetting database...')
-        Object.keys(models).forEach(model => models[model].collection.remove())
-      }
-
-      // Seed data
-      if (options.seedDB) {
-        const seeds = optional(path.join(config.rootPath, 'seeds'))
-
-        if (seeds && seeds.default) {
-          seeds.default(models)
-          logEvent('Adding seed data...')
-        }
-      }
+    return new Promise((resolve, reject) => {
+      if ([1, 2].indexOf(mongoose.connection.readyState) === -1) {
+        mongoose.connect(config.db.connection, { useMongoClient: true }).then(resolve).catch(reject)
+        mongoose.connection.once('connected', () => logEvent(`Database running → MongoDB @ ${config.env}`))
+        mongoose.connection.once('error', () => terminate('Something went wrong while starting the database.'))
+      } else resolve()
     })
   }
 
   /**
    * resetDB
    */
-  app.resetDB = () => {
-    app.syncDB({ resetDB: true })
-  }
+  app.resetDB = () => (app.startDB().then(() => {
+    logEvent('Resetting database...')
+    const promises = Object.keys(models).map(model => models[model].collection.remove())
+    return Promise.all(promises)
+  }))
 
   /**
    * seedDB
    */
-  app.seedDB = () => {
-    app.syncDB({ seedDB: true })
-  }
+  app.seedDB = () => (app.startDB().then(() => {
+    const seeds = optional(path.join(config.rootPath, 'seeds'))
+    const promises = []
+    if (seeds && seeds.default) {
+      logEvent('Adding seed data...')
+      return Promise.all(seeds.default(models, promises))
+    }
+
+    return Promise.resolve()
+  }))
 
   return app
 }

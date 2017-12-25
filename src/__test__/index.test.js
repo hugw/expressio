@@ -42,8 +42,10 @@ describe('Expressio', () => {
     expect(spyTerminate).not.toHaveBeenCalled()
     expect(server.startServer).toBeDefined()
     expect(server.stopServer).toBeDefined()
-    expect(server.syncDB).toBeDefined()
+    expect(server.stopDB).toBeDefined()
+    expect(server.startDB).toBeDefined()
     expect(server.resetDB).toBeDefined()
+    expect(server.seedDB).toBeDefined()
   })
 
   it('should load environment variables', () => {

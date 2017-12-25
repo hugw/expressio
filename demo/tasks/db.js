@@ -9,5 +9,5 @@
 import { argv } from 'yargs'
 import app from '../app'
 
-if (argv.reset) app.resetDB()
-if (argv.seed) app.seedDB()
+if (argv.seed) app.resetDB().then(app.seedDB).then(app.stopDB)
+else if (argv.reset) app.resetDB().then(app.stopDB)

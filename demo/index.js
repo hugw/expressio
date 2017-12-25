@@ -9,6 +9,5 @@
 import app from './app'
 
 app.startServer()
-app.resetDB()
 
 export default app
