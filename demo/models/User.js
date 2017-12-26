@@ -5,6 +5,11 @@ export default (mongoose, Schema) => {
       required: true,
       trim: true,
     },
+    hidden: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     email: {
       type: String,
       unique: true,
@@ -12,6 +17,8 @@ export default (mongoose, Schema) => {
       trim: true,
       lowercase: true,
     },
+  }, {
+    filter: ['hidden']
   })
 
   return mongoose.model('User', User)

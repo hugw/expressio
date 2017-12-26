@@ -122,16 +122,26 @@ describe('Demo routes', () => {
   it('(GET /config) should respond with a config object', async () => {
     const response = await request(app).get('/config')
     expect(response.statusCode).toBe(200)
-    expect(response.body.config).toEqual(['config', 'statusCode', 'jwt', 'models'])
+    expect(response.body.config).toEqual(['config', 'statusCode', 'jwt', 'reqError', 'models'])
   })
 
   it('(POST /user) with valid params should return an user payload', async () => {
-    const payload = { name: 'John Doe', email: 'john@doe.com' }
+    const payload = { name: 'John Doe', email: 'john@doe.com', hidden: 'boo' }
     const response = await request(app).post('/user')
       .send(payload)
     expect(response.statusCode).toBe(200)
     expect(response.body.page).toEqual('User')
     expect(response.body.user.name).toBe('John Doe')
     expect(response.body.user.email).toBe('john@doe.com')
+    expect(response.body.user.hidden).toBeUndefined()
+  })
+
+  it('(GET /custom-error) should respond with a custom 400 payload', async () => {
+    const response = await request(app).get('/custom-error')
+    expect(response.statusCode).toBe(400)
+    expect(response.body.message).toEqual('Bad Request')
+    expect(response.body.errors).toEqual({
+      key: 'something wrong with this key'
+    })
   })
 })

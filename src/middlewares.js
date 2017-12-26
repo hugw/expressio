@@ -6,10 +6,11 @@
  * @license MIT
  */
 
-import HTTPStatus from 'http-status'
 import joi from 'joi'
 import { IS_DEV } from 'isenv'
 import ejwt from 'express-jwt'
+
+import { reqError } from './utils'
 
 /**
  * validate
@@ -17,22 +18,17 @@ import ejwt from 'express-jwt'
  * Body validator/Sanitizer
  */
 export const validate = schema => (req, res, next) => {
-  const { statusCode } = req.xp
-
   const options = {
     abortEarly: false
   }
 
   joi.validate(req.body, schema, options, (err, value) => {
-    const error = new Error(statusCode[400])
-
-    error.status = 400
-    error.data = {
+    const error = reqError(400, {
       errors: err && err.details.reduce((obj, i) => {
         const item = { [i.context.key]: i.message.replace(/"/g, '') }
         return Object.assign({}, obj, item)
       }, {})
-    }
+    })
 
     if (!err) req.body = value
 
@@ -41,19 +37,15 @@ export const validate = schema => (req, res, next) => {
 }
 
 export const mongooseErrorHandler = (err, req, res, next) => {
-  const { statusCode } = req.xp
   let error
 
   if (err && err.name === 'ValidationError') {
-    error = new Error(statusCode[400])
-
-    error.status = 400
-    error.data = {
+    error = reqError(400, {
       errors: Object.keys(err.errors).reduce((obj, i) => {
         const item = { [i]: err.errors[i].message }
         return Object.assign({}, obj, item)
       }, {})
-    }
+    })
   }
 
   next(error || err)
@@ -64,11 +56,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
  *
  * Format 404 error objects
  */
-export const notFoundHandler = (req, res, next) => {
-  const err = new Error(HTTPStatus[404])
-  err.status = 404
-  next(err)
-}
+export const notFoundHandler = (req, res, next) => next(reqError(404))
 
 /**
  * generalErrorHandler

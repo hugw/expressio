@@ -50,4 +50,14 @@ routes.post('/user', (req, res, next) => {
   })
 })
 
+routes.get('/custom-error', (req, res, next) => {
+  const { reqError } = req.xp
+
+  next(reqError(400, {
+    errors: {
+      key: 'something wrong with this key'
+    }
+  }))
+})
+
 export default routes

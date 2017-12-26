@@ -30,6 +30,7 @@ import {
   isDir,
   logEvent,
   terminate,
+  reqError,
 } from './utils'
 
 import {
@@ -150,6 +151,12 @@ export default function expressio(appConfig) {
         transform: (doc, ret) => {
           delete ret._id // eslint-disable-line
           delete ret.__v // eslint-disable-line
+
+          if (schema.options.filter) {
+            schema.options.filter.forEach((key) => {
+              delete ret[key] // eslint-disable-line
+            })
+          }
         }
       }
 
@@ -172,6 +179,7 @@ export default function expressio(appConfig) {
       config,
       statusCode: HTTPStatus,
       jwt,
+      reqError,
       ...models ? { models } : {}
     }
 

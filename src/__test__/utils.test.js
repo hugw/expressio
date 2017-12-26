@@ -7,7 +7,7 @@
  */
 
 import path from 'path'
-import { isNodeSupported, isDir, getConfig } from '../utils'
+import { isNodeSupported, isDir, getConfig, reqError } from '../utils'
 
 describe('Expressio / Utils', () => {
   describe('#isNodeSupported', () => {
@@ -54,6 +54,23 @@ describe('Expressio / Utils', () => {
       expect(isDir(null)).toBeFalsy()
       expect(isDir(false)).toBeFalsy()
       expect(isDir(undefined)).toBeFalsy()
+    })
+  })
+
+  describe('#reqError', () => {
+    it('should generate a request error object with no custom data', () => {
+      const err = reqError(400)
+      expect(err).toBeInstanceOf(Error)
+      expect(err.message).toEqual('Bad Request')
+      expect(err.status).toEqual(400)
+    })
+
+    it('should generate a request error object with custom data', () => {
+      const err = reqError(400, { foo: 'foo' })
+      expect(err).toBeInstanceOf(Error)
+      expect(err.message).toEqual('Bad Request')
+      expect(err.status).toEqual(400)
+      expect(err.data).toEqual({ foo: 'foo' })
     })
   })
 

@@ -8,6 +8,7 @@ export default {
       '/article',
       '/config',
       '/user',
+      '/custom-error'
     ]
   },
   db: {

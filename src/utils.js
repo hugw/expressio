@@ -13,6 +13,7 @@ import merge from 'lodash/merge'
 import optional from 'optional'
 import { CURRENT_ENV, IS_DEV } from 'isenv'
 import chalk from 'chalk'
+import HTTPStatus from 'http-status'
 
 /**
  * isNodeSupported
@@ -63,6 +64,20 @@ export function getModels(dir, mongoose) {
 
     return models
   } catch (e) { return false }
+}
+
+/**
+ * reqError
+ *
+ * Generate a new formatted
+ * request error.
+ */
+export function reqError(code, data) {
+  const err = new Error(HTTPStatus[code])
+  err.status = code
+  err.data = data
+
+  return err
 }
 
 /**
