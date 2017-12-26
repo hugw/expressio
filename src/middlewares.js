@@ -73,7 +73,7 @@ export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-
     message: err.message,
     statusCode: err.status,
     ...err.data,
-    ...stack || {}
+    ...stack ? { stack } : {}
   })
 }
 
