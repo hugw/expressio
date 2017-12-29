@@ -6,7 +6,7 @@
  * @license MIT
  */
 
-import expressio, { express, dataTypes, jwt, statusCode, validate } from '../'
+import expressio, { express, dataTypes, jwt, statusCode, validate, controller } from '../'
 import * as utils from '../utils'
 
 describe('Expressio', () => {
@@ -30,6 +30,7 @@ describe('Expressio', () => {
 
   it('should expose middlewares', () => {
     expect(validate).toBeDefined()
+    expect(controller).toBeDefined()
   })
 
   it('should return a valid expressio object', () => {

@@ -144,4 +144,17 @@ describe('Demo routes', () => {
       key: 'something wrong with this key'
     })
   })
+
+  it('(POST /controller) show catch thrown errors and return a 500 error', async () => {
+    const response = await request(app).post('/controller')
+    expect(response.statusCode).toBe(500)
+    expect(response.body.message).toEqual('Internal Server Error')
+  })
+
+  it('(GET /controller) should respond with a 200 payload', async () => {
+    const response = await request(app).get('/controller')
+    expect(response.statusCode).toBe(200)
+    expect(response.body.page).toEqual('Controller')
+    expect(response.body.promise).toEqual('wait a bit')
+  })
 })

@@ -7,7 +7,7 @@
  */
 
 import express from 'express'
-import { validate, dataTypes } from '../src'
+import { validate, dataTypes, controller } from '../src'
 
 const routes = express()
 
@@ -59,5 +59,14 @@ routes.get('/custom-error', (req, res, next) => {
     }
   }))
 })
+
+routes.get('/controller', controller(async (req, res) => {
+  const promise = await Promise.resolve('wait a bit')
+  res.json({ page: 'Controller', promise })
+}))
+
+routes.post('/controller', controller(async () => {
+  throw new Error()
+}))
 
 export default routes

@@ -9,8 +9,17 @@
 import joi from 'joi'
 import { IS_DEV } from 'isenv'
 import ejwt from 'express-jwt'
+import HTTPStatus from 'http-status'
 
 import { reqError } from './utils'
+
+/**
+ * controller
+ *
+ * Add async support and base
+ * error handling for common routes
+ */
+export const controller = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
 
 /**
  * validate
@@ -70,7 +79,7 @@ export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-
   res.status(err.status || 500)
 
   res.json({
-    message: err.message,
+    message: err.message || HTTPStatus[500],
     statusCode: err.status,
     ...err.data,
     ...stack ? { stack } : {}

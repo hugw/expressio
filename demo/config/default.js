@@ -8,7 +8,8 @@ export default {
       '/article',
       '/config',
       '/user',
-      '/custom-error'
+      '/custom-error',
+      '/controller'
     ]
   },
   db: {

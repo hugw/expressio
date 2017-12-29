@@ -35,6 +35,7 @@ import {
 } from './utils'
 
 import {
+  controller,
   authorize,
   validate,
   notFoundHandler,
@@ -44,9 +45,6 @@ import {
 } from './middlewares'
 
 export default function expressio(rootPath, appConfig = {}) {
-  let server
-  let models
-
   const folders = {
     public: 'public',
     models: 'models',
@@ -67,8 +65,10 @@ export default function expressio(rootPath, appConfig = {}) {
   }
 
   const app = express()
-
   const resolveApp = currentPath => path.join(rootPath, currentPath)
+
+  let server
+  let models
 
   // Check if rootPath was provided
   if (!isDir(rootPath)) return terminate('"rootPath" is not valid.')
@@ -165,13 +165,9 @@ export default function expressio(rootPath, appConfig = {}) {
    * error handlers
    */
   app.startServer = (options = { resetDB: false, seedDB: false }) => {
-    // Not found error handler
+    // Add error handlers
     app.use(notFoundHandler)
-
-    // Mongoose error handler
     app.use(mongooseErrorHandler)
-
-    // General error handler
     app.use(generalErrorhandler)
 
     server = app.listen(config.port, config.address, () => {
@@ -240,7 +236,8 @@ export default function expressio(rootPath, appConfig = {}) {
 
 /**
  * Expose external
- * dependencies
+ * dependencies and utility
+ * functions
  */
 export {
   express,
@@ -252,4 +249,4 @@ export {
 /**
  * Expose middlewares
  */
-export { validate }
+export { validate, controller }
