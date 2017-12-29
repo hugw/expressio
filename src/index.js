@@ -199,12 +199,15 @@ export default function expressio(rootPath, appConfig = {}) {
   app.startDB = () => {
     if (!config.db.enabled) return Promise.reject()
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if ([1, 2].indexOf(mongoose.connection.readyState) === -1) {
-        mongoose.connect(config.db.connection, { useMongoClient: true }).then(resolve).catch(reject)
-        mongoose.connection.once('connected', () => logEvent(`Database running → MongoDB @ ${config.env}`))
-        mongoose.connection.once('error', () => terminate('Something went wrong while starting the database.'))
-      } else resolve()
+        mongoose.connect(config.db.connection, { useMongoClient: true })
+          .then(() => {
+            logEvent(`Database running → MongoDB @ ${config.env}`)
+            resolve('Connected')
+          })
+          .catch(() => terminate('Something went wrong while starting the database.'))
+      } else resolve('Already connected')
     })
   }
 
