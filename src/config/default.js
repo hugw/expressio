@@ -27,6 +27,5 @@ export default {
   env: CURRENT_ENV,
   port: process.env.PORT || '4000',
   reqNode: { minor: 6, major: 8 },
-  rootPath: null,
   secret: process.env.SECRET || 'Default secret key'
 }

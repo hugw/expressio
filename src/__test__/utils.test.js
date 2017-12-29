@@ -79,7 +79,7 @@ describe('Expressio / Utils', () => {
   describe('#getConfig', () => {
     const configPath = path.join(__dirname, 'config')
 
-    it('should return a settings object', () => {
+    it('should return a config object', () => {
       expect(getConfig(configPath)).toEqual({
         address: '127.0.0.1',
         authorization: {
@@ -99,7 +99,6 @@ describe('Expressio / Utils', () => {
         env: 'test',
         port: '4000',
         reqNode: { minor: 6, major: 8 },
-        rootPath: null,
         secret: 'Default secret key',
         local: 'test',
         default: 'default'

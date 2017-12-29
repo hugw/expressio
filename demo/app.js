@@ -9,9 +9,7 @@
 import expressio from '../src'
 import routes from './routes'
 
-const app = expressio({
-  rootPath: __dirname,
-})
+const app = expressio(__dirname)
 
 app.use(routes)
 

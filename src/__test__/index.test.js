@@ -6,7 +6,6 @@
  * @license MIT
  */
 
-import path from 'path'
 import expressio, { express, joi, validate } from '../'
 import * as utils from '../utils'
 
@@ -35,9 +34,7 @@ describe('Expressio', () => {
   })
 
   it('should return a valid expressio object', () => {
-    const server = expressio({
-      rootPath: __dirname,
-    })
+    const server = expressio(__dirname)
 
     expect(spyTerminate).not.toHaveBeenCalled()
     expect(server.startServer).toBeDefined()
@@ -49,16 +46,13 @@ describe('Expressio', () => {
   })
 
   it('should load environment variables', () => {
-    expressio({
-      rootPath: __dirname,
-    })
+    expressio(__dirname)
 
     expect(process.env.FOO).toBe('BAR')
   })
 
   it('should stop the process when node minimum version is not met', () => {
-    expressio({
-      rootPath: __dirname,
+    expressio(__dirname, {
       reqNode: { minor: 20, major: 20 }
     })
 
@@ -67,17 +61,14 @@ describe('Expressio', () => {
   })
 
   it('should stop the server when no valid "rootPath" folder is provided', () => {
-    expressio({
-      rootPath: null,
-    })
+    expressio()
 
     expect(spyTerminate).toHaveBeenCalled()
     expect(spyTerminate).toBeCalledWith('"rootPath" is not valid.')
   })
 
   it('should stop the server when no database settings is provided', () => {
-    expressio({
-      rootPath: __dirname,
+    expressio(__dirname, {
       db: {
         enabled: true,
         connection: null

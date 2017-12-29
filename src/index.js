@@ -42,7 +42,7 @@ import {
   mongooseErrorHandler
 } from './middlewares'
 
-export default function expressio(appConfig) {
+export default function expressio(rootPath, appConfig = {}) {
   let server
   let models
 
@@ -66,7 +66,6 @@ export default function expressio(appConfig) {
   }
 
   const app = express()
-  const { rootPath } = appConfig
 
   const resolveApp = currentPath => path.join(rootPath, currentPath)
 
