@@ -31,7 +31,6 @@ import {
   isDir,
   logEvent,
   terminate,
-  reqError,
 } from './utils'
 
 import {
@@ -43,6 +42,11 @@ import {
   mongooseErrorHandler,
   schemaOpts
 } from './middlewares'
+
+import {
+  generalError,
+  validationError,
+} from './error-handlers'
 
 export default function expressio(rootPath, appConfig = {}) {
   const folders = {
@@ -148,7 +152,6 @@ export default function expressio(rootPath, appConfig = {}) {
   app.use((req, res, next) => {
     req.xp = {
       config,
-      reqError,
       ...models ? { models } : {}
     }
 
@@ -252,4 +255,9 @@ export {
 /**
  * Expose middlewares
  */
-export { validate, controller }
+export const middlewares = { validate, controller }
+
+/**
+ * Expose error handlers
+ */
+export const errorHandlers = { generalError, validationError }

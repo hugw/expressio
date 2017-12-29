@@ -1,5 +1,5 @@
 /**
- * Middlewares & Error Handlers
+ * Middlewares
  *
  * @copyright Copyright (c) 2017, hugw.io
  * @author Hugo W - me@hugw.io
@@ -11,7 +11,7 @@ import { IS_DEV } from 'isenv'
 import ejwt from 'express-jwt'
 import HTTPStatus from 'http-status'
 
-import { reqError } from './utils'
+import { validationError, generalError } from './error-handlers'
 
 /**
  * controller
@@ -32,12 +32,10 @@ export const validate = schema => (req, res, next) => {
   }
 
   joi.validate(req.body, schema, options, (err, value) => {
-    const error = reqError(400, {
-      errors: err && err.details.reduce((obj, i) => {
-        const item = { [i.context.key]: i.message.replace(/"/g, '') }
-        return Object.assign({}, obj, item)
-      }, {})
-    })
+    const error = validationError(err && err.details.reduce((obj, i) => {
+      const item = { [i.context.key]: i.message.replace(/"/g, '') }
+      return Object.assign({}, obj, item)
+    }, {}))
 
     if (!err) req.body = value
 
@@ -49,12 +47,10 @@ export const mongooseErrorHandler = (err, req, res, next) => {
   let error
 
   if (err && err.name === 'ValidationError') {
-    error = reqError(400, {
-      errors: Object.keys(err.errors).reduce((obj, i) => {
-        const item = { [i]: err.errors[i].message }
-        return Object.assign({}, obj, item)
-      }, {})
-    })
+    error = validationError(Object.keys(err.errors).reduce((obj, i) => {
+      const item = { [i]: err.errors[i].message }
+      return Object.assign({}, obj, item)
+    }, {}))
   }
 
   next(error || err)
@@ -65,7 +61,9 @@ export const mongooseErrorHandler = (err, req, res, next) => {
  *
  * Format 404 error objects
  */
-export const notFoundHandler = (req, res, next) => next(reqError(404))
+export const notFoundHandler = () => {
+  throw generalError(404)
+}
 
 /**
  * generalErrorHandler

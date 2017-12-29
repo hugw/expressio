@@ -67,20 +67,6 @@ export function getModels(dir, mongoose) {
 }
 
 /**
- * reqError
- *
- * Generate a new formatted
- * request error.
- */
-export function reqError(code, data) {
-  const err = new Error(HTTPStatus[code])
-  err.status = code
-  err.data = data
-
-  return err
-}
-
-/**
  * terminate
  *
  * Used when a requirement wasn't met

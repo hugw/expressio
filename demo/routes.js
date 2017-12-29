@@ -7,7 +7,10 @@
  */
 
 import express from 'express'
-import { validate, dataTypes, controller } from '../src'
+import { middlewares, dataTypes, errorHandlers } from '../src'
+
+const { validationError, generalError } = errorHandlers
+const { validate, controller } = middlewares
 
 const routes = express()
 
@@ -50,14 +53,10 @@ routes.post('/user', (req, res, next) => {
   })
 })
 
-routes.get('/custom-error', (req, res, next) => {
-  const { reqError } = req.xp
-
-  next(reqError(400, {
-    errors: {
-      key: 'something wrong with this key'
-    }
-  }))
+routes.get('/custom-error', () => {
+  throw validationError({
+    key: 'something wrong with this key'
+  })
 })
 
 routes.get('/controller', controller(async (req, res) => {
@@ -66,7 +65,7 @@ routes.get('/controller', controller(async (req, res) => {
 }))
 
 routes.post('/controller', controller(async () => {
-  throw new Error()
+  throw generalError()
 }))
 
 export default routes
