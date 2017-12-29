@@ -75,35 +75,6 @@ describe('Expressio', () => {
     expect(spyTerminate).toBeCalledWith('"rootPath" is not valid.')
   })
 
-  it('should stop the server when no "public" folder is provided', () => {
-    expressio({
-      rootPath: path.resolve(__dirname, './fixtures/no-public-folder'),
-    })
-
-    expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('"public" folder does not exist.')
-  })
-
-  it('should stop the server when no "models" folder is provided', () => {
-    expressio({
-      rootPath: path.resolve(__dirname, './fixtures/no-models-folder'),
-      db: { enabled: true }
-    })
-
-    expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('"models" folder does not exist.')
-  })
-
-  it('should stop the server when no "config" folder is provided', () => {
-    expressio({
-      rootPath: path.resolve(__dirname, './fixtures/no-config-folder'),
-      db: { enabled: true }
-    })
-
-    expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('"config" folder does not exist.')
-  })
-
   it('should stop the server when no database settings is provided', () => {
     expressio({
       rootPath: __dirname,

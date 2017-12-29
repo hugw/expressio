@@ -7,6 +7,7 @@
  */
 
 import path from 'path'
+import fs from 'fs'
 import express from 'express'
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
@@ -41,73 +42,62 @@ import {
   mongooseErrorHandler
 } from './middlewares'
 
-/**
- * expressio
- *
- * New server instance
- * to be loaded with a predefined
- * configuration.
- */
 export default function expressio(appConfig) {
   let server
   let models
 
-  const app = express()
-
-  const defaults = {
-    folders: {
-      public: 'public',
-      models: 'models',
-      config: 'config'
-    },
-    logger: {
-      response: ['statusCode', 'body'],
-      request: [
-        'url',
-        'headers',
-        'method',
-        'httpVersion',
-        'originalUrl',
-        'query',
-        'body'
-      ]
-    }
+  const folders = {
+    public: 'public',
+    models: 'models',
+    config: 'config'
   }
 
-  // Check if rootPath config
-  // was provided
-  if (!isDir(appConfig.rootPath)) return terminate('"rootPath" is not valid.')
+  const logger = {
+    response: ['statusCode', 'body'],
+    request: [
+      'url',
+      'headers',
+      'method',
+      'httpVersion',
+      'originalUrl',
+      'query',
+      'body'
+    ]
+  }
+
+  const app = express()
+  const { rootPath } = appConfig
+
+  const resolveApp = currentPath => path.join(rootPath, currentPath)
+
+  // Check if rootPath was provided
+  if (!isDir(rootPath)) return terminate('"rootPath" is not valid.')
 
   // Load environment variables
-  dotenv.config({ path: path.join(appConfig.rootPath, '.env') })
+  dotenv.config({ path: resolveApp('.env') })
 
-  const configPath = path.join(appConfig.rootPath, defaults.folders.config)
+  // Load config folder variables
+  const configPath = resolveApp(folders.config)
   const config = getConfig(configPath, appConfig)
 
   // Check if current Node version
   // installed is supported
-  if (!isNodeSupported(config.reqNode)) {
-    return terminate('Current Node version is not supported.')
-  }
+  if (!isNodeSupported(config.reqNode)) return terminate('Current Node version is not supported.')
 
-  // Check if current default
-  // paths are valid directories
-  Object.keys(defaults.folders).forEach((name) => {
-    // Make sure we check models folder only
-    // if database is set
-    if (name === 'models' && !config.db.enabled) return false
-    if (name === 'db' && !config.db.enabled) return false
+  // Create required folders if they do not exist
+  Object.keys(folders).forEach((folder) => {
+    // Models folder should be created
+    // only if database is enabled
+    if (folder === 'models' && !config.db.enabled) return false
 
-    const dirPath = path.join(config.rootPath, defaults.folders[name])
-    const msg = `"${name}" folder does not exist.`
-
-    if (!isDir(dirPath)) return terminate(msg)
+    const dir = resolveApp(folders[folder])
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir)
   })
 
-  // Define a public Dir for static content
-  app.use(express.static(path.join(config.rootPath, defaults.folders.public)))
+  // Define a the public dir for static content
+  app.use(express.static(resolveApp(folders.public)))
 
-  // Parse incomming requests
+  // Parse incoming requests
   // to JSON format
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: true }))
@@ -130,8 +120,8 @@ export default function expressio(appConfig) {
       ],
       expressFormat: true,
       colorize: true,
-      responseWhitelist: defaults.logger.response,
-      requestWhitelist: defaults.logger.request
+      responseWhitelist: logger.response,
+      requestWhitelist: logger.request
     }))
   }
 
@@ -167,7 +157,7 @@ export default function expressio(appConfig) {
     })
 
     // Load models
-    const modelsPath = path.join(config.rootPath, defaults.folders.models)
+    const modelsPath = resolveApp(folders.models)
     models = getModels(modelsPath, mongoose)
   }
 
@@ -256,7 +246,7 @@ export default function expressio(appConfig) {
    * seedDB
    */
   app.seedDB = () => (app.startDB().then(() => {
-    const seeds = optional(path.join(config.rootPath, 'seeds'))
+    const seeds = optional(resolveApp('seeds'))
     const promises = []
     if (seeds && seeds.default) {
       logEvent('Adding seed data...')
