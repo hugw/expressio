@@ -8,6 +8,5 @@
 
 export default function (models, promises) {
   promises.push(models.User.create({ name: 'John Doe', email: 'jd@gmail.com' }))
-
   return promises
 }

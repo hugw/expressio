@@ -96,3 +96,30 @@ export const authorize = (req, res, next) => {
   const fn = ejwt({ secret }).unless(ignorePaths.length && { path: ignorePaths })
   return fn(req, res, next)
 }
+
+/**
+ * schemaOpts
+ *
+ * Add global options for
+ * mongoose schemas
+ */
+export const schemaOpts = (schema) => {
+  const toOpts = {
+    virtuals: true,
+    transform: (doc, ret) => {
+      delete ret._id // eslint-disable-line
+      delete ret.__v // eslint-disable-line
+
+      if (schema.options.filter) {
+        schema.options.filter.forEach((key) => {
+          delete ret[key] // eslint-disable-line
+        })
+      }
+    }
+  }
+
+  schema.set('timestamps', true)
+  schema.set('minimize', false)
+  schema.set('toJSON', toOpts)
+  schema.set('toObject', toOpts)
+}

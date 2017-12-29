@@ -39,7 +39,8 @@ import {
   validate,
   notFoundHandler,
   generalErrorhandler,
-  mongooseErrorHandler
+  mongooseErrorHandler,
+  schemaOpts
 } from './middlewares'
 
 export default function expressio(rootPath, appConfig = {}) {
@@ -134,26 +135,7 @@ export default function expressio(rootPath, appConfig = {}) {
     mongoose.set('debug', IS_DEV)
     mongoose.Promise = global.Promise
     mongoose.plugin(beautifyUnique)
-    mongoose.plugin((schema) => {
-      const toOpts = {
-        virtuals: true,
-        transform: (doc, ret) => {
-          delete ret._id // eslint-disable-line
-          delete ret.__v // eslint-disable-line
-
-          if (schema.options.filter) {
-            schema.options.filter.forEach((key) => {
-              delete ret[key] // eslint-disable-line
-            })
-          }
-        }
-      }
-
-      schema.set('timestamps', true)
-      schema.set('minimize', false)
-      schema.set('toJSON', toOpts)
-      schema.set('toObject', toOpts)
-    })
+    mongoose.plugin(schemaOpts)
 
     // Load models
     const modelsPath = resolveApp(folders.models)
@@ -166,8 +148,6 @@ export default function expressio(rootPath, appConfig = {}) {
   app.use((req, res, next) => {
     req.xp = {
       config,
-      statusCode: HTTPStatus,
-      jwt,
       reqError,
       ...models ? { models } : {}
     }
@@ -259,15 +239,15 @@ export default function expressio(rootPath, appConfig = {}) {
 }
 
 /**
- * Expose Express
- * Object
+ * Expose external
+ * dependencies
  */
-export { express }
-
-/**
- * Expose Joi
- */
-export { joi }
+export {
+  express,
+  HTTPStatus as statusCode,
+  jwt,
+  joi as dataTypes
+}
 
 /**
  * Expose middlewares

@@ -6,7 +6,7 @@
  * @license MIT
  */
 
-import expressio, { express, joi, validate } from '../'
+import expressio, { express, dataTypes, jwt, statusCode, validate } from '../'
 import * as utils from '../utils'
 
 describe('Expressio', () => {
@@ -21,15 +21,14 @@ describe('Expressio', () => {
     spyTerminate.mockRestore()
   })
 
-  it('should expose an Express object', () => {
+  it('should expose an external dependencies object', () => {
     expect(express).toBeDefined()
+    expect(dataTypes).toBeDefined()
+    expect(jwt).toBeDefined()
+    expect(statusCode).toBeDefined()
   })
 
-  it('should expose a joi object', () => {
-    expect(joi).toBeDefined()
-  })
-
-  it('should expose a validate middleware', () => {
+  it('should expose middlewares', () => {
     expect(validate).toBeDefined()
   })
 

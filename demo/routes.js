@@ -7,7 +7,7 @@
  */
 
 import express from 'express'
-import { validate, joi } from '../src'
+import { validate, dataTypes } from '../src'
 
 const routes = express()
 
@@ -27,9 +27,9 @@ routes.get('/authorized', (req, res) => {
   res.json({ page: 'Authorized', user: req.user })
 })
 
-const article = joi.object().keys({
-  title: joi.string().min(3).required(),
-  description: joi.string().required(),
+const article = dataTypes.object().keys({
+  title: dataTypes.string().min(3).required(),
+  description: dataTypes.string().required(),
 })
 
 routes.post('/article', validate(article), (req, res) => {

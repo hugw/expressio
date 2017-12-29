@@ -122,7 +122,7 @@ describe('Demo routes', () => {
   it('(GET /config) should respond with a config object', async () => {
     const response = await request(app).get('/config')
     expect(response.statusCode).toBe(200)
-    expect(response.body.config).toEqual(['config', 'statusCode', 'jwt', 'reqError', 'models'])
+    expect(response.body.config).toEqual(['config', 'reqError', 'models'])
   })
 
   it('(POST /user) with valid params should return an user payload', async () => {
