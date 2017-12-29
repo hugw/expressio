@@ -37,15 +37,15 @@ import {
   controller,
   authorize,
   validate,
-  notFoundHandler,
-  generalErrorhandler,
-  mongooseErrorHandler,
   schemaOpts
 } from './middlewares'
 
 import {
   generalError,
   validationError,
+  notFoundHandler,
+  generalErrorhandler,
+  mongooseErrorHandler,
 } from './error-handlers'
 
 export default function expressio(rootPath, appConfig = {}) {

@@ -7,9 +7,21 @@
  */
 
 
-import { generalError, validationError } from '../error-handlers'
+import {
+  generalError,
+  validationError,
+  notFoundHandler,
+  generalErrorhandler,
+  mongooseErrorHandler
+} from '../error-handlers'
 
 describe('Expressio / Error Handlers', () => {
+  it('should expose express error handlers', () => {
+    expect(notFoundHandler).toBeDefined()
+    expect(generalErrorhandler).toBeDefined()
+    expect(mongooseErrorHandler).toBeDefined()
+  })
+
   describe('#generalError', () => {
     it('should generate an error object with no code & custom data', () => {
       const err = generalError()

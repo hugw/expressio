@@ -13,7 +13,6 @@ import merge from 'lodash/merge'
 import optional from 'optional'
 import { CURRENT_ENV, IS_DEV } from 'isenv'
 import chalk from 'chalk'
-import HTTPStatus from 'http-status'
 
 /**
  * isNodeSupported

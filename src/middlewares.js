@@ -7,11 +7,9 @@
  */
 
 import joi from 'joi'
-import { IS_DEV } from 'isenv'
 import ejwt from 'express-jwt'
-import HTTPStatus from 'http-status'
 
-import { validationError, generalError } from './error-handlers'
+import { validationError } from './error-handlers'
 
 /**
  * controller
@@ -40,47 +38,6 @@ export const validate = schema => (req, res, next) => {
     if (!err) req.body = value
 
     next(err && error)
-  })
-}
-
-export const mongooseErrorHandler = (err, req, res, next) => {
-  let error
-
-  if (err && err.name === 'ValidationError') {
-    error = validationError(Object.keys(err.errors).reduce((obj, i) => {
-      const item = { [i]: err.errors[i].message }
-      return Object.assign({}, obj, item)
-    }, {}))
-  }
-
-  next(error || err)
-}
-
-/**
- * notFoundHandler
- *
- * Format 404 error objects
- */
-export const notFoundHandler = () => {
-  throw generalError(404)
-}
-
-/**
- * generalErrorHandler
- *
- * Format all caught errors
- * and expose some properties based
- * on current environment
- */
-export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-line
-  const stack = IS_DEV && err.stack && err.stack.split('\n')
-  res.status(err.status || 500)
-
-  res.json({
-    message: err.message || HTTPStatus[500],
-    statusCode: err.status,
-    ...err.data,
-    ...stack ? { stack } : {}
   })
 }
 
