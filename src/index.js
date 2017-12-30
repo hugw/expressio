@@ -17,7 +17,6 @@ import HTTPStatus from 'http-status'
 import winstonExp from 'express-winston'
 import winston from 'winston'
 import jwt from 'jsonwebtoken'
-import joi from 'joi'
 import { IS_DEV } from 'isenv'
 import dotenv from 'dotenv'
 import optional from 'optional'
@@ -47,6 +46,8 @@ import {
   generalErrorhandler,
   mongooseErrorHandler,
 } from './error-handlers'
+
+import validatejs from './validate'
 
 export default function expressio(rootPath, appConfig = {}) {
   const folders = {
@@ -249,7 +250,7 @@ export {
   express,
   HTTPStatus as statusCode,
   jwt,
-  joi as dataTypes
+  validatejs
 }
 
 /**

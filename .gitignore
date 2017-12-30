@@ -2,7 +2,5 @@
 node_modules
 npm-debug.log
 .env
-lerna-debug.log
 .vscode
 dist
-*.sqlite

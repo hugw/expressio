@@ -6,7 +6,7 @@
  * @license MIT
  */
 
-import expressio, { express, dataTypes, jwt, statusCode, middlewares, errorHandlers } from '../'
+import expressio, { express, validatejs, jwt, statusCode, middlewares, errorHandlers } from '../'
 import * as utils from '../utils'
 
 describe('Expressio', () => {
@@ -23,7 +23,7 @@ describe('Expressio', () => {
 
   it('should expose external dependencies & utility functions', () => {
     expect(express).toBeDefined()
-    expect(dataTypes).toBeDefined()
+    expect(validatejs).toBeDefined()
     expect(jwt).toBeDefined()
     expect(statusCode).toBeDefined()
   })

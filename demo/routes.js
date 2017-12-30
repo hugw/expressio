@@ -7,7 +7,7 @@
  */
 
 import express from 'express'
-import { middlewares, dataTypes, errorHandlers } from '../src'
+import { middlewares, errorHandlers } from '../src'
 
 const { validationError, generalError } = errorHandlers
 const { validate, controller } = middlewares
@@ -30,12 +30,23 @@ routes.get('/authorized', (req, res) => {
   res.json({ page: 'Authorized', user: req.user })
 })
 
-const article = dataTypes.object().keys({
-  title: dataTypes.string().min(3).required(),
-  description: dataTypes.string().required(),
-})
+const schema = {
+  title: {
+    label: 'Title',
+    rules: {
+      presence: { allowEmpty: false },
+      length: { minimum: 3 }
+    }
+  },
+  description: {
+    label: 'Description',
+    rules: {
+      presence: { allowEmpty: false }
+    }
+  }
+}
 
-routes.post('/article', validate(article), (req, res) => {
+routes.post('/article', validate(schema), (req, res) => {
   res.json({ page: 'Article', ...req.body })
 })
 

@@ -6,10 +6,10 @@
  * @license MIT
  */
 
-import joi from 'joi'
 import ejwt from 'express-jwt'
 
-import { validationError } from './error-handlers'
+import { validationError, generalError } from './error-handlers'
+import validatejs from './validate'
 
 /**
  * controller
@@ -22,23 +22,44 @@ export const controller = fn => (req, res, next) => Promise.resolve(fn(req, res,
 /**
  * validate
  *
- * Body validator/Sanitizer
+ * Request body validator
  */
 export const validate = schema => (req, res, next) => {
-  const options = {
-    abortEarly: false
+  // Extract labels
+  const labels = Object.keys(schema).reduce((obj, item) => {
+    const label = { [item]: schema[item].label }
+    return Object.assign({}, obj, label)
+  }, {})
+
+  // Extract rules
+  const constrains = Object.keys(schema).reduce((obj, item) => {
+    const rule = { [item]: schema[item].rules }
+    return Object.assign({}, obj, rule)
+  }, {})
+
+  const successFn = (attr) => {
+    req.body = attr
+    next()
   }
 
-  joi.validate(req.body, schema, options, (err, value) => {
-    const error = validationError(err && err.details.reduce((obj, i) => {
-      const item = { [i.context.key]: i.message.replace(/"/g, '') }
-      return Object.assign({}, obj, item)
-    }, {}))
+  const errorFn = (err) => {
+    try {
+      if (err instanceof Error) throw generalError()
 
-    if (!err) req.body = value
+      throw validationError(err.reduce((obj, item) => {
+        const name = item.attribute
+        const formattedItem = {
+          [name]: {
+            message: `${labels[name]} ${item.error}`,
+            validator: item.validator
+          }
+        }
+        return Object.assign({}, obj, formattedItem)
+      }, {}))
+    } catch (e) { next(e) }
+  }
 
-    next(err && error)
-  })
+  validatejs.async(req.body, constrains).then(successFn, errorFn)
 }
 
 /**

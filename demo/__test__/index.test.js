@@ -15,8 +15,8 @@ const validToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSld
 const invalidToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1MTM4OTk0MDUsImV4cCI6MTkyNDEyNjYwNSwiYXVkIjoiRXhwcmVzc2lvIiwic3ViIjoiIiwiTmFtZSI6IkpvaG4gRG9lIiwiSWQiOiIxIn0.qC9sUsSzrfBZbcHOEemRmbi2t5k4mkVFq3h7Ox0TPmQ'
 
 describe('Demo routes', () => {
-  beforeAll(() => {
-    app.resetDB()
+  beforeAll(async () => {
+    await app.resetDB()
   })
 
   afterAll(() => {
@@ -97,13 +97,12 @@ describe('Demo routes', () => {
     expect(response.body).toEqual({ page: 'Article', ...payload })
   })
 
-  it('(POST /article) with extra params should return a 400 error', async () => {
+  it('(POST /article) with extra params should filter from body', async () => {
     const payload = { title: 'Article title', description: 'Lorem ipsum...', extra: 'notallowed' }
     const response = await request(app).post('/article')
       .send(payload)
-    expect(response.statusCode).toBe(400)
-    expect(response.body.message).toEqual('Bad Request')
-    expect(response.body.errors).toEqual({ extra: 'extra is not allowed' })
+    expect(response.statusCode).toBe(200)
+    expect(response.body.extra).toBeUndefined()
   })
 
   it('(POST /article) with invalid params should return a 400 error', async () => {
@@ -113,9 +112,14 @@ describe('Demo routes', () => {
     expect(response.statusCode).toBe(400)
     expect(response.body.message).toEqual('Bad Request')
     expect(response.body.errors).toEqual({
-      title: 'title length must be at least 3 characters long',
-      description: 'description is not allowed to be empty',
-      extra: 'extra is not allowed'
+      description: {
+        message: 'Description can\'t be blank',
+        validator: 'presence'
+      },
+      title: {
+        message: 'Title is too short (minimum is 3 characters)',
+        validator: 'length'
+      }
     })
   })
 
