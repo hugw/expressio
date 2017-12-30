@@ -39,6 +39,9 @@ export const validate = schema => (req, res, next) => {
 
   const successFn = (attr) => {
     req.body = attr
+    req.labels = labels
+    req.constrains = constrains
+
     next()
   }
 

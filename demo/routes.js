@@ -30,7 +30,7 @@ routes.get('/authorized', (req, res) => {
   res.json({ page: 'Authorized', user: req.user })
 })
 
-const schema = {
+const articleSchema = {
   title: {
     label: 'Title',
     rules: {
@@ -46,7 +46,7 @@ const schema = {
   }
 }
 
-routes.post('/article', validate(schema), (req, res) => {
+routes.post('/article', validate(articleSchema), (req, res) => {
   res.json({ page: 'Article', ...req.body })
 })
 
@@ -55,7 +55,24 @@ routes.get('/config', (req, res) => {
   res.json({ page: 'Config', config })
 })
 
-routes.post('/user', (req, res, next) => {
+const userSchema = {
+  name: {
+    label: 'Name',
+    rules: {}
+  },
+  email: {
+    label: 'Email',
+    rules: {
+      email: true
+    }
+  },
+  hidden: {
+    label: 'Hidden',
+    rules: {}
+  },
+}
+
+routes.post('/user', validate(userSchema), (req, res, next) => {
   const { models: { User } } = req.xp
 
   User.create({ ...req.body }, (err, user) => {

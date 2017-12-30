@@ -40,9 +40,18 @@ export const mongooseErrorHandler = (err, req, res, next) => {
   let error
 
   if (err && err.name === 'ValidationError') {
-    error = validationError(Object.keys(err.errors).reduce((obj, i) => {
-      const item = { [i]: err.errors[i].message }
-      return Object.assign({}, obj, item)
+    error = validationError(Object.keys(err.errors).reduce((obj, item) => {
+      const validator = err.errors[item].kind
+      const label = (req.labels && req.labels[item]) || item
+
+      const formattedItem = {
+        [item]: {
+          message: (validator === 'unique') ? `${label} is already in use` : err.errors[item].message,
+          validator: err.errors[item].kind
+        }
+      }
+
+      return Object.assign({}, obj, formattedItem)
     }, {}))
   }
 

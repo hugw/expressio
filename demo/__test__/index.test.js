@@ -140,6 +140,20 @@ describe('Demo routes', () => {
     expect(response.body.user.hidden).toBeUndefined()
   })
 
+  it('(POST /user) with duplicate email should return an error message', async () => {
+    const payload = { name: 'John Doe', email: 'john@doe.com', hidden: 'boo' }
+    const response = await request(app).post('/user')
+      .send(payload)
+    expect(response.statusCode).toBe(400)
+    expect(response.body.message).toEqual('Bad Request')
+    expect(response.body.errors).toEqual({
+      email: {
+        message: 'Email is already in use',
+        validator: 'unique'
+      },
+    })
+  })
+
   it('(GET /custom-error) should respond with a custom 400 payload', async () => {
     const response = await request(app).get('/custom-error')
     expect(response.statusCode).toBe(400)
