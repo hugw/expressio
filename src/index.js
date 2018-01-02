@@ -257,7 +257,6 @@ export default function expressio(rootPath, appConfig = {}) {
  * functions
  */
 export {
-  express,
   HTTPStatus as statusCode,
   jwt,
   validatejs
