@@ -48,6 +48,7 @@ import {
 } from './error-handlers'
 
 import validatejs from './validate'
+import transport from './mailer'
 
 export default function expressio(rootPath, appConfig = {}) {
   const folders = {
@@ -84,6 +85,9 @@ export default function expressio(rootPath, appConfig = {}) {
   // Load config folder variables
   const configPath = resolveApp(folders.config)
   const config = getConfig(configPath, appConfig)
+
+  // Setup mailer
+  const mailer = transport(config.mailer)
 
   // Check if current Node version
   // installed is supported
@@ -153,6 +157,7 @@ export default function expressio(rootPath, appConfig = {}) {
   app.use((req, res, next) => {
     req.xp = {
       config,
+      mailer,
       ...models ? { models } : {}
     }
 
@@ -237,6 +242,11 @@ export default function expressio(rootPath, appConfig = {}) {
 
     return Promise.resolve()
   }))
+
+  /**
+   * mailer
+   */
+  app.mailer = mailer
 
   return app
 }

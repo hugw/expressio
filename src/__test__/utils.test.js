@@ -84,7 +84,15 @@ describe('Expressio / Utils', () => {
         reqNode: { minor: 6, major: 8 },
         secret: 'Default secret key',
         local: 'test',
-        default: 'default'
+        default: 'default',
+        mailer: {
+          host: 'smtp.ethereal.email',
+          port: 587,
+          auth: {
+            user: 'yrhxokkz4da2rtlw@ethereal.email',
+            pass: 'Eu7ZNpyZYKUyyJNzk9'
+          }
+        }
       })
     })
 

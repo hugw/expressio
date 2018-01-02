@@ -48,6 +48,7 @@ describe('Expressio', () => {
     expect(server.startDB).toBeDefined()
     expect(server.resetDB).toBeDefined()
     expect(server.seedDB).toBeDefined()
+    expect(server.mailer).toBeDefined()
   })
 
   it('should load environment variables', () => {
