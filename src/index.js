@@ -243,6 +243,11 @@ export default function expressio(rootPath, appConfig = {}) {
     return Promise.resolve()
   }))
 
+  /**
+   * mailer
+   */
+  app.mailer = mailer
+
   return app
 }
 
