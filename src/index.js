@@ -243,11 +243,6 @@ export default function expressio(rootPath, appConfig = {}) {
     return Promise.resolve()
   }))
 
-  /**
-   * mailer
-   */
-  app.mailer = mailer
-
   return app
 }
 
@@ -256,10 +251,13 @@ export default function expressio(rootPath, appConfig = {}) {
  * dependencies and utility
  * functions
  */
+const router = express.Router
+
 export {
   HTTPStatus as statusCode,
   jwt,
-  validatejs
+  validatejs,
+  router
 }
 
 /**

@@ -6,7 +6,7 @@
  * @license MIT
  */
 
-import expressio, { validatejs, jwt, statusCode, middlewares, errorHandlers } from '../'
+import expressio, { validatejs, jwt, statusCode, middlewares, errorHandlers, router } from '../'
 import * as utils from '../utils'
 
 describe('Expressio', () => {
@@ -25,6 +25,7 @@ describe('Expressio', () => {
     expect(validatejs).toBeDefined()
     expect(jwt).toBeDefined()
     expect(statusCode).toBeDefined()
+    expect(router).toBeDefined()
   })
 
   it('should expose middlewares', () => {
@@ -47,7 +48,6 @@ describe('Expressio', () => {
     expect(server.startDB).toBeDefined()
     expect(server.resetDB).toBeDefined()
     expect(server.seedDB).toBeDefined()
-    expect(server.mailer).toBeDefined()
   })
 
   it('should load environment variables', () => {
