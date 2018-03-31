@@ -24,7 +24,7 @@ export const controller = fn => (req, res, next) => Promise.resolve(fn(req, res,
  *
  * Request body validator
  */
-export const validate = schema => (req, res, next) => {
+export const validate = (schema, type = 'body') => (req, res, next) => {
   // Extract labels
   const labels = Object.keys(schema).reduce((obj, item) => {
     const label = { [item]: schema[item].label }
@@ -62,7 +62,8 @@ export const validate = schema => (req, res, next) => {
     } catch (e) { next(e) }
   }
 
-  validatejs.async(req.body, constrains).then(successFn, errorFn)
+  const reqType = ['body', 'params', 'query'].includes(type) ? req[type] : req.body
+  validatejs.async(reqType, constrains).then(successFn, errorFn)
 }
 
 /**
