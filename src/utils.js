@@ -42,30 +42,6 @@ export function isDir(dir) {
 }
 
 /**
- * getModels
- *
- * Auto load models
- * and return all into
- * a single object.
- */
-export function getModels(dir, mongoose) {
-  const models = {}
-
-  try {
-    fs.readdirSync(dir)
-      .filter(file => ((file.indexOf('.') !== 0) && (file !== 'index.js')))
-      .forEach((file) => {
-        const genModel = require(path.join(dir, file)).default
-        const model = genModel(mongoose, mongoose.Schema)
-
-        models[model.modelName] = model
-      })
-
-    return models
-  } catch (e) { return false }
-}
-
-/**
  * terminate
  *
  * Used when a requirement wasn't met

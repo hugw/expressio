@@ -6,6 +6,7 @@
  * @license MIT
  */
 
+import fs from 'fs'
 import mongoose from 'mongoose'
 import beautifyUnique from 'mongoose-beautiful-unique-validation'
 import { IS_DEV } from 'isenv'
@@ -15,11 +16,62 @@ import path from 'path'
 import {
   logEvent,
   terminate,
-  getModels,
 } from './utils'
 
-import { schemaOpts } from './middlewares'
+/**
+ * schemaOpts
+ *
+ * Add global options for
+ * mongoose schemas
+ */
+const schemaOpts = (schema) => {
+  const toOpts = {
+    virtuals: true,
+    transform: (doc, ret) => {
+      delete ret._id // eslint-disable-line
+      delete ret.__v // eslint-disable-line
 
+      if (schema.options.filter) {
+        schema.options.filter.forEach((key) => {
+          delete ret[key] // eslint-disable-line
+        })
+      }
+    }
+  }
+
+  schema.set('timestamps', true)
+  schema.set('minimize', false)
+  schema.set('toJSON', toOpts)
+  schema.set('toObject', toOpts)
+}
+
+/**
+ * getModels
+ *
+ * Auto load models
+ * and return all into
+ * a single object.
+ */
+function getModels(dir) {
+  const models = {}
+
+  try {
+    fs.readdirSync(dir)
+      .filter(file => ((file.indexOf('.') !== 0) && (file !== 'index.js')))
+      .forEach((file) => {
+        const genModel = require(path.join(dir, file)).default
+        const model = genModel(mongoose, mongoose.Schema)
+
+        models[model.modelName] = model
+      })
+
+    return models
+  } catch (e) { return false }
+}
+
+/**
+ * Database API
+ */
 export default (config) => {
   if (!config.db.enabled) return null
   if (!config.db.connection) return terminate(`Database connection for "${config.env}" env does not exist.`)
@@ -94,7 +146,7 @@ export default (config) => {
   /**
    * Models
    */
-  api.models = getModels(modelsPath, mongoose)
+  api.models = getModels(modelsPath)
 
   return {
     ...api,
