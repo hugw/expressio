@@ -51,8 +51,6 @@ export default function expressio(rootPath, appConfig = {}) {
   const app = express()
   const resolveApp = currentPath => path.join(rootPath, currentPath)
 
-  let server
-
   // Check if rootPath was provided
   if (!isDir(rootPath)) return terminate('"rootPath" is not valid.')
 
@@ -131,34 +129,6 @@ export default function expressio(rootPath, appConfig = {}) {
   app.use(authorize)
 
   /**
-   * startServer
-   *
-   * Bootstrap server and
-   * error handlers
-   */
-  app.startServer = () => {
-    // Add error handlers
-    app.use(notFoundHandler)
-    app.use(mongooseErrorHandler)
-    app.use(generalErrorhandler)
-
-    server = app.listen(config.port, config.address, () => {
-      const { address, port } = server.address()
-      logEvent(`Server running → ${address}:${port} @ ${config.env}`)
-    })
-
-    if (database) database.start()
-  }
-
-  /**
-   * stopServer
-   */
-  app.stopServer = () => {
-    if (server) server.close()
-    if (database) database.stop()
-  }
-
-  /**
    * mailer
    */
   app.mailer = mailer
@@ -167,6 +137,30 @@ export default function expressio(rootPath, appConfig = {}) {
    * Database
    */
   app.database = database
+
+  /**
+   * Server
+   */
+  app.server = {
+    start: () => {
+      // Add error handlers
+      app.use(notFoundHandler)
+      app.use(mongooseErrorHandler)
+      app.use(generalErrorhandler)
+
+      app.serverInstance = app.listen(config.port, config.address, () => {
+        const { address, port } = app.serverInstance.address()
+        logEvent(`Server running → ${address}:${port} @ ${config.env}`)
+      })
+
+      if (database) database.start()
+    },
+
+    stop: () => {
+      if (app.serverInstance) app.serverInstance.close()
+      if (database) database.stop()
+    }
+  }
 
   return app
 }

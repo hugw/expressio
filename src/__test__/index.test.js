@@ -39,11 +39,10 @@ describe('Expressio', () => {
   })
 
   it('should return a valid expressio object', () => {
-    const server = expressio(__dirname)
+    const app = expressio(__dirname)
     expect(spyTerminate).not.toHaveBeenCalled()
-    expect(server.startServer).toBeDefined()
-    expect(server.stopServer).toBeDefined()
-    expect(server.mailer).toBeDefined()
+    expect(app.server).toBeDefined()
+    expect(app.mailer).toBeDefined()
   })
 
   it('should load environment variables', () => {

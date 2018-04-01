@@ -20,8 +20,7 @@ describe('Demo routes', () => {
   })
 
   afterAll(() => {
-    app.stopServer()
-    app.database.stop()
+    app.server.stop()
   })
 
   it('(GET /) should respond with a success payload', async () => {
