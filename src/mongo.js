@@ -72,19 +72,19 @@ export default (config) => {
   /**
    * Start
    */
-  api.start = () => new Promise(async (resolve) => {
+  api.start = async () => {
     if ([1, 2].includes(mongoose.connection.readyState)) {
-      return resolve('Already connected')
+      return Promise.resolve('Already connected')
     }
 
     try {
       await mongoose.connect(config.db.connection, { useMongoClient: true })
       logEvent(`Database running → MongoDB @ ${config.env}`)
-      resolve('Connected')
+      return Promise.resolve('Connected')
     } catch (e) {
       terminate('Something went wrong while starting the database.')
     }
-  })
+  }
 
   /**
    * Stop
