@@ -99,9 +99,15 @@ export default (rootPath, config) => {
 
     if (seed && seed.default) {
       logEvent('Adding seed data...')
-      await seed.default(api.models)
+
+      try {
+        await seed.default(api.models)
+      } catch (e) {
+        logEvent(e, 'red')
+        logEvent('An error occured while seeding database. Aborting...', 'red')
+      }
     } else {
-      logEvent('No seed data found...')
+      logEvent('No seed data found...', 'red')
     }
 
     await api.stop()

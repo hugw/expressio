@@ -55,7 +55,7 @@ export function terminate(msg) {
 /**
  * logEvent
  */
-export const logEvent = msg => (IS_DEV && console.log(chalk.green(msg)))
+export const logEvent = (msg, color = 'green') => (IS_DEV && console.log(chalk[color](msg)))
 
 /**
  * getConfig
