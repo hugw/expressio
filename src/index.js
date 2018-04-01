@@ -19,12 +19,8 @@ import winston from 'winston'
 import jwt from 'jsonwebtoken'
 import { IS_DEV } from 'isenv'
 import dotenv from 'dotenv'
-import optional from 'optional'
-import mongoose from 'mongoose'
-import beautifyUnique from 'mongoose-beautiful-unique-validation'
 
 import {
-  getModels,
   getConfig,
   isNodeSupported,
   isDir,
@@ -35,8 +31,7 @@ import {
 import {
   controller,
   authorize,
-  validate,
-  schemaOpts
+  validate
 } from './middlewares'
 
 import {
@@ -48,7 +43,8 @@ import {
 } from './error-handlers'
 
 import validatejs from './validate'
-import transport from './mailer'
+import mailerTransport from './mailer'
+import mongo from './mongo'
 
 export default function expressio(rootPath, appConfig = {}) {
   const folders = {
@@ -74,7 +70,6 @@ export default function expressio(rootPath, appConfig = {}) {
   const resolveApp = currentPath => path.join(rootPath, currentPath)
 
   let server
-  let models
 
   // Check if rootPath was provided
   if (!isDir(rootPath)) return terminate('"rootPath" is not valid.')
@@ -87,7 +82,7 @@ export default function expressio(rootPath, appConfig = {}) {
   const config = getConfig(configPath, appConfig)
 
   // Setup mailer
-  const mailer = transport(config.mailer)
+  const mailer = mailerTransport(config.mailer)
 
   // Check if current Node version
   // installed is supported
@@ -134,22 +129,8 @@ export default function expressio(rootPath, appConfig = {}) {
     }))
   }
 
-  // Set database related
-  // information
-  if (config.db.enabled) {
-    const { db } = config
-    if (!db.connection) return terminate(`Database connection for "${config.env}" env does not exist.`)
-
-    // Setup mongoose specifics
-    mongoose.set('debug', IS_DEV)
-    mongoose.Promise = global.Promise
-    mongoose.plugin(beautifyUnique)
-    mongoose.plugin(schemaOpts)
-
-    // Load models
-    const modelsPath = resolveApp(folders.models)
-    models = getModels(modelsPath, mongoose)
-  }
+  // Setup database
+  const database = mongo({ ...config, rootPath, folders })
 
   // Add common config / objects
   // to request object and make
@@ -158,7 +139,7 @@ export default function expressio(rootPath, appConfig = {}) {
     req.xp = {
       config,
       mailer,
-      ...models ? { models } : {}
+      models: database && database.models
     }
 
     next()
@@ -173,7 +154,7 @@ export default function expressio(rootPath, appConfig = {}) {
    * Bootstrap server and
    * error handlers
    */
-  app.startServer = (options = { resetDB: false, seedDB: false }) => {
+  app.startServer = () => {
     // Add error handlers
     app.use(notFoundHandler)
     app.use(mongooseErrorHandler)
@@ -184,7 +165,7 @@ export default function expressio(rootPath, appConfig = {}) {
       logEvent(`Server running → ${address}:${port} @ ${config.env}`)
     })
 
-    app.startDB(options)
+    database.start()
   }
 
   /**
@@ -192,61 +173,18 @@ export default function expressio(rootPath, appConfig = {}) {
    */
   app.stopServer = () => {
     if (server) server.close()
-    app.stopDatabase()
+    // app.stopDatabase() // @TODO
   }
-
-  /**
-   * stopDatabase
-   */
-  app.stopDB = () => {
-    if (config.db) mongoose.disconnect()
-  }
-
-  /**
-   * startDB
-   */
-  app.startDB = () => {
-    if (!config.db.enabled) return Promise.reject()
-
-    return new Promise((resolve) => {
-      if ([1, 2].indexOf(mongoose.connection.readyState) === -1) {
-        mongoose.connect(config.db.connection, { useMongoClient: true })
-          .then(() => {
-            logEvent(`Database running → MongoDB @ ${config.env}`)
-            resolve('Connected')
-          })
-          .catch(() => terminate('Something went wrong while starting the database.'))
-      } else resolve('Already connected')
-    })
-  }
-
-  /**
-   * resetDB
-   */
-  app.resetDB = () => (app.startDB().then(() => {
-    logEvent('Resetting database...')
-    const promises = Object.keys(models).map(model => models[model].collection.remove())
-    return Promise.all(promises)
-  }))
-
-  /**
-   * seedDB
-   */
-  app.seedDB = () => (app.startDB().then(() => {
-    const seeds = optional(resolveApp('seeds'))
-    const promises = []
-    if (seeds && seeds.default) {
-      logEvent('Adding seed data...')
-      return Promise.all(seeds.default(models, promises))
-    }
-
-    return Promise.resolve()
-  }))
 
   /**
    * mailer
    */
   app.mailer = mailer
+
+  /**
+   * Database
+   */
+  app.database = database
 
   return app
 }

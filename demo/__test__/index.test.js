@@ -16,11 +16,12 @@ const invalidToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgS
 
 describe('Demo routes', () => {
   beforeAll(async () => {
-    await app.resetDB()
+    await app.database.reset({ stop: false })
   })
 
   afterAll(() => {
     app.stopServer()
+    app.database.stop()
   })
 
   it('(GET /) should respond with a success payload', async () => {

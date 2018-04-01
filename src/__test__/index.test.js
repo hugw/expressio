@@ -40,14 +40,9 @@ describe('Expressio', () => {
 
   it('should return a valid expressio object', () => {
     const server = expressio(__dirname)
-
     expect(spyTerminate).not.toHaveBeenCalled()
     expect(server.startServer).toBeDefined()
     expect(server.stopServer).toBeDefined()
-    expect(server.stopDB).toBeDefined()
-    expect(server.startDB).toBeDefined()
-    expect(server.resetDB).toBeDefined()
-    expect(server.seedDB).toBeDefined()
     expect(server.mailer).toBeDefined()
   })
 
