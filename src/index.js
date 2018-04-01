@@ -45,27 +45,9 @@ import {
 import validatejs from './validate'
 import mailerTransport from './mailer'
 import mongo from './mongo'
+import { FOLDERS, LOGGER } from './constants'
 
 export default function expressio(rootPath, appConfig = {}) {
-  const folders = {
-    public: 'public',
-    models: 'models',
-    config: 'config'
-  }
-
-  const logger = {
-    response: ['statusCode', 'body'],
-    request: [
-      'url',
-      'headers',
-      'method',
-      'httpVersion',
-      'originalUrl',
-      'query',
-      'body'
-    ]
-  }
-
   const app = express()
   const resolveApp = currentPath => path.join(rootPath, currentPath)
 
@@ -78,7 +60,7 @@ export default function expressio(rootPath, appConfig = {}) {
   dotenv.config({ path: resolveApp('.env') })
 
   // Load config folder variables
-  const configPath = resolveApp(folders.config)
+  const configPath = resolveApp(FOLDERS.config)
   const config = getConfig(configPath, appConfig)
 
   // Setup mailer
@@ -89,17 +71,17 @@ export default function expressio(rootPath, appConfig = {}) {
   if (!isNodeSupported(config.reqNode)) return terminate('Current Node version is not supported.')
 
   // Create required folders if they do not exist
-  Object.keys(folders).forEach((folder) => {
+  Object.keys(FOLDERS).forEach((folder) => {
     // Models folder should be created
     // only if database is enabled
     if (folder === 'models' && !config.db.enabled) return false
 
-    const dir = resolveApp(folders[folder])
+    const dir = resolveApp(FOLDERS[folder])
     if (!fs.existsSync(dir)) fs.mkdirSync(dir)
   })
 
   // Define a the public dir for static content
-  app.use(express.static(resolveApp(folders.public)))
+  app.use(express.static(resolveApp(FOLDERS.public)))
 
   // Parse incoming requests
   // to JSON format
@@ -124,13 +106,13 @@ export default function expressio(rootPath, appConfig = {}) {
       ],
       expressFormat: true,
       colorize: true,
-      responseWhitelist: logger.response,
-      requestWhitelist: logger.request
+      responseWhitelist: LOGGER.response,
+      requestWhitelist: LOGGER.request
     }))
   }
 
   // Setup database
-  const database = mongo({ ...config, rootPath, folders })
+  const database = mongo(rootPath, config)
 
   // Add common config / objects
   // to request object and make
@@ -165,7 +147,7 @@ export default function expressio(rootPath, appConfig = {}) {
       logEvent(`Server running → ${address}:${port} @ ${config.env}`)
     })
 
-    database.start()
+    if (database) database.start()
   }
 
   /**
@@ -173,7 +155,7 @@ export default function expressio(rootPath, appConfig = {}) {
    */
   app.stopServer = () => {
     if (server) server.close()
-    // app.stopDatabase() // @TODO
+    if (database) database.stop()
   }
 
   /**

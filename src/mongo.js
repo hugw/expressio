@@ -1,5 +1,5 @@
 /**
- * Mongo
+ * Mongo API
  *
  * @copyright Copyright (c) 2018, hugw.io
  * @author Hugo W - me@hugw.io
@@ -17,6 +17,8 @@ import {
   logEvent,
   terminate,
 } from './utils'
+
+import { FOLDERS, PATHS } from './constants'
 
 /**
  * schemaOpts
@@ -72,7 +74,7 @@ function getModels(dir) {
 /**
  * Database API
  */
-export default (config) => {
+export default (rootPath, config) => {
   if (!config.db.enabled) return null
   if (!config.db.connection) return terminate(`Database connection for "${config.env}" env does not exist.`)
 
@@ -83,8 +85,8 @@ export default (config) => {
   mongoose.plugin(schemaOpts)
 
   const api = {}
-  const modelsPath = path.join(config.rootPath, config.folders.models)
-  const seedPath = path.join(config.rootPath, 'seed')
+  const modelsPath = path.join(rootPath, FOLDERS.models)
+  const seedPath = path.join(rootPath, PATHS.seed)
 
   /**
    * Seed
