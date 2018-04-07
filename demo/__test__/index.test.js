@@ -8,7 +8,7 @@
 
 import request from 'supertest'
 
-import app from '../'
+import app from '../app'
 
 const validToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1MTM4OTk0MDUsImV4cCI6MTkyNDEyNjYwNSwiYXVkIjoiRXhwcmVzc2lvIiwic3ViIjoiIiwiTmFtZSI6IkpvaG4gRG9lIiwiSWQiOiIxIn0.WZu0BVJcmK73jwZEFkbT0E6M_np_4dt3IXiqBt3YRF4'
 
@@ -16,6 +16,7 @@ const invalidToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgS
 
 describe('Demo routes', () => {
   beforeAll(async () => {
+    await app.server.start()
     await app.database.reset()
   })
 

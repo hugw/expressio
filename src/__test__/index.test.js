@@ -67,14 +67,11 @@ describe('Expressio', () => {
     expect(spyTerminate).toBeCalledWith('"rootPath" is not valid.')
   })
 
-  it('should stop the server when no database settings is provided', () => {
-    expressio(__dirname, {
-      db: {
-        connection: null
-      }
+  it('should return empty database object when no settings is provided', () => {
+    const app = expressio(__dirname, {
+      db: null
     })
 
-    expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('Database connection does not exist.')
+    expect(app.database).toBeDefined()
   })
 })
