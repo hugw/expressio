@@ -76,8 +76,8 @@ describe('Expressio / Utils', () => {
           optionsSuccessStatus: 204
         },
         db: {
-          enabled: false,
-          connection: 'mongodb://localhost:27017/test'
+          connection: 'mongodb://localhost:27017/test',
+          seed: null
         },
         env: 'test',
         port: '4000',

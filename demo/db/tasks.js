@@ -11,5 +11,5 @@ import app from '../app'
 
 const { database } = app
 
-if (argv.seed) database.seed()
-else if (argv.reset) database.reset()
+if (argv.seed) database.seed({ disconnect: true })
+else if (argv.reset) database.reset({ disconnect: true })

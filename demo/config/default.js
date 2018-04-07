@@ -1,3 +1,5 @@
+import path from 'path'
+
 export default {
   appName: process.env.APP_NAME,
   authorization: {
@@ -13,6 +15,7 @@ export default {
     ]
   },
   db: {
-    enabled: true
-  }
+    connection: 'mongodb://localhost:27017/demo-development',
+    seed: path.join(__dirname, '../db/seed')
+  },
 }

@@ -6,19 +6,15 @@
  * @license MIT
  */
 
-import fs from 'fs'
 import mongoose from 'mongoose'
 import beautifyUnique from 'mongoose-beautiful-unique-validation'
 import { IS_DEV } from 'isenv'
 import optional from 'optional'
-import path from 'path'
 
 import {
   logEvent,
   terminate,
 } from './utils'
-
-import { FOLDERS, PATHS } from './constants'
 
 /**
  * schemaOpts
@@ -48,60 +44,35 @@ const schemaOpts = (schema) => {
 }
 
 /**
- * getModels
- *
- * Auto load models
- * and return all into
- * a single object.
+ * Moongose setup
  */
-function getModels(dir) {
-  const models = {}
+mongoose.set('debug', IS_DEV)
+mongoose.Promise = global.Promise
+mongoose.plugin(beautifyUnique)
+mongoose.plugin(schemaOpts)
 
-  try {
-    fs.readdirSync(dir)
-      .filter(file => ((file.indexOf('.') !== 0) && (file !== 'index.js')))
-      .forEach((file) => {
-        const genModel = require(path.join(dir, file)).default
-        const model = genModel(mongoose, mongoose.Schema)
-
-        models[model.modelName] = model
-      })
-
-    return models
-  } catch (e) { return false }
-}
+export { mongoose }
 
 /**
  * Database API
  */
-export default (rootPath, config) => {
-  if (!config.db.enabled) return null
-  if (!config.db.connection) return terminate(`Database connection for "${config.env}" env does not exist.`)
-
-  // Setup mongoose specifics
-  mongoose.set('debug', IS_DEV)
-  mongoose.Promise = global.Promise
-  mongoose.plugin(beautifyUnique)
-  mongoose.plugin(schemaOpts)
+export default (config) => {
+  if (!config.connection) return terminate('Database connection does not exist.')
 
   const api = {}
-  const modelsPath = path.join(rootPath, FOLDERS.models)
-  const seedPath = path.join(rootPath, PATHS.seed)
 
   /**
-   * Seed
+   * Seed Only
    */
-  api.seed = async () => {
-    await api.start()
-    await api.reset({ stop: false })
-
-    const seed = optional(seedPath)
+  api.seedOnly = async () => {
+    const seed = optional(config.seed)
 
     if (seed && seed.default) {
       logEvent('Adding seed data...')
 
       try {
-        await seed.default(api.models)
+        await seed.default(mongoose.models)
+        logEvent('Seed data added successfuly...')
       } catch (e) {
         logEvent(e, 'red')
         logEvent('An error occured while seeding database. Aborting...', 'red')
@@ -110,35 +81,54 @@ export default (rootPath, config) => {
       logEvent('No seed data found...', 'red')
     }
 
-    await api.stop()
     return Promise.resolve()
+  }
+
+  /**
+   * Seed
+   */
+  api.seed = async (opts = { disconnect: false }) => {
+    await api.connect()
+    await api.resetOnly()
+    await api.seedOnly()
+
+    if (opts.disconnect) await api.disconnect()
+    return Promise.resolve()
+  }
+
+  /**
+   * Reset Only
+   */
+  api.resetOnly = async () => {
+    logEvent('Resetting database...')
+
+    const { collections } = mongoose.connection
+    const promises = Object.values(collections).map(collection => collection.remove())
+
+    return Promise.all(promises)
   }
 
   /**
    * Reset
    */
-  api.reset = async (opts = { stop: true }) => {
-    await api.start()
+  api.reset = async (opts = { disconnect: false }) => {
+    await api.connect()
+    await api.resetOnly()
 
-    logEvent('Resetting database...')
-
-    const promises = Object.values(api.models).map(model => model.collection.remove())
-    await Promise.all(promises)
-
-    if (opts.stop) await api.stop()
+    if (opts.disconnect) await api.disconnect()
     return Promise.resolve()
   }
 
   /**
-   * Start
+   * Connect
    */
-  api.start = async () => {
+  api.connect = async () => {
     if ([1, 2].includes(mongoose.connection.readyState)) {
       return Promise.resolve('Already connected')
     }
 
     try {
-      await mongoose.connect(config.db.connection, { useMongoClient: true })
+      await mongoose.connect(config.connection, { useMongoClient: true })
       logEvent(`Database running → MongoDB @ ${config.env}`)
       return Promise.resolve('Connected')
     } catch (e) {
@@ -147,17 +137,9 @@ export default (rootPath, config) => {
   }
 
   /**
-   * Stop
+   * Disconnect
    */
-  api.stop = () => mongoose.disconnect()
+  api.disconnect = () => mongoose.disconnect()
 
-  /**
-   * Models
-   */
-  api.models = getModels(modelsPath)
-
-  return {
-    ...api,
-    mongoose,
-  }
+  return api
 }

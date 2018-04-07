@@ -21,8 +21,8 @@ export default {
     optionsSuccessStatus: 204
   },
   db: {
-    enabled: false,
     connection: 'mongodb://localhost:27017/development',
+    seed: null
   },
   env: CURRENT_ENV,
   port: process.env.PORT || '4000',

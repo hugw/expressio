@@ -8,12 +8,7 @@
 
 export const FOLDERS = {
   public: 'public',
-  models: 'models',
   config: 'config'
-}
-
-export const PATHS = {
-  seed: 'seed'
 }
 
 export const LOGGER = {

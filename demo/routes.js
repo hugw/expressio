@@ -8,6 +8,7 @@
 
 import express from 'express'
 import { middlewares, errorHandlers } from '../src'
+import User from './models/User'
 
 const { validationError, generalError } = errorHandlers
 const { validate, controller } = middlewares
@@ -73,8 +74,6 @@ const userSchema = {
 }
 
 routes.post('/user', validate(userSchema), (req, res, next) => {
-  const { models: { User } } = req.xp
-
   User.create({ ...req.body }, (err, user) => {
     if (err) return next(err)
     res.json({ page: 'User', user })

@@ -16,7 +16,7 @@ const invalidToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgS
 
 describe('Demo routes', () => {
   beforeAll(async () => {
-    await app.database.reset({ stop: false })
+    await app.database.reset()
   })
 
   afterAll(() => {
@@ -126,7 +126,7 @@ describe('Demo routes', () => {
   it('(GET /config) should respond with a config object', async () => {
     const response = await request(app).get('/config')
     expect(response.statusCode).toBe(200)
-    expect(response.body.config).toEqual(['config', 'mailer', 'models'])
+    expect(response.body.config).toEqual(['config', 'mailer'])
   })
 
   it('(POST /user) with valid params should return an user payload', async () => {
@@ -137,6 +137,7 @@ describe('Demo routes', () => {
     expect(response.body.page).toEqual('User')
     expect(response.body.user.name).toBe('John Doe')
     expect(response.body.user.email).toBe('john@doe.com')
+    expect(response.body.user.createdAt).toBeDefined()
     expect(response.body.user.hidden).toBeUndefined()
   })
 

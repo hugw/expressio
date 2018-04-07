@@ -70,12 +70,11 @@ describe('Expressio', () => {
   it('should stop the server when no database settings is provided', () => {
     expressio(__dirname, {
       db: {
-        enabled: true,
         connection: null
       }
     })
 
     expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('Database connection for "test" env does not exist.')
+    expect(spyTerminate).toBeCalledWith('Database connection does not exist.')
   })
 })

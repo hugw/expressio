@@ -7,5 +7,5 @@
  */
 
 export default async function (models) {
-  await models.User.create({ name: 'John Doe', email: 'jd@gmail.com' })
+  await models.User.create({ name: 'John Doe', email: 'jd@gmail.com', hidden: 'hide me' })
 }

@@ -44,7 +44,7 @@ import {
 
 import validatejs from './validate'
 import mailerTransport from './mailer'
-import mongo from './mongo'
+import mongo, { mongoose } from './mongo'
 import { FOLDERS, LOGGER } from './constants'
 
 export default function expressio(rootPath, appConfig = {}) {
@@ -70,10 +70,6 @@ export default function expressio(rootPath, appConfig = {}) {
 
   // Create required folders if they do not exist
   Object.keys(FOLDERS).forEach((folder) => {
-    // Models folder should be created
-    // only if database is enabled
-    if (folder === 'models' && !config.db.enabled) return false
-
     const dir = resolveApp(FOLDERS[folder])
     if (!fs.existsSync(dir)) fs.mkdirSync(dir)
   })
@@ -110,7 +106,7 @@ export default function expressio(rootPath, appConfig = {}) {
   }
 
   // Setup database
-  const database = mongo(rootPath, config)
+  const database = config.db && mongo(config.db)
 
   // Add common config / objects
   // to request object and make
@@ -119,7 +115,6 @@ export default function expressio(rootPath, appConfig = {}) {
     req.xp = {
       config,
       mailer,
-      models: database && database.models
     }
 
     next()
@@ -153,12 +148,12 @@ export default function expressio(rootPath, appConfig = {}) {
         logEvent(`Server running → ${address}:${port} @ ${config.env}`)
       })
 
-      if (database) database.start()
+      if (database) database.connect()
     },
 
     stop: () => {
       if (app.serverInstance) app.serverInstance.close()
-      if (database) database.stop()
+      if (database) database.disconnect()
     }
   }
 
@@ -176,7 +171,8 @@ export {
   HTTPStatus as statusCode,
   jwt,
   validatejs,
-  router
+  router,
+  mongoose
 }
 
 /**
