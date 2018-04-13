@@ -211,4 +211,27 @@ describe('Expressio / Mongo API', () => {
       expect(await User.find().count()).toEqual(1)
     })
   })
+
+  describe('Hidden fields', () => {
+    it('should not be available when fetching data', async () => {
+      await database.seed()
+      const user = await User.findOne()
+      const props = Object.keys(user.toObject())
+
+      expect(props).not.toContain('hiddenField')
+      expect(props).not.toContain('_id')
+      expect(props).not.toContain('__v')
+    })
+  })
+
+  describe('Timestamps', () => {
+    it('should be available when fetching/creating new documents', async () => {
+      await database.seed()
+      const user = await User.findOne()
+      const props = Object.keys(user.toObject())
+
+      expect(props).toContain('createdAt')
+      expect(props).toContain('updatedAt')
+    })
+  })
 })
