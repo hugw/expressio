@@ -10,11 +10,10 @@ import mongoose from 'mongoose'
 import beautifyUnique from 'mongoose-beautiful-unique-validation'
 import { IS_DEV } from 'isenv'
 import optional from 'optional'
+import path from 'path'
 
-import {
-  logEvent,
-  terminate,
-} from './utils'
+import { terminate } from './utils'
+import logger from './logger'
 
 /**
  * schemaOpts
@@ -46,7 +45,7 @@ const schemaOpts = (schema) => {
 /**
  * Moongose setup
  */
-mongoose.set('debug', IS_DEV)
+mongoose.set('debug', IS_DEV) // @TODO Move to winston
 mongoose.Promise = global.Promise
 mongoose.plugin(beautifyUnique)
 mongoose.plugin(schemaOpts)
@@ -56,81 +55,77 @@ export { mongoose }
 /**
  * Database API
  */
-export default (config) => {
+export default ({ mongo: config, env, root }) => {
   if (!config.connection) return terminate('Database connection does not exist.')
 
-  const api = {}
+  const database = {}
 
   /**
    * Seed Only
    */
-  api.seedOnly = async () => {
-    const seed = optional(config.seed)
+  database.seedOnly = async () => {
+    const seed = config.seed && optional(path.join(root, config.seed))
 
     if (seed && seed.default) {
-      logEvent('Adding seed data...')
+      logger.info('Adding seed data...')
 
       try {
         await seed.default(mongoose.models)
-        logEvent('Seed data added successfuly...')
+        logger.info('Seed data added successfuly.')
       } catch (e) {
-        logEvent(e, 'red')
-        logEvent('An error occured while seeding database. Aborting...', 'red')
+        logger.info('An error ocurred while seeding database. Process aborted.')
+        logger.info(e)
       }
     } else {
-      logEvent('No seed data found...', 'red')
+      logger.info('No seed data found.')
     }
-
-    return Promise.resolve()
   }
 
   /**
    * Seed
    */
-  api.seed = async (opts = { disconnect: false }) => {
-    await api.connect()
-    await api.resetOnly()
-    await api.seedOnly()
+  database.seed = async (opts = { disconnect: false }) => {
+    await database.connect()
+    await database.resetOnly()
+    await database.seedOnly()
 
-    if (opts.disconnect) await api.disconnect()
-    return Promise.resolve()
+    if (opts.disconnect) database.disconnect()
   }
 
   /**
    * Reset Only
    */
-  api.resetOnly = async () => {
-    logEvent('Resetting database...')
+  database.resetOnly = async () => {
+    logger.info('Resetting database...')
 
     const { collections } = mongoose.connection
     const promises = Object.values(collections).map(collection => collection.remove())
 
-    return Promise.all(promises)
+    await Promise.all(promises)
+    logger.info('Database reset successfully.')
   }
 
   /**
    * Reset
    */
-  api.reset = async (opts = { disconnect: false }) => {
-    await api.connect()
-    await api.resetOnly()
+  database.reset = async (opts = { disconnect: false }) => {
+    await database.connect()
+    await database.resetOnly()
 
-    if (opts.disconnect) await api.disconnect()
-    return Promise.resolve()
+    if (opts.disconnect) database.disconnect()
   }
 
   /**
    * Connect
    */
-  api.connect = async () => {
+  database.connect = async () => {
     if ([1, 2].includes(mongoose.connection.readyState)) {
-      return Promise.resolve('Already connected')
+      return 'Mongo already connected'
     }
 
     try {
       await mongoose.connect(config.connection, { useMongoClient: true })
-      logEvent(`Database running → MongoDB @ ${config.env}`)
-      return Promise.resolve('Connected')
+      logger.info(`Database running → MongoDB @ ${env}.`)
     } catch (e) {
       terminate('Something went wrong while starting the database.')
     }
@@ -139,7 +134,9 @@ export default (config) => {
   /**
    * Disconnect
    */
-  api.disconnect = () => mongoose.disconnect()
+  database.disconnect = () => {
+    mongoose.disconnect()
+  }
 
-  return api
+  return database
 }
