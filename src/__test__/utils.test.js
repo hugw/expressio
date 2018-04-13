@@ -6,8 +6,8 @@
  * @license MIT
  */
 
-import path from 'path'
-import { isNodeSupported, isDir, getConfig } from '../utils'
+import { isNodeSupported, isDir, getConfig, terminate } from '../utils'
+import logger from '../logger'
 
 describe('Expressio / Utils', () => {
   describe('#isNodeSupported', () => {
@@ -57,50 +57,64 @@ describe('Expressio / Utils', () => {
     })
   })
 
-  it.skip('#getModels', () => {})
+  describe('#terminate', () => {
+    const processSpy = jest.spyOn(process, 'exit').mockImplementation(() => true)
+    const loggerSpy = jest.spyOn(logger, 'error').mockImplementation(() => true)
 
-  describe('#getConfig', () => {
-    const configPath = path.join(__dirname, 'config')
-
-    it('should return a config object', () => {
-      expect(getConfig(configPath)).toEqual({
-        address: '127.0.0.1',
-        authorization: {
-          enabled: true,
-          ignorePaths: []
-        },
-        cors: {
-          origin: '*',
-          methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-          preflightContinue: false,
-          optionsSuccessStatus: 204
-        },
-        db: {
-          connection: 'mongodb://localhost:27017/test',
-          seed: null
-        },
-        env: 'test',
-        port: '4000',
-        reqNode: { minor: 6, major: 8 },
-        secret: 'Default secret key',
-        local: 'test',
-        default: 'default',
-        mailer: {
-          host: 'smtp.ethereal.email',
-          port: 587,
-          auth: {
-            user: 'yrhxokkz4da2rtlw@ethereal.email',
-            pass: 'Eu7ZNpyZYKUyyJNzk9'
-          }
-        }
-      })
+    beforeEach(() => {
+      processSpy.mockClear()
+      loggerSpy.mockClear()
     })
 
-    it('should return a config object with overwritten values from a second param passed', () => {
-      const config = { secret: 'my secret', db: { enabled: true } }
-      const configs = getConfig(configPath, config)
-      expect(configs.secret).toBe('my secret')
-      expect(configs.db.enabled).toBe(true)
+    afterAll(() => {
+      processSpy.mockRestore()
+      loggerSpy.mockRestore()
+    })
+
+    it('should log the error message and exit the process', () => {
+      terminate('an error message')
+      expect(processSpy).toHaveBeenCalledWith(1)
+      expect(loggerSpy).toHaveBeenCalledWith('an error message')
+    })
+  })
+
+  describe('#getConfig', () => {
+    const config = {
+      base: {
+        secret: 'Another secret',
+        foo: 'bar',
+      },
+      test: {
+        mongo: {
+          connection: null,
+          seed: 'pathToSeed'
+        },
+        mailer: null,
+        cors: null,
+      }
+    }
+
+    it('should terminate if the config object provided is invalid', () => {
+      expect(getConfig({})).toBeNull()
+    })
+
+    it('should return a formatted config object', () => {
+      expect(getConfig(config)).toEqual({
+        address: '127.0.0.1',
+        logLevel: 'info',
+        port: '4000',
+        env: 'test',
+        public: 'public',
+        foo: 'bar',
+        cors: null,
+        secret: 'Another secret',
+        mongo: {
+          connection: null,
+          seed: 'pathToSeed'
+        },
+        reqNode: { minor: 6, major: 8 },
+        mailer: null
+      })
     })
   })
 })

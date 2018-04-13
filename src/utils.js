@@ -8,11 +8,10 @@
 
 /* eslint no-console: 0 */
 import fs from 'fs'
-import path from 'path'
 import merge from 'lodash/merge'
-import optional from 'optional'
-import { CURRENT_ENV, IS_DEV } from 'isenv'
-import chalk from 'chalk'
+
+import logger from './logger'
+import config from './config'
 
 /**
  * isNodeSupported
@@ -48,14 +47,9 @@ export function isDir(dir) {
  * and the process had to be terminated.
  */
 export function terminate(msg) {
-  console.error(chalk.red(msg))
+  logger.error(msg)
   process.exit(1)
 }
-
-/**
- * logEvent
- */
-export const logEvent = (msg, color = 'green') => (IS_DEV && console.log(chalk[color](msg)))
 
 /**
  * getConfig
@@ -63,20 +57,15 @@ export const logEvent = (msg, color = 'green') => (IS_DEV && console.log(chalk[c
  * Load config variables based on
  * current environment.
  */
-export function getConfig(dir, optionalConfig = {}) {
-  const defaults = require('./config/default').default
-  const config = require(`./config/${CURRENT_ENV}`).default
+export function getConfig(appConfig) {
+  const { env } = config.base
+  if (!appConfig.base) return null
 
-  // Make sure we don't break anything
-  // if config files doesn't exist
-  const appDefaults = optional(path.join(dir, 'default'))
-  const appConfig = optional(path.join(dir, CURRENT_ENV))
   return merge(
     {},
-    defaults,
-    config,
-    appDefaults && appDefaults.default,
-    appConfig && appConfig.default,
-    optionalConfig
+    config.base,
+    config[env],
+    appConfig.base,
+    appConfig[env] && appConfig[env],
   )
 }
