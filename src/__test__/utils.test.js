@@ -94,10 +94,6 @@ describe('Expressio / Utils', () => {
       }
     }
 
-    it('should terminate if the config object provided is invalid', () => {
-      expect(getConfig({})).toBeNull()
-    })
-
     it('should return a formatted config object', () => {
       expect(getConfig(config)).toEqual({
         address: '127.0.0.1',

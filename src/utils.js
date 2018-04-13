@@ -59,7 +59,6 @@ export function terminate(msg) {
  */
 export function getConfig(appConfig) {
   const { env } = config.base
-  if (!appConfig.base) return null
 
   return merge(
     {},
