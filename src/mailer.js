@@ -7,14 +7,18 @@
  */
 
 import nodemailer from 'nodemailer'
-import { logEvent } from './utils'
+import logger from './logger'
 
-export default (cfg) => {
-  const transporter = nodemailer.createTransport(cfg)
+export default ({ mailer: config }) => {
+  // @TODO Check if config object is valid
+  const transporter = nodemailer.createTransport(config)
 
-  transporter.dispatch = opts => new Promise((res, rej) => {
+  transporter.dispatch = opts => async () => {
     transporter.sendMail(opts, (error, info) => {
-      if (error) return rej(error) // @TODO Handle mailer errors
+      if (error) {
+        logger.debug(error)
+        throw error // @TODO Handle mailer errors
+      }
 
       const mailInfo = JSON.stringify({
         ...info,
@@ -24,12 +28,12 @@ export default (cfg) => {
 
       const url = nodemailer.getTestMessageUrl(info)
 
-      logEvent(`Mail response → ${mailInfo}`)
-      if (url) logEvent(`Mail url → ${url}`)
+      logger.info(`Mail response → ${mailInfo}.`)
+      if (url) logger.info(`Mail url → ${url}.`)
 
-      return res(info)
+      return info
     })
-  })
+  }
 
   return transporter
 }
