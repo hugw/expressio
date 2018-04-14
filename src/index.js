@@ -13,69 +13,68 @@ import bodyParser from 'body-parser'
 import helmet from 'helmet'
 import cors from 'cors'
 import compress from 'compression'
-import HTTPStatus from 'http-status'
-import winstonExp from 'express-winston'
-import winston from 'winston'
 import jwt from 'jsonwebtoken'
-import { IS_DEV } from 'isenv'
 import dotenv from 'dotenv'
+import boom from 'boom'
 
 import {
   getConfig,
   isNodeSupported,
   isDir,
-  logEvent,
   terminate,
 } from './utils'
+
+import logger, { loggerMiddleware } from './logger'
+import server from './server'
+import mailerTransport from './mailer'
+import mongo, { mongoose } from './mongo'
+import validatejs from './validate'
 
 import {
   controller,
   authorize,
-  validate
+  validate,
+  configuration
 } from './middlewares'
 
 import {
-  generalError,
-  validationError,
-  notFoundHandler,
-  generalErrorhandler,
+  notFoundErrorHandler,
+  generalErrorHandler,
   mongooseErrorHandler,
 } from './error-handlers'
 
-import validatejs from './validate'
-import mailerTransport from './mailer'
-import mongo, { mongoose } from './mongo'
-import { FOLDERS, LOGGER } from './constants'
-
-export default function expressio(rootPath, appConfig = {}) {
+export default function expressio(appConfig) {
   const app = express()
-  const resolveApp = currentPath => path.join(rootPath, currentPath)
+
+  // Check if the config object was provided
+  if (!(appConfig && appConfig.base)) return terminate('No valid configuration object was provided.')
+
+  // Build main config object
+  // based on current environment
+  const config = getConfig(appConfig)
 
   // Check if rootPath was provided
-  if (!isDir(rootPath)) return terminate('"rootPath" is not valid.')
+  if (!isDir(config.root)) return terminate('"root" configuration is not a valid path.')
+
+  const resolveApp = currentPath => path.join(config.root, currentPath)
 
   // Load environment variables
   dotenv.config({ path: resolveApp('.env') })
-
-  // Load config folder variables
-  const configPath = resolveApp(FOLDERS.config)
-  const config = getConfig(configPath, appConfig)
-
-  // Setup mailer
-  const mailer = mailerTransport(config.mailer)
 
   // Check if current Node version
   // installed is supported
   if (!isNodeSupported(config.reqNode)) return terminate('Current Node version is not supported.')
 
-  // Create required folders if they do not exist
-  Object.keys(FOLDERS).forEach((folder) => {
-    const dir = resolveApp(FOLDERS[folder])
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir)
-  })
+  // Set log level
+  logger.level = config.logLevel
 
-  // Define a the public dir for static content
-  app.use(express.static(resolveApp(FOLDERS.public)))
+  // Define public folder for static content
+  if (config.public) {
+    const publicDir = resolveApp(config.public)
+    if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir)
+
+    app.use(express.static(publicDir))
+  }
 
   // Parse incoming requests
   // to JSON format
@@ -92,69 +91,59 @@ export default function expressio(rootPath, appConfig = {}) {
   app.use(cors(config.cors))
 
   // Logging
-  if (IS_DEV) {
-    // Setup console logging
-    app.use(winstonExp.logger({
-      transports: [
-        new winston.transports.Console({ colorize: true, prettyPrint: true, })
-      ],
-      expressFormat: true,
-      colorize: true,
-      responseWhitelist: LOGGER.response,
-      requestWhitelist: LOGGER.request
-    }))
-  }
+  app.use(loggerMiddleware)
 
-  // Setup database
-  const database = config.db && mongo(config.db)
+  // Authorization
+  app.authorize = authorize(app, config)
 
-  // Add common config / objects
-  // to request object and make
-  // then available to other routes
-  app.use((req, res, next) => {
-    req.xp = {
-      config,
-      mailer,
-    }
+  // Validation
+  app.use(validate)
 
-    next()
-  })
-
-  // Add authorization
-  app.use(authorize)
+  // Configuration
+  app.use(configuration(config))
 
   /**
-   * mailer
+   * Mailer
    */
-  app.mailer = mailer
+  app.mailer = mailerTransport(config)
+
+  /**
+   * Config
+   */
+  app.config = config
 
   /**
    * Database
    */
-  app.database = database
+  app.database = mongo(config)
 
   /**
    * Server
    */
-  app.server = {
-    start: () => {
-      // Add error handlers
-      app.use(notFoundHandler)
-      app.use(mongooseErrorHandler)
-      app.use(generalErrorhandler)
+  app.server = server(app, config)
 
-      app.serverInstance = app.listen(config.port, config.address, () => {
-        const { address, port } = app.serverInstance.address()
-        logEvent(`Server running → ${address}:${port} @ ${config.env}`)
-      })
+  /**
+   * Start application
+   *
+   * Add error handlers, start server
+   * and database when applied
+   */
+  app.start = () => {
+    // Error handlers
+    app.use(notFoundErrorHandler)
+    if (app.database) app.use(mongooseErrorHandler)
+    app.use(generalErrorHandler)
 
-      if (database) database.connect()
-    },
+    app.server.start()
+    if (app.database) app.database.connect()
+  }
 
-    stop: () => {
-      if (app.serverInstance) app.serverInstance.close()
-      if (database) database.disconnect()
-    }
+  /**
+   * Stop application
+   */
+  app.stop = () => {
+    app.server.stop()
+    if (app.database) app.database.disconnect()
   }
 
   return app
@@ -168,19 +157,17 @@ export default function expressio(rootPath, appConfig = {}) {
 const router = express.Router
 
 export {
-  HTTPStatus as statusCode,
   jwt,
   validatejs,
   router,
-  mongoose
+  mongoose,
+  boom,
+  logger
 }
 
 /**
  * Expose middlewares
  */
-export const middlewares = { validate, controller }
-
-/**
- * Expose error handlers
- */
-export const errorHandlers = { generalError, validationError }
+export const middlewares = {
+  controller
+}

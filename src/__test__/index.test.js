@@ -6,72 +6,95 @@
  * @license MIT
  */
 
-import expressio, { validatejs, jwt, statusCode, middlewares, errorHandlers, router } from '../'
+import path from 'path'
+import expressio, {
+  jwt,
+  validatejs,
+  router,
+  mongoose,
+  boom,
+  logger,
+  middlewares
+} from '../'
 import * as utils from '../utils'
 
 describe('Expressio', () => {
-  const spyTerminate = jest.spyOn(utils, 'terminate')
+  const terminateSpy = jest.spyOn(utils, 'terminate')
     .mockImplementation(() => true)
 
   afterEach(() => {
-    spyTerminate.mockClear()
+    terminateSpy.mockClear()
   })
 
   afterAll(() => {
-    spyTerminate.mockRestore()
+    terminateSpy.mockRestore()
   })
 
   it('should expose external dependencies & utility functions', () => {
     expect(validatejs).toBeDefined()
     expect(jwt).toBeDefined()
-    expect(statusCode).toBeDefined()
     expect(router).toBeDefined()
+    expect(boom).toBeDefined()
+    expect(logger).toBeDefined()
+    expect(mongoose).toBeDefined()
   })
 
   it('should expose middlewares', () => {
-    expect(middlewares.validate).toBeDefined()
     expect(middlewares.controller).toBeDefined()
   })
 
-  it('should expose error handlers', () => {
-    expect(errorHandlers.generalError).toBeDefined()
-    expect(errorHandlers.validationError).toBeDefined()
-  })
+  it('given a valid configuration, it should return  an expressio object', () => {
+    const app = expressio({
+      base: {
+        root: __dirname,
+        public: null
+      }
+    })
 
-  it('should return a valid expressio object', () => {
-    const app = expressio(__dirname)
-    expect(spyTerminate).not.toHaveBeenCalled()
     expect(app.server).toBeDefined()
     expect(app.mailer).toBeDefined()
+    expect(app.stop).toBeDefined()
+    expect(app.start).toBeDefined()
+    expect(app.database).toBeDefined()
+    expect(app.authorize).toBeDefined()
+    expect(app.config).toBeDefined()
+  })
+
+  it('given no configuration, it should terminate with proper error', () => {
+    expressio()
+    expect(terminateSpy).toHaveBeenLastCalledWith('No valid configuration object was provided.')
+  })
+
+  it('given a malformed configuration, it should terminate with proper error', () => {
+    expressio({})
+    expect(terminateSpy).toHaveBeenLastCalledWith('No valid configuration object was provided.')
+  })
+
+  it('given an invalid root configuration, it should terminate with proper error', () => {
+    expressio({ base: { root: null } })
+    expect(terminateSpy).toHaveBeenLastCalledWith('"root" configuration is not a valid path.')
+  })
+
+  it('given invalid node req configuration, it should terminate with proper error', () => {
+    expressio({
+      base: {
+        root: __dirname,
+        public: null,
+        reqNode: { minor: 20, major: 20 },
+      }
+    })
+
+    expect(terminateSpy).toBeCalledWith('Current Node version is not supported.')
   })
 
   it('should load environment variables', () => {
-    expressio(__dirname)
+    expressio({
+      base: {
+        root: path.join(__dirname, 'fixtures'),
+        public: null
+      }
+    })
 
     expect(process.env.FOO).toBe('BAR')
-  })
-
-  it('should stop the process when node minimum version is not met', () => {
-    expressio(__dirname, {
-      reqNode: { minor: 20, major: 20 }
-    })
-
-    expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('Current Node version is not supported.')
-  })
-
-  it('should stop the server when no valid "rootPath" folder is provided', () => {
-    expressio()
-
-    expect(spyTerminate).toHaveBeenCalled()
-    expect(spyTerminate).toBeCalledWith('"rootPath" is not valid.')
-  })
-
-  it('should return empty database object when no settings is provided', () => {
-    const app = expressio(__dirname, {
-      db: null
-    })
-
-    expect(app.database).toBeDefined()
   })
 })

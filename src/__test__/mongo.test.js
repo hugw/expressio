@@ -6,6 +6,7 @@
  * @license MIT
  */
 
+import path from 'path'
 import mongo, { mongoose } from '../mongo'
 import * as utils from '../utils'
 import logger from '../logger'
@@ -15,7 +16,7 @@ const config = {
     connection: 'mongodb://localhost:27017/testApi',
     seed: './seed'
   },
-  root: __dirname,
+  root: path.join(__dirname, 'fixtures'),
   env: 'currentEnv'
 }
 
