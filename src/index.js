@@ -128,14 +128,14 @@ export default function expressio(appConfig) {
    * Add error handlers, start server
    * and database when applied
    */
-  app.start = () => {
+  app.start = async () => {
     // Error handlers
     app.use(notFoundErrorHandler)
     if (app.database) app.use(mongooseErrorHandler)
     app.use(generalErrorHandler)
 
-    app.server.start()
-    if (app.database) app.database.connect()
+    await app.server.start()
+    if (app.database) await app.database.connect()
   }
 
   /**
