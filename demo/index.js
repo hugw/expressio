@@ -8,6 +8,4 @@
 
 import app from './app'
 
-app.server.start()
-
-export default app
+app.start()
