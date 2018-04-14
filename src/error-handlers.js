@@ -6,29 +6,8 @@
  * @license MIT
  */
 
-import HTTPStatus from 'http-status'
-import { IS_DEV } from 'isenv'
-
-/**
- * generalError
- *
- * Generate a formatted
- * response error.
- */
-export function generalError(code = 500, data) {
-  const err = new Error(HTTPStatus[code])
-  err.status = code
-  err.data = data
-
-  return err
-}
-
-/**
- * validationError
- */
-export function validationError(data) {
-  return generalError(400, { errors: data })
-}
+import boom from 'boom'
+import logger from './logger'
 
 /**
  * mongooseErrorHandler
@@ -40,7 +19,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
   let error
 
   if (err && err.name === 'ValidationError') {
-    error = validationError(Object.keys(err.errors).reduce((obj, item) => {
+    const validation = Object.keys(err.errors).reduce((obj, item) => {
       const validator = err.errors[item].kind
       const label = (req.labels && req.labels[item]) || item
 
@@ -52,20 +31,20 @@ export const mongooseErrorHandler = (err, req, res, next) => {
       }
 
       return Object.assign({}, obj, formattedItem)
-    }, {}))
+    }, {})
+
+    error = boom.badData('Invalid data', { validation })
   }
 
   next(error || err)
 }
 
 /**
- * notFoundHandler
+ * notFoundErrorHandler
  *
  * Format 404 error objects
  */
-export const notFoundHandler = () => {
-  throw generalError(404)
-}
+export const notFoundErrorHandler = () => boom.notFound('The requested endpoint was not found')
 
 /**
  * generalErrorHandler
@@ -74,14 +53,16 @@ export const notFoundHandler = () => {
  * and expose some properties based
  * on current environment
  */
-export const generalErrorhandler = (err, req, res, next) => { // eslint-disable-line
-  const stack = IS_DEV && err.stack && err.stack.split('\n')
-  res.status(err.status || 500)
+export const generalErrorHandler = (err, req, res, next) => { // eslint-disable-line
+  logger.error(err)
 
+  if (!boom.isBoom(err)) {
+    boom.boomify(err, { statusCode: 500 })
+  }
+
+  res.status(err.output.statusCode)
   res.json({
-    message: err.message || HTTPStatus[500],
-    statusCode: err.status,
+    ...err.output.payload,
     ...err.data,
-    ...stack ? { stack } : {}
   })
 }
