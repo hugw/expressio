@@ -16,8 +16,6 @@ import logger from './logger'
  * all kind of mongoose errors thrown
  */
 export const mongooseErrorHandler = (err, req, res, next) => {
-  let error
-
   if (err && err.name === 'ValidationError') {
     const validation = Object.keys(err.errors).reduce((obj, item) => {
       const validator = err.errors[item].kind
@@ -33,10 +31,10 @@ export const mongooseErrorHandler = (err, req, res, next) => {
       return Object.assign({}, obj, formattedItem)
     }, {})
 
-    error = boom.badData('Invalid data', { validation })
+    return next(boom.badData('Invalid data', { validation }))
   }
 
-  next(error || err)
+  next(err)
 }
 
 /**
@@ -52,12 +50,11 @@ export const notFoundErrorHandler = (req, res, next) => {
  * authorizationErrorHandler
  */
 export const authorizationErrorHandler = (err, req, res, next) => {
-  let error
   if (err.name === 'UnauthorizedError') {
-    error = boom.unauthorized(err.message)
+    return next(boom.unauthorized(err.message))
   }
 
-  next(error || err)
+  next(err)
 }
 
 /**

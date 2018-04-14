@@ -9,6 +9,7 @@
 import ejwt from 'express-jwt'
 import boom from 'boom'
 import capitalize from 'lodash/capitalize'
+import mapValues from 'lodash/mapValues'
 import validatejs from './validate'
 
 /**
@@ -18,22 +19,6 @@ import validatejs from './validate'
  * error handling for common routes
  */
 export const controller = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
-
-/**
- * getSchemaLabels
- */
-export const getSchemaLabels = schema => Object.keys(schema).reduce((obj, item) => {
-  const label = { [item]: schema[item].label }
-  return Object.assign({}, obj, label)
-}, {})
-
-/**
- * getSchemaConstrains
- */
-export const getSchemaConstrains = schema => Object.keys(schema).reduce((obj, item) => {
-  const rule = { [item]: schema[item].rules }
-  return Object.assign({}, obj, rule)
-}, {})
 
 /**
  * getValidationErrors
@@ -55,23 +40,23 @@ export const getValidationErrors = (err, labels) => err.reduce((obj, item) => {
  * Request body/param/query validator
  */
 export const validateRequest = (req, type) => async (schema) => {
-  const labels = getSchemaLabels(schema)
-  const constrains = getSchemaConstrains(schema)
+  const labels = mapValues(schema, item => item.label)
+  const constrains = mapValues(schema, item => item.rules)
 
-  return validatejs.async(req[type], constrains).then((attr) => {
-    const name = `validated${capitalize(type)}`
-    req[name] = { data: attr, labels, constrains }
+  try {
+    const attr = await validatejs.async(req[type], constrains)
+    const resObj = `validated${capitalize(type)}`
+    req[resObj] = { data: attr, labels, constrains }
 
     return attr
-  }, (err) => {
+  } catch (err) {
     if (err instanceof Error) {
       throw boom.badImplementation('Something went wrong while validating your data')
     }
 
     const validation = getValidationErrors(err, labels)
-
     throw boom.badData(`Invalid ${type} data`, { validation })
-  })
+  }
 }
 
 /**
