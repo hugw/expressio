@@ -7,8 +7,7 @@
  */
 
 import ejwt from 'express-jwt'
-
-import { validationError, generalError } from './error-handlers'
+import boom from 'boom'
 import validatejs from './validate'
 
 /**
@@ -20,11 +19,11 @@ import validatejs from './validate'
 export const controller = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
 
 /**
- * validate
+ * validateRequest
  *
- * Request body validator
+ * Request body/param/query validator
  */
-export const validate = (schema, type = 'body') => (req, res, next) => {
+export const validateRequest = (data, type) => async (schema) => {
   // Extract labels
   const labels = Object.keys(schema).reduce((obj, item) => {
     const label = { [item]: schema[item].label }
@@ -37,33 +36,49 @@ export const validate = (schema, type = 'body') => (req, res, next) => {
     return Object.assign({}, obj, rule)
   }, {})
 
-  const successFn = (attr) => {
-    req.body = attr
-    req.labels = labels
-    req.constrains = constrains
+  await validatejs.async(data, constrains).then(attr => ({ data: attr, labels, constrains }), (err) => {
+    if (err instanceof Error) {
+      throw boom.badImplementation('Something went wrong while validating your data')
+    }
 
-    next()
-  }
-
-  const errorFn = (err) => {
-    try {
-      if (err instanceof Error) throw generalError()
-
-      throw validationError(err.reduce((obj, item) => {
-        const name = item.attribute
-        const formattedItem = {
-          [name]: {
-            message: `${labels[name]} ${item.error}`,
-            validator: item.validator
-          }
+    const validation = err.reduce((obj, item) => {
+      const name = item.attribute
+      const formattedItem = {
+        [name]: {
+          message: `${labels[name]} ${item.error}`,
+          validator: item.validator
         }
-        return Object.assign({}, obj, formattedItem)
-      }, {}))
-    } catch (e) { next(e) }
-  }
+      }
+      return Object.assign({}, obj, formattedItem)
+    }, {})
 
-  const reqType = ['body', 'params', 'query'].includes(type) ? req[type] : req.body
-  validatejs.async(reqType, constrains).then(successFn, errorFn)
+    throw boom.badData(`Invalid ${type} data`, { validation })
+  })
+}
+
+/**
+ * validate
+ *
+ * Setup validate api via
+ * middleware
+ */
+export const validate = (req, res, next) => {
+  req.validateBody = validateRequest(req.body)
+  req.validateParams = validateRequest(req.params)
+  req.validateQuery = validateRequest(req.query)
+
+  next()
+}
+
+/**
+ * configuration
+ *
+ * Alternatively allow
+ * config to be available via req object
+ */
+export const configuration = config => (req, res, next) => {
+  req.config = config
+  next()
 }
 
 /**
@@ -72,16 +87,10 @@ export const validate = (schema, type = 'body') => (req, res, next) => {
  * Authorize requests based
  * on JWT Tokens
  */
-export const authorize = (req, res, next) => {
-  const {
-    config: {
-      secret,
-      authorization: { ignorePaths, enabled }
-    }
-  } = req.xp
-
-  if (!enabled) return next()
-
-  const fn = ejwt({ secret }).unless(ignorePaths.length && { path: ignorePaths })
-  return fn(req, res, next)
+export const authorize = (app, config) => (ignorePaths) => {
+  app.use((req, res, next) => {
+    const { secret } = config
+    const fn = ejwt({ secret }).unless(ignorePaths.length && { path: ignorePaths })
+    return fn(req, res, next)
+  })
 }
