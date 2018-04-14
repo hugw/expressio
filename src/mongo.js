@@ -70,7 +70,7 @@ export default ({ mongo: config, env, root }) => {
       logger.info('Adding seed data...')
 
       try {
-        await seed.default(mongoose.models)
+        await seed.default(mongoose.models, env)
         logger.info('Seed data added successfuly.')
       } catch (e) {
         logger.info('An error ocurred while seeding database. Process aborted.')
