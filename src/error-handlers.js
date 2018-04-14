@@ -31,7 +31,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
       return Object.assign({}, obj, formattedItem)
     }, {})
 
-    return next(boom.badData('Invalid data', { attributes }))
+    return next(boom.badData('Invalid data', { body: attributes }))
   }
 
   next(err)
