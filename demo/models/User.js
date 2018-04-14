@@ -6,11 +6,6 @@ const User = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  hidden: {
-    type: String,
-    required: true,
-    trim: true,
-  },
   email: {
     type: String,
     unique: true,
@@ -18,8 +13,6 @@ const User = new mongoose.Schema({
     trim: true,
     lowercase: true,
   },
-}, {
-  filter: ['hidden']
 })
 
 export default mongoose.model('User', User)
