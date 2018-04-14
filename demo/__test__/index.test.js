@@ -16,18 +16,18 @@ const invalidToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgS
 
 describe('Demo routes', () => {
   beforeAll(async () => {
-    await app.server.start()
+    await app.start()
     await app.database.reset()
   })
 
   afterAll(() => {
-    app.server.stop()
+    app.stop()
   })
 
   it('(GET /) should respond with a success payload', async () => {
     const response = await request(app).get('/')
     expect(response.statusCode).toBe(200)
-    expect(response.body).toEqual({ page: 'Home', appName: 'Demo' })
+    expect(response.body).toEqual({ page: 'Home', app: 'Demo Server' })
   })
 
   it('(GET /public) should respond with a success payload', async () => {
@@ -90,65 +90,26 @@ describe('Demo routes', () => {
     expect(response.body.statusCode).toEqual(404)
   })
 
-  it('(POST /article) with valid params should return an article payload', async () => {
-    const payload = { title: 'Article title', description: 'Lorem ipsum...' }
-    const response = await request(app).post('/article')
-      .send(payload)
-    expect(response.statusCode).toBe(200)
-    expect(response.body).toEqual({ page: 'Article', ...payload })
-  })
-
-  it('(POST /article) with extra params should filter from body', async () => {
-    const payload = { title: 'Article title', description: 'Lorem ipsum...', extra: 'notallowed' }
-    const response = await request(app).post('/article')
-      .send(payload)
-    expect(response.statusCode).toBe(200)
-    expect(response.body.extra).toBeUndefined()
-  })
-
-  it('(POST /article) with invalid params should return a 400 error', async () => {
-    const payload = { title: 'Ar', description: '', extra: 'notallowed' }
-    const response = await request(app).post('/article')
-      .send(payload)
-    expect(response.statusCode).toBe(400)
-    expect(response.body.message).toEqual('Bad Request')
-    expect(response.body.errors).toEqual({
-      description: {
-        message: 'Description can\'t be blank',
-        validator: 'presence'
-      },
-      title: {
-        message: 'Title is too short (minimum is 3 characters)',
-        validator: 'length'
-      }
-    })
-  })
-
-  it('(GET /config) should respond with a config object', async () => {
-    const response = await request(app).get('/config')
-    expect(response.statusCode).toBe(200)
-    expect(response.body.config).toEqual(['config', 'mailer'])
-  })
-
   it('(POST /user) with valid params should return an user payload', async () => {
-    const payload = { name: 'John Doe', email: 'john@doe.com', hidden: 'boo' }
+    const payload = { name: 'John Doe', email: 'john@doe.com' }
     const response = await request(app).post('/user')
       .send(payload)
+
     expect(response.statusCode).toBe(200)
     expect(response.body.page).toEqual('User')
     expect(response.body.user.name).toBe('John Doe')
     expect(response.body.user.email).toBe('john@doe.com')
     expect(response.body.user.createdAt).toBeDefined()
-    expect(response.body.user.hidden).toBeUndefined()
   })
 
   it('(POST /user) with duplicate email should return an error message', async () => {
-    const payload = { name: 'John Doe', email: 'john@doe.com', hidden: 'boo' }
+    const payload = { name: 'John Doe', email: 'john@doe.com' }
     const response = await request(app).post('/user')
       .send(payload)
-    expect(response.statusCode).toBe(400)
-    expect(response.body.message).toEqual('Bad Request')
-    expect(response.body.errors).toEqual({
+
+    expect(response.statusCode).toBe(422)
+    expect(response.body.message).toEqual('Invalid data')
+    expect(response.body.validation).toEqual({
       email: {
         message: 'Email is already in use',
         validator: 'unique'
@@ -156,25 +117,24 @@ describe('Demo routes', () => {
     })
   })
 
-  it('(GET /custom-error) should respond with a custom 400 payload', async () => {
-    const response = await request(app).get('/custom-error')
-    expect(response.statusCode).toBe(400)
-    expect(response.body.message).toEqual('Bad Request')
-    expect(response.body.errors).toEqual({
-      key: 'something wrong with this key'
+  it('(POST /user) with invalid email should return an error message', async () => {
+    const payload = { name: 'John Doe', email: 'foo' }
+    const response = await request(app).post('/user')
+      .send(payload)
+
+    expect(response.statusCode).toBe(422)
+    expect(response.body.message).toEqual('Invalid body data')
+    expect(response.body.validation).toEqual({
+      email: {
+        message: 'Email is not a valid email',
+        validator: 'email'
+      },
     })
   })
 
-  it('(POST /controller) show catch thrown errors and return a 500 error', async () => {
-    const response = await request(app).post('/controller')
-    expect(response.statusCode).toBe(500)
-    expect(response.body.message).toEqual('Internal Server Error')
-  })
-
-  it('(GET /controller) should respond with a 200 payload', async () => {
-    const response = await request(app).get('/controller')
-    expect(response.statusCode).toBe(200)
-    expect(response.body.page).toEqual('Controller')
-    expect(response.body.promise).toEqual('wait a bit')
+  it('(GET /forbidden) show catch thrown errors and return a forbidden error', async () => {
+    const response = await request(app).get('/forbidden')
+    expect(response.statusCode).toBe(403)
+    expect(response.body.message).toEqual('Oops!')
   })
 })

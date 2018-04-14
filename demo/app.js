@@ -7,9 +7,23 @@
  */
 
 import expressio from '../src'
-import routes from './routes'
 
-const app = expressio(__dirname)
+import routes from './routes'
+import config from './config'
+
+const app = expressio(config)
+
+app.authorize({
+  unless: {
+    path: [
+      '/',
+      '/public',
+      '/notfound',
+      '/forbidden',
+      '/user'
+    ]
+  }
+})
 
 app.use(routes)
 

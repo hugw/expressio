@@ -21,7 +21,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
   if (err && err.name === 'ValidationError') {
     const validation = Object.keys(err.errors).reduce((obj, item) => {
       const validator = err.errors[item].kind
-      const label = (req.labels && req.labels[item]) || item
+      const label = (req.validatedBody && req.validatedBody.labels[item]) || item
 
       const formattedItem = {
         [item]: {
@@ -44,7 +44,21 @@ export const mongooseErrorHandler = (err, req, res, next) => {
  *
  * Format 404 error objects
  */
-export const notFoundErrorHandler = () => boom.notFound('The requested endpoint was not found')
+export const notFoundErrorHandler = (req, res, next) => {
+  next(boom.notFound('Not Found'))
+}
+
+/**
+ * authorizationErrorHandler
+ */
+export const authorizationErrorHandler = (err, req, res, next) => {
+  let error
+  if (err.name === 'UnauthorizedError') {
+    error = boom.unauthorized(err.message)
+  }
+
+  next(error || err)
+}
 
 /**
  * generalErrorHandler
@@ -54,7 +68,7 @@ export const notFoundErrorHandler = () => boom.notFound('The requested endpoint 
  * on current environment
  */
 export const generalErrorHandler = (err, req, res, next) => { // eslint-disable-line
-  logger.error(err)
+  logger.warn(err)
 
   if (!boom.isBoom(err)) {
     boom.boomify(err, { statusCode: 500 })

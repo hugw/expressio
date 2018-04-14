@@ -17,9 +17,13 @@ const logger = new winston.Logger({
   ]
 })
 
-export const loggerMiddleware = winstonExp.logger({
+export const loggerMiddleware = config => winstonExp.logger({
   transports: [
-    new winston.transports.Console({ colorize: true, prettyPrint: true, })
+    new winston.transports.Console({
+      colorize: true,
+      prettyPrint: true,
+      level: config.logLevel
+    })
   ],
   expressFormat: true,
   colorize: true,

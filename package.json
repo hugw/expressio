@@ -12,7 +12,7 @@
     "demo:db": "babel-node ./demo/db/tasks",
     "lint": "eslint .",
     "postinstall": "npm run build",
-    "test": "jest . --verbose --colors --forceExit",
+    "test": "jest . --verbose --colors --runInBand --forceExit",
     "test:watch": "npm run test -- --watch "
   },
   "dependencies": {

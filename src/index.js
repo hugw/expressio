@@ -41,6 +41,7 @@ import {
   notFoundErrorHandler,
   generalErrorHandler,
   mongooseErrorHandler,
+  authorizationErrorHandler,
 } from './error-handlers'
 
 export default function expressio(appConfig) {
@@ -91,7 +92,7 @@ export default function expressio(appConfig) {
   app.use(cors(config.cors))
 
   // Logging
-  app.use(loggerMiddleware)
+  app.use(loggerMiddleware(config))
 
   // Authorization
   app.authorize = authorize(app, config)
@@ -132,6 +133,7 @@ export default function expressio(appConfig) {
     // Error handlers
     app.use(notFoundErrorHandler)
     if (app.database) app.use(mongooseErrorHandler)
+    app.use(authorizationErrorHandler)
     app.use(generalErrorHandler)
 
     await app.server.start()

@@ -12,7 +12,7 @@ import {
 
 describe('Expressio / Error Handlers', () => {
   describe('#notFoundErrorHandler', () => {
-    it('should return a 404 Boom error object', () => {
+    it.skip('should return a 404 Boom error object', () => {
       const err = notFoundErrorHandler()
 
       expect(err).toBeInstanceOf(Error)
