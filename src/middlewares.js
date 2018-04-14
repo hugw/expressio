@@ -54,8 +54,8 @@ export const validateRequest = (req, type) => async (schema) => {
       throw boom.badImplementation('Something went wrong while validating your data')
     }
 
-    const validation = getValidationErrors(err, labels)
-    throw boom.badData(`Invalid ${type} data`, { validation })
+    const attributes = getValidationErrors(err, labels)
+    throw boom.badData(`Invalid ${type} data`, { attributes })
   }
 }
 

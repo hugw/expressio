@@ -17,7 +17,7 @@ import logger from './logger'
  */
 export const mongooseErrorHandler = (err, req, res, next) => {
   if (err && err.name === 'ValidationError') {
-    const validation = Object.keys(err.errors).reduce((obj, item) => {
+    const attributes = Object.keys(err.errors).reduce((obj, item) => {
       const validator = err.errors[item].kind
       const label = (req.validatedBody && req.validatedBody.labels[item]) || item
 
@@ -31,7 +31,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
       return Object.assign({}, obj, formattedItem)
     }, {})
 
-    return next(boom.badData('Invalid data', { validation }))
+    return next(boom.badData('Invalid data', { attributes }))
   }
 
   next(err)

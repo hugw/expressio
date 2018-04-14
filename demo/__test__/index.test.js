@@ -109,7 +109,7 @@ describe('Demo routes', () => {
 
     expect(response.statusCode).toBe(422)
     expect(response.body.message).toEqual('Invalid data')
-    expect(response.body.validation).toEqual({
+    expect(response.body.attributes).toEqual({
       email: {
         message: 'Email is already in use',
         validator: 'unique'
@@ -124,7 +124,7 @@ describe('Demo routes', () => {
 
     expect(response.statusCode).toBe(422)
     expect(response.body.message).toEqual('Invalid body data')
-    expect(response.body.validation).toEqual({
+    expect(response.body.attributes).toEqual({
       email: {
         message: 'Email is not a valid email',
         validator: 'email'
