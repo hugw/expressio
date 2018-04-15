@@ -11,42 +11,54 @@ import User from './models/User'
 
 const routes = router()
 
-routes.get('/', controller((req, res) => {
-  res.json({ page: 'Home', app: req.config.name })
+routes.get('/', controller({
+  handler: (req, res) => {
+    res.json({ page: 'Home', app: req.config.name })
+  }
 }))
 
-routes.get('/public', controller((req, res) => {
-  res.json({ page: 'Public' })
+routes.get('/public', controller({
+  handler: (req, res) => {
+    res.json({ page: 'Public' })
+  }
 }))
 
 routes.get('/unauthorized', controller((req, res) => {
   res.json({ page: 'Unauthorized' })
 }))
 
-routes.get('/authorized', controller((req, res) => {
-  res.json({ page: 'Authorized', user: req.user })
+routes.get('/authorized', controller({
+  handler: (req, res) => {
+    res.json({ page: 'Authorized', user: req.user })
+  }
 }))
 
-routes.post('/user', controller(async (req, res) => {
-  const body = await req.validateBody({
-    name: {
-      label: 'Name',
-      rules: {}
-    },
-    email: {
-      label: 'Email',
-      rules: {
-        email: true
-      }
-    },
-  })
-
-  const user = await User.create({ ...body })
-  res.json({ page: 'User', user })
+routes.post('/user', controller({
+  handler: async (req, res) => {
+    const { body } = req
+    const user = await User.create({ ...body })
+    res.json({ page: 'User', user })
+  },
+  validate: {
+    body: {
+      name: {
+        label: 'Name',
+        rules: {}
+      },
+      email: {
+        label: 'Email',
+        rules: {
+          email: true
+        }
+      },
+    }
+  }
 }))
 
-routes.get('/forbidden', controller(() => {
-  throw httpError(403, { message: 'Oops!' })
+routes.get('/forbidden', controller({
+  handler: () => {
+    throw httpError(403, { message: 'Oops!' })
+  }
 }))
 
 export default routes

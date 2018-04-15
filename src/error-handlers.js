@@ -6,6 +6,7 @@
  * @license MIT
  */
 
+import get from 'lodash/get'
 import logger from './logger'
 import { httpError } from './utils'
 
@@ -19,7 +20,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
   if (err && err.name === 'ValidationError') {
     const errors = Object.keys(err.errors).reduce((obj, item) => {
       const validator = err.errors[item].kind
-      const label = (req.validatedBody && req.validatedBody.labels[item]) || item
+      const label = get(req, `validation.body.labels.${item}`, item)
 
       const formattedItem = {
         [item]: {

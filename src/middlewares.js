@@ -7,18 +7,10 @@
  */
 
 import ejwt from 'express-jwt'
-import capitalize from 'lodash/capitalize'
 import mapValues from 'lodash/mapValues'
+import intersection from 'lodash/intersection'
 import validatejs from './validate'
 import { httpError } from './utils'
-
-/**
- * controller
- *
- * Add async support and base
- * error handling for common routes
- */
-export const controller = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
 
 /**
  * getValidationErrors
@@ -39,16 +31,19 @@ export const getValidationErrors = (err, labels) => err.reduce((obj, item) => {
  *
  * Request body/param/query validator
  */
-export const validateRequest = (req, type) => async (schema) => {
+export const validateRequest = async (schema, data, type) => {
   const labels = mapValues(schema, item => item.label)
   const constrains = mapValues(schema, item => item.rules)
 
   try {
-    const attr = await validatejs.async(req[type], constrains)
-    const resObj = `validated${capitalize(type)}`
-    req[resObj] = { data: attr, labels, constrains }
+    const attr = await validatejs.async(data, constrains)
 
-    return attr
+    return {
+      data: attr,
+      labels,
+      constrains,
+      type
+    }
   } catch (err) {
     if (err instanceof Error) {
       throw httpError()
@@ -60,17 +55,39 @@ export const validateRequest = (req, type) => async (schema) => {
 }
 
 /**
- * validate
+ * controller
  *
- * Setup validate api via
- * middleware
+ * Add async support and base
+ * error handling for common routes
  */
-export const validate = (req, res, next) => {
-  req.validateBody = validateRequest(req, 'body')
-  req.validateParams = validateRequest(req, 'params')
-  req.validateQuery = validateRequest(req, 'query')
+export const controller = resource => async (req, res, next) => {
+  const { validate, handler } = resource
+  if (!handler) return next()
 
-  next()
+  try {
+    if (validate) {
+      const types = intersection(Object.keys(validate), ['body', 'params', 'query'])
+      const validations = types.map(type => validateRequest(validate[type], req[type], type))
+      const results = await Promise.all(validations)
+
+      results.forEach((result) => {
+        const {
+          type,
+          labels,
+          contrains,
+          data
+        } = result
+
+        req[type] = data
+        req.validation = {
+          ...req.validation || {},
+          [type]: { labels, contrains }
+        }
+      })
+    }
+
+    await resource.handler(req, res, next)
+  } catch (e) { next(e) }
 }
 
 /**

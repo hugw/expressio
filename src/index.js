@@ -30,11 +30,7 @@ import mailerTransport from './mailer'
 import mongo, { mongoose } from './mongo'
 import validatejs from './validate'
 
-import {
-  controller,
-  authorize,
-  validate,
-} from './middlewares'
+import { controller, authorize } from './middlewares'
 
 import {
   notFoundErrorHandler,
@@ -95,9 +91,6 @@ export default function expressio(appConfig) {
 
   // Logging
   app.use(loggerMiddleware(config))
-
-  // Validation
-  app.use(validate)
 
   // Allow config and mailer
   // to be optionally availabe via req object
