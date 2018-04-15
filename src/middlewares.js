@@ -90,10 +90,9 @@ export const configuration = config => (req, res, next) => {
  * Authorize requests based
  * on JWT Tokens
  */
-export const authorize = (app, config) => ({ unless = null }) => {
-  app.use((req, res, next) => {
-    const { secret } = config
-    const fn = ejwt({ secret }).unless(unless)
-    return fn(req, res, next)
-  })
+export const authorize = opts => (req, res, next) => {
+  const { secret } = req.config
+  const unless = opts && opts.ignore && { path: opts.ignore }
+  const fn = ejwt({ secret }).unless(unless)
+  return fn(req, res, next)
 }

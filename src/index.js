@@ -138,7 +138,11 @@ export default function expressio(appConfig) {
     if (app.database) app.database.disconnect()
   }
 
-  return { app, mailer, config }
+  return {
+    app,
+    config,
+    mailer: mailer(config)
+  }
 }
 
 /**
@@ -154,7 +158,8 @@ export {
   router,
   mongoose,
   httpError,
-  logger
+  logger,
+  authorize
 }
 
 /**

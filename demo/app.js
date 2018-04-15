@@ -6,24 +6,22 @@
  * @license MIT
  */
 
-import expressio from '../src'
+import expressio, { authorize } from '../src'
 
 import routes from './routes'
 import config from './config'
 
 const { app } = expressio(config)
 
-app.authorize({
-  unless: {
-    path: [
-      '/',
-      '/public',
-      '/notfound',
-      '/forbidden',
-      '/user'
-    ]
-  }
-})
+app.use(authorize({
+  ignore: [
+    '/',
+    '/public',
+    '/notfound',
+    '/forbidden',
+    '/user'
+  ]
+}))
 
 app.use(routes)
 

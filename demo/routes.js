@@ -28,27 +28,6 @@ routes.get('/authorized', controller((req, res) => {
   res.json({ page: 'Authorized', user: req.user })
 }))
 
-// const articleSchema = {
-//   title: {
-//     label: 'Title',
-//     rules: {
-//       presence: { allowEmpty: false },
-//       length: { minimum: 3 }
-//     }
-//   },
-//   description: {
-//     label: 'Description',
-//     rules: {
-//       presence: { allowEmpty: false }
-//     }
-//   }
-// }
-
-// routes.post('/article', validate(articleSchema), (req, res) => {
-//   res.json({ page: 'Article', ...req.body })
-// })
-
-
 routes.post('/user', controller(async (req, res) => {
   const body = await req.validateBody({
     name: {
