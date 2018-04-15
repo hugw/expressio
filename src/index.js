@@ -159,12 +159,6 @@ export {
   mongoose,
   httpError,
   logger,
-  authorize
-}
-
-/**
- * Expose middlewares
- */
-export const middlewares = {
+  authorize,
   controller
 }

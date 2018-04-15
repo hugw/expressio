@@ -15,7 +15,7 @@ import expressio, {
   httpError,
   logger,
   authorize,
-  middlewares
+  controller
 } from '../'
 import * as utils from '../utils'
 
@@ -39,10 +39,7 @@ describe('Expressio', () => {
     expect(logger).toBeDefined()
     expect(mongoose).toBeDefined()
     expect(authorize).toBeDefined()
-  })
-
-  it('should expose middlewares', () => {
-    expect(middlewares.controller).toBeDefined()
+    expect(controller).toBeDefined()
   })
 
   it('given a valid configuration, it should return  an expressio object', () => {

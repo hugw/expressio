@@ -6,10 +6,9 @@
  * @license MIT
  */
 
-import { middlewares, router, httpError } from '../src'
+import { router, httpError, controller } from '../src'
 import User from './models/User'
 
-const { controller } = middlewares
 const routes = router()
 
 routes.get('/', controller((req, res) => {
