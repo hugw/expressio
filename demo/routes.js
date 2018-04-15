@@ -6,7 +6,7 @@
  * @license MIT
  */
 
-import { middlewares, router, boom } from '../src'
+import { middlewares, router, httpError } from '../src'
 import User from './models/User'
 
 const { controller } = middlewares
@@ -68,7 +68,7 @@ routes.post('/user', controller(async (req, res) => {
 }))
 
 routes.get('/forbidden', controller(() => {
-  throw boom.forbidden('Oops!')
+  throw httpError(403, { message: 'Oops!' })
 }))
 
 export default routes

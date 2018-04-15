@@ -7,10 +7,10 @@
  */
 
 import ejwt from 'express-jwt'
-import boom from 'boom'
 import capitalize from 'lodash/capitalize'
 import mapValues from 'lodash/mapValues'
 import validatejs from './validate'
+import { httpError } from './utils'
 
 /**
  * controller
@@ -51,11 +51,11 @@ export const validateRequest = (req, type) => async (schema) => {
     return attr
   } catch (err) {
     if (err instanceof Error) {
-      throw boom.badImplementation('Something went wrong while validating your data')
+      throw httpError()
     }
 
-    const attributes = getValidationErrors(err, labels)
-    throw boom.badData(`Invalid ${type} data`, { [type]: attributes })
+    const errors = getValidationErrors(err, labels)
+    throw httpError(422, { message: `Invalid ${type} data`, type: 'validation', errors })
   }
 }
 

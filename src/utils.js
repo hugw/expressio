@@ -9,6 +9,8 @@
 /* eslint no-console: 0 */
 import fs from 'fs'
 import merge from 'lodash/merge'
+import camelCase from 'lodash/camelCase'
+import statuses from 'statuses'
 
 import logger from './logger'
 import config from './config'
@@ -67,4 +69,26 @@ export function getConfig(appConfig) {
     appConfig.base,
     appConfig[env] && appConfig[env],
   )
+}
+
+/**
+ * httpError
+ */
+export function httpError(code, meta = {}) {
+  const status = statuses[code] ? code : 500
+  const message = meta.message || statuses[status]
+  const type = meta.type || camelCase(statuses[status])
+  const errors = meta.errors || undefined
+
+  const error = new Error(message)
+
+  error.isHttp = true
+  error.output = {
+    status,
+    message,
+    type,
+    ...errors ? { errors } : {}
+  }
+
+  return error
 }

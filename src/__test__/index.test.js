@@ -12,7 +12,7 @@ import expressio, {
   validatejs,
   router,
   mongoose,
-  boom,
+  httpError,
   logger,
   middlewares
 } from '../'
@@ -34,7 +34,7 @@ describe('Expressio', () => {
     expect(validatejs).toBeDefined()
     expect(jwt).toBeDefined()
     expect(router).toBeDefined()
-    expect(boom).toBeDefined()
+    expect(httpError).toBeDefined()
     expect(logger).toBeDefined()
     expect(mongoose).toBeDefined()
   })

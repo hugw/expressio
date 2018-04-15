@@ -15,13 +15,13 @@ import cors from 'cors'
 import compress from 'compression'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
-import boom from 'boom'
 
 import {
   getConfig,
   isNodeSupported,
   isDir,
   terminate,
+  httpError
 } from './utils'
 
 import logger, { loggerMiddleware } from './logger'
@@ -163,7 +163,7 @@ export {
   validatejs,
   router,
   mongoose,
-  boom,
+  httpError,
   logger
 }
 

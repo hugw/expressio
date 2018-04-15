@@ -6,8 +6,8 @@
  * @license MIT
  */
 
-import boom from 'boom'
 import logger from './logger'
+import { httpError } from './utils'
 
 /**
  * mongooseErrorHandler
@@ -17,7 +17,7 @@ import logger from './logger'
  */
 export const mongooseErrorHandler = (err, req, res, next) => {
   if (err && err.name === 'ValidationError') {
-    const attributes = Object.keys(err.errors).reduce((obj, item) => {
+    const errors = Object.keys(err.errors).reduce((obj, item) => {
       const validator = err.errors[item].kind
       const label = (req.validatedBody && req.validatedBody.labels[item]) || item
 
@@ -31,7 +31,7 @@ export const mongooseErrorHandler = (err, req, res, next) => {
       return Object.assign({}, obj, formattedItem)
     }, {})
 
-    return next(boom.badData('Invalid data', { body: attributes }))
+    return next(httpError(422, { message: 'Invalid data', type: 'validation', errors }))
   }
 
   next(err)
@@ -42,16 +42,18 @@ export const mongooseErrorHandler = (err, req, res, next) => {
  *
  * Format 404 error objects
  */
-export const notFoundErrorHandler = (req, res, next) => {
-  next(boom.notFound('Not Found'))
-}
+export const notFoundErrorHandler = (req, res, next) => next(httpError(404))
 
 /**
  * authorizationErrorHandler
  */
 export const authorizationErrorHandler = (err, req, res, next) => {
   if (err.name === 'UnauthorizedError') {
-    return next(boom.unauthorized(err.message))
+    const authError = httpError(401, {
+      message: err.message,
+      type: err.name
+    })
+    return next(authError)
   }
 
   next(err)
@@ -66,14 +68,8 @@ export const authorizationErrorHandler = (err, req, res, next) => {
  */
 export const generalErrorHandler = (err, req, res, next) => { // eslint-disable-line
   logger.warn(err)
+  const resError = err.isHttp ? err.output : httpError().output
 
-  if (!boom.isBoom(err)) {
-    boom.boomify(err, { statusCode: 500 })
-  }
-
-  res.status(err.output.statusCode)
-  res.json({
-    ...err.output.payload,
-    ...err.data,
-  })
+  res.status(resError.status)
+  res.json({ ...resError })
 }
