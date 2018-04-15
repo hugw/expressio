@@ -26,7 +26,7 @@ import {
 
 import logger, { loggerMiddleware } from './logger'
 import server from './server'
-import mailer from './mailer'
+import mailerTransport from './mailer'
 import mongo, { mongoose } from './mongo'
 import validatejs from './validate'
 
@@ -34,7 +34,6 @@ import {
   controller,
   authorize,
   validate,
-  configuration
 } from './middlewares'
 
 import {
@@ -69,6 +68,9 @@ export default function expressio(appConfig) {
   // Set log level
   logger.level = config.logLevel
 
+  // Setup mailer
+  const mailer = mailerTransport(config)
+
   // Define public folder for static content
   if (config.public) {
     const publicDir = resolveApp(config.public)
@@ -94,14 +96,16 @@ export default function expressio(appConfig) {
   // Logging
   app.use(loggerMiddleware(config))
 
-  // Authorization
-  app.authorize = authorize(app, config)
-
   // Validation
   app.use(validate)
 
-  // Configuration
-  app.use(configuration(config))
+  // Allow config and mailer
+  // to be optionally availabe via req object
+  app.use((req, res, next) => {
+    req.config = config
+    req.mailer = mailer
+    next()
+  })
 
   /**
    * Database
@@ -138,11 +142,7 @@ export default function expressio(appConfig) {
     if (app.database) app.database.disconnect()
   }
 
-  return {
-    app,
-    config,
-    mailer: mailer(config)
-  }
+  return { app, config, mailer }
 }
 
 /**

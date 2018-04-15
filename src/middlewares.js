@@ -74,17 +74,6 @@ export const validate = (req, res, next) => {
 }
 
 /**
- * configuration
- *
- * Alternatively allow
- * config to be available via req object
- */
-export const configuration = config => (req, res, next) => {
-  req.config = config
-  next()
-}
-
-/**
  * authorize
  *
  * Authorize requests based
