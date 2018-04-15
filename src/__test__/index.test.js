@@ -44,7 +44,7 @@ describe('Expressio', () => {
   })
 
   it('given a valid configuration, it should return  an expressio object', () => {
-    const app = expressio({
+    const { app, config, mailer } = expressio({
       base: {
         root: __dirname,
         public: null
@@ -52,12 +52,12 @@ describe('Expressio', () => {
     })
 
     expect(app.server).toBeDefined()
-    expect(app.mailer).toBeDefined()
+    expect(mailer).toBeDefined()
     expect(app.stop).toBeDefined()
     expect(app.start).toBeDefined()
     expect(app.database).toBeDefined()
     expect(app.authorize).toBeDefined()
-    expect(app.config).toBeDefined()
+    expect(config).toBeDefined()
   })
 
   it('given no configuration, it should terminate with proper error', () => {

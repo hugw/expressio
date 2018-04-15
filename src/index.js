@@ -26,7 +26,7 @@ import {
 
 import logger, { loggerMiddleware } from './logger'
 import server from './server'
-import mailerTransport from './mailer'
+import mailer from './mailer'
 import mongo, { mongoose } from './mongo'
 import validatejs from './validate'
 
@@ -104,16 +104,6 @@ export default function expressio(appConfig) {
   app.use(configuration(config))
 
   /**
-   * Mailer
-   */
-  app.mailer = mailerTransport(config)
-
-  /**
-   * Config
-   */
-  app.config = config
-
-  /**
    * Database
    */
   app.database = mongo(config)
@@ -148,7 +138,7 @@ export default function expressio(appConfig) {
     if (app.database) app.database.disconnect()
   }
 
-  return app
+  return { app, mailer, config }
 }
 
 /**
