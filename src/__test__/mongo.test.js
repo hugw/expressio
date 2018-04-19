@@ -71,13 +71,13 @@ describe('Expressio / Mongo API', () => {
 
   it('should terminate when no valid connection is provided', () => {
     mongo({ mongo: { connection: null } })
-    expect(terminateSpy).toBeCalledWith('Database connection does not exist.')
+    expect(terminateSpy).toBeCalledWith('Mongo database connection does not exist.')
   })
 
   describe('#connect', () => {
     it('should start the server successfully', async () => {
       await database.connect()
-      expect(logger.info).toBeCalledWith('Database running → MongoDB @ currentEnv.')
+      expect(logger.info).toBeCalledWith('Mongo database running → MongoDB @ currentEnv.')
       expect(mongoose.connection.readyState).toEqual(1)
     })
 
@@ -97,7 +97,7 @@ describe('Expressio / Mongo API', () => {
 
       const badDatabase = mongo(badConfig)
       await badDatabase.connect()
-      expect(terminateSpy).toBeCalledWith('Something went wrong while starting the database.')
+      expect(terminateSpy).toBeCalledWith('Something went wrong while starting Mongo database.')
     })
   })
 
@@ -125,8 +125,8 @@ describe('Expressio / Mongo API', () => {
 
       expect(await User.find().count()).toEqual(0)
       expect(logger.info).toHaveBeenCalledTimes(2)
-      expect(logger.info).toHaveBeenCalledWith('Database reset successfully.')
-      expect(logger.info).toHaveBeenCalledWith('Resetting database...')
+      expect(logger.info).toHaveBeenCalledWith('Mongo database reset successfully.')
+      expect(logger.info).toHaveBeenCalledWith('Resetting Mongo database...')
     })
   })
 

@@ -30,9 +30,24 @@ export default {
     secret: process.env.SECRET || 'Default secret key',
 
     // Database
+    database: 'mongo',
+
     mongo: {
       connection: 'mongodb://localhost:27017/development',
       seed: null
+    },
+
+    sequelize: {
+      models: 'models',
+      connection: {
+        host: null,
+        username: null,
+        password: null,
+      },
+      config: {
+        dialect: 'sqlite',
+        storage: 'db/sqlite/development.sqlite'
+      }
     },
 
     // Required Node version

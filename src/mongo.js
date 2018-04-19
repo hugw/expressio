@@ -56,7 +56,7 @@ export { mongoose }
  * Database API
  */
 export default ({ mongo: config, env, root }) => {
-  if (!config.connection) return terminate('Database connection does not exist.')
+  if (!config.connection) return terminate('Mongo database connection does not exist.')
 
   const database = {}
 
@@ -73,7 +73,7 @@ export default ({ mongo: config, env, root }) => {
         await seed.default(mongoose.models, env)
         logger.info('Seed data added successfuly.')
       } catch (e) {
-        logger.info('An error ocurred while seeding database. Process aborted.')
+        logger.info('An error ocurred while seeding Mongo database. Process aborted.')
         logger.info(e)
       }
     } else {
@@ -96,13 +96,13 @@ export default ({ mongo: config, env, root }) => {
    * Reset Only
    */
   database.resetOnly = async () => {
-    logger.info('Resetting database...')
+    logger.info('Resetting Mongo database...')
 
     const { collections } = mongoose.connection
     const promises = Object.values(collections).map(collection => collection.remove())
 
     await Promise.all(promises)
-    logger.info('Database reset successfully.')
+    logger.info('Mongo database reset successfully.')
   }
 
   /**
@@ -125,9 +125,9 @@ export default ({ mongo: config, env, root }) => {
 
     try {
       await mongoose.connect(config.connection, { useMongoClient: true })
-      logger.info(`Database running → MongoDB @ ${env}.`)
+      logger.info(`Mongo database running → MongoDB @ ${env}.`)
     } catch (e) {
-      terminate('Something went wrong while starting the database.')
+      terminate('Something went wrong while starting Mongo database.')
     }
   }
 

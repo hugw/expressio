@@ -103,7 +103,7 @@ export default function expressio(appConfig) {
   /**
    * Mongo
    */
-  app.mongo = mongo(config)
+  app.mongo = config.database === 'mongo' && mongo(config)
 
   /**
    * Server
