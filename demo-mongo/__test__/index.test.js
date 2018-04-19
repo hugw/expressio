@@ -17,7 +17,7 @@ const invalidToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgS
 describe('Demo routes', () => {
   beforeAll(async () => {
     await app.start()
-    await app.database.reset()
+    await app.mongo.reset()
   })
 
   afterAll(() => {

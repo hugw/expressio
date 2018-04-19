@@ -54,7 +54,7 @@ describe('Expressio', () => {
     expect(mailer).toBeDefined()
     expect(app.stop).toBeDefined()
     expect(app.start).toBeDefined()
-    expect(app.database).toBeDefined()
+    expect(app.mongo).toBeDefined()
     expect(config).toBeDefined()
   })
 

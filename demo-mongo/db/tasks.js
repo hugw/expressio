@@ -9,7 +9,7 @@
 import { argv } from 'yargs'
 import app from '../app'
 
-const { database } = app
+const { mongo } = app
 
-if (argv.seed) database.seed({ disconnect: true })
-else if (argv.reset) database.reset({ disconnect: true })
+if (argv.seed) mongo.seed({ disconnect: true })
+else if (argv.reset) mongo.reset({ disconnect: true })

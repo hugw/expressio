@@ -101,9 +101,9 @@ export default function expressio(appConfig) {
   })
 
   /**
-   * Database
+   * Mongo
    */
-  app.database = mongo(config)
+  app.mongo = mongo(config)
 
   /**
    * Server
@@ -119,12 +119,12 @@ export default function expressio(appConfig) {
   app.start = async () => {
     // Error handlers
     app.use(notFoundErrorHandler)
-    if (app.database) app.use(mongooseErrorHandler)
+    if (app.mongo) app.use(mongooseErrorHandler)
     app.use(authorizationErrorHandler)
     app.use(generalErrorHandler)
 
     await app.server.start()
-    if (app.database) await app.database.connect()
+    if (app.mongo) await app.mongo.connect()
   }
 
   /**
@@ -132,7 +132,7 @@ export default function expressio(appConfig) {
    */
   app.stop = () => {
     app.server.stop()
-    if (app.database) app.database.disconnect()
+    if (app.mongo) app.mongo.disconnect()
   }
 
   return { app, config, mailer }

@@ -8,8 +8,8 @@
   "main": "./dist",
   "scripts": {
     "build": "babel ./src --ignore '__test__/' -s -D -d dist",
-    "demo": "nodemon -w ./demo -w ./src --inspect --exec \"babel-node ./demo\"",
-    "demo:db": "babel-node ./demo/db/tasks",
+    "demo-mongo": "nodemon -w ./demo-mongo -w ./src --inspect --exec \"babel-node ./demo-mongo\"",
+    "demo-mongo:db": "babel-node ./demo-mongo/db/tasks",
     "lint": "eslint .",
     "postinstall": "npm run build",
     "test": "jest . --verbose --colors --runInBand --forceExit",
