@@ -46,7 +46,7 @@ export const validateRequest = async (schema, data, type) => {
     }
   } catch (err) {
     if (err instanceof Error) {
-      throw httpError()
+      throw httpError(500, { message: err.message })
     }
 
     const errors = getValidationErrors(err, labels)

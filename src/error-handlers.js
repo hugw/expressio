@@ -39,6 +39,33 @@ export const mongooseErrorHandler = (err, req, res, next) => {
 }
 
 /**
+ * sequelizeErrorHandler
+ *
+ * Express middleware to handle
+ * all kind of mongoose errors thrown
+ */
+export const sequelizeErrorHandler = (err, req, res, next) => {
+  if (err && err.name === 'SequelizeUniqueConstraintError') {
+    const errors = err.fields.reduce((obj, item) => {
+      const label = get(req, `validation.body.labels.${item}`, item)
+
+      const formattedItem = {
+        [item]: {
+          message: `${label} is already in use`,
+          validator: 'unique'
+        }
+      }
+
+      return Object.assign({}, obj, formattedItem)
+    }, {})
+
+    return next(httpError(422, { message: 'Invalid data', type: 'validation', errors }))
+  }
+
+  next(err)
+}
+
+/**
  * notFoundErrorHandler
  *
  * Format 404 error objects

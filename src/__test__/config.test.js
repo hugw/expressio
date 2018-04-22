@@ -28,6 +28,22 @@ describe('Expressio / Config', () => {
           connection: 'mongodb://localhost:27017/development',
           seed: null
         },
+        sequelize: {
+          folder: {
+            models: 'models',
+            db: 'db',
+          },
+          seed: null,
+          connection: {
+            database: null,
+            username: null,
+            password: null,
+            host: null,
+            dialect: 'sqlite',
+            storage: 'development.sqlite'
+          },
+          config: {}
+        },
         reqNode: { minor: 6, major: 8 },
         mailer: {
           host: 'smtp.ethereal.email',

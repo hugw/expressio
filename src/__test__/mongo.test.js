@@ -14,7 +14,7 @@ import logger from '../logger'
 const config = {
   mongo: {
     connection: 'mongodb://localhost:27017/testApi',
-    seed: './seed'
+    seed: 'seed-mongo'
   },
   root: path.join(__dirname, 'fixtures'),
   env: 'currentEnv'
@@ -77,7 +77,7 @@ describe('Expressio / Mongo API', () => {
   describe('#connect', () => {
     it('should start the server successfully', async () => {
       await database.connect()
-      expect(logger.info).toBeCalledWith('Mongo database running → MongoDB @ currentEnv.')
+      expect(logger.info).toBeCalledWith('Database running → MongoDB @ currentEnv.')
       expect(mongoose.connection.readyState).toEqual(1)
     })
 

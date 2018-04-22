@@ -125,7 +125,7 @@ export default ({ mongo: config, env, root }) => {
 
     try {
       await mongoose.connect(config.connection, { useMongoClient: true })
-      logger.info(`Mongo database running → MongoDB @ ${env}.`)
+      logger.info(`Database running → MongoDB @ ${env}.`)
     } catch (e) {
       terminate('Something went wrong while starting Mongo database.')
     }

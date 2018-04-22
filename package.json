@@ -10,10 +10,12 @@
     "build": "babel ./src --ignore '__test__/' -s -D -d dist",
     "demo-mongo": "nodemon -w ./demo-mongo -w ./src --inspect --exec \"babel-node ./demo-mongo\"",
     "demo-mongo:db": "babel-node ./demo-mongo/db/tasks",
+    "demo-sequelize": "nodemon -w ./demo-sequelize -w ./src --inspect --exec \"babel-node ./demo-sequelize\"",
+    "demo-sequelize:db": "babel-node ./demo-sequelize/db/tasks",
     "lint": "eslint .",
     "postinstall": "npm run build",
     "test": "jest . --verbose --colors --runInBand --forceExit",
-    "test:watch": "npm run test -- --watch "
+    "test:watch": "npm run test -- --watch"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
@@ -36,7 +38,12 @@
     "mongoose-beautiful-unique-validation": "^7.0.0",
     "nodemailer": "^4.4.1",
     "optional": "^0.1.4",
+    "pg": "^7.4.1",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.37.6",
+    "sqlite3": "^4.0.0",
     "statuses": "^1.5.0",
+    "umzug": "^2.1.0",
     "validate.js": "^0.12.0",
     "winston": "^2.4.0",
     "yargs": "^10.0.3"

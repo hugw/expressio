@@ -15,6 +15,7 @@ import cors from 'cors'
 import compress from 'compression'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import Sequelize from 'sequelize'
 
 import {
   getConfig,
@@ -28,6 +29,7 @@ import logger, { loggerMiddleware } from './logger'
 import server from './server'
 import mailerTransport from './mailer'
 import mongo, { mongoose } from './mongo'
+import sequelize from './sequelize'
 import validatejs from './validate'
 
 import { controller, authorize } from './middlewares'
@@ -36,6 +38,7 @@ import {
   notFoundErrorHandler,
   generalErrorHandler,
   mongooseErrorHandler,
+  sequelizeErrorHandler,
   authorizationErrorHandler,
 } from './error-handlers'
 
@@ -97,13 +100,19 @@ export default function expressio(appConfig) {
   app.use((req, res, next) => {
     req.config = config
     req.mailer = mailer
+    req.models = config.sequelize && app.sequelize.models
     next()
   })
 
   /**
    * Mongo
    */
-  app.mongo = config.database === 'mongo' && mongo(config)
+  app.mongo = config.mongo && mongo(config)
+
+  /**
+   * Sequelize
+   */
+  app.sequelize = config.sequelize && sequelize(config)
 
   /**
    * Server
@@ -120,11 +129,13 @@ export default function expressio(appConfig) {
     // Error handlers
     app.use(notFoundErrorHandler)
     if (app.mongo) app.use(mongooseErrorHandler)
+    if (app.sequelize) app.use(sequelizeErrorHandler)
     app.use(authorizationErrorHandler)
     app.use(generalErrorHandler)
 
     await app.server.start()
     if (app.mongo) await app.mongo.connect()
+    if (app.sequelize) await app.sequelize.connect()
   }
 
   /**
@@ -133,6 +144,7 @@ export default function expressio(appConfig) {
   app.stop = () => {
     app.server.stop()
     if (app.mongo) app.mongo.disconnect()
+    if (app.sequelize) app.sequelize.disconnect()
   }
 
   return { app, config, mailer }
@@ -153,5 +165,6 @@ export {
   httpError,
   logger,
   authorize,
-  controller
+  controller,
+  Sequelize
 }

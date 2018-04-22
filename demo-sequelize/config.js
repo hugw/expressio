@@ -31,12 +31,24 @@ export default {
     secret: process.env.SECRET || 'Default secret key',
 
     // Databases
-    mongo: {
-      connection: 'mongodb://localhost:27017/demo-development',
-      seed: 'db/seed'
-    },
+    mongo: null,
 
-    sequelize: null,
+    sequelize: {
+      folder: {
+        models: 'models',
+        db: 'db',
+      },
+      seed: 'db/seed',
+      connection: {
+        database: null,
+        username: null,
+        password: null,
+        host: null,
+        dialect: 'sqlite',
+        storage: 'development.sqlite'
+      },
+      config: {}
+    },
 
     // Required Node version
     reqNode: { minor: 6, major: 8 },
@@ -55,15 +67,13 @@ export default {
   // Test
   test: {
     logLevel: 'error',
-    mongo: {
-      connection: 'mongodb://localhost:27017/demo-test',
-    }
+    sequelize: {
+      connection: {
+        storage: 'test.sqlite'
+      }
+    },
   },
 
   // Production
-  production: {
-    mongo: {
-      connection: 'mongodb://localhost:27017/demo-production',
-    }
-  }
+  production: {}
 }
