@@ -16,15 +16,21 @@ routes.post('/user', controller({
     const user = await models.User.create({ ...body })
     res.json({ page: 'User', user })
   },
-  validate: {
+  schema: {
     body: {
       name: {
         label: 'Name',
-        rules: {}
+        sanitize: {
+          trim: true,
+        },
+        validate: {}
       },
       email: {
         label: 'Email',
-        rules: {
+        sanitize: {
+          lowercase: true,
+        },
+        validate: {
           email: true
         }
       },
@@ -39,11 +45,11 @@ routes.get('/user/:id', controller({
     if (!user) throw httpError(422, { message: 'User does not exist' })
     res.json({ page: 'User', user })
   },
-  validate: {
+  schema: {
     params: {
       id: {
         label: 'Id',
-        rules: {
+        validate: {
           numericality: true
         }
       },

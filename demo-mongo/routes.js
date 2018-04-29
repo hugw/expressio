@@ -39,15 +39,15 @@ routes.post('/user', controller({
     const user = await User.create({ ...body })
     res.json({ page: 'User', user })
   },
-  validate: {
+  schema: {
     body: {
       name: {
         label: 'Name',
-        rules: {}
+        validate: {}
       },
       email: {
         label: 'Email',
-        rules: {
+        validate: {
           email: true
         }
       },

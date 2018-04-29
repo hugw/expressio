@@ -27,16 +27,28 @@ export const getValidationErrors = (err, labels) => err.reduce((obj, item) => {
 }, {})
 
 /**
+ * sanitizeData
+ */
+export const sanitizeData = (data, options) => Object.keys(data).reduce((obj, key) => {
+  let value = data[key]
+
+  value = options[key].trim ? value.trim() : value
+  value = options[key].lowercase ? value.toLowerCase() : value
+  return Object.assign({}, obj, { [key]: value })
+}, {})
+
+/**
  * validateRequest
  *
  * Request body/param/query validator
  */
 export const validateRequest = async (schema, data, type) => {
   const labels = mapValues(schema, item => item.label)
-  const constrains = mapValues(schema, item => item.rules)
+  const sanitize = mapValues(schema, item => item.sanitize || { trim: false, lowercase: false })
+  const constrains = mapValues(schema, item => item.validate)
 
   try {
-    const attr = await validatejs.async(data, constrains)
+    const attr = await validatejs.async(sanitizeData(data, sanitize), constrains)
 
     return {
       data: attr,
@@ -61,13 +73,13 @@ export const validateRequest = async (schema, data, type) => {
  * error handling for common routes
  */
 export const controller = resource => async (req, res, next) => {
-  const { validate, handler } = resource
+  const { schema, handler } = resource
   if (!handler) return next()
 
   try {
-    if (validate) {
-      const types = intersection(Object.keys(validate), ['body', 'params', 'query'])
-      const validations = types.map(type => validateRequest(validate[type], req[type], type))
+    if (schema) {
+      const types = intersection(Object.keys(schema), ['body', 'params', 'query'])
+      const validations = types.map(type => validateRequest(schema[type], req[type], type))
       const results = await Promise.all(validations)
 
       results.forEach((result) => {

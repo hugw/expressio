@@ -1,5 +1,5 @@
 export default {
-  up: async (query, DataTypes) => query.createTable('Tasks', {
+  up: (query, DataTypes) => query.createTable('Tasks', {
     id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -27,5 +27,5 @@ export default {
     },
   }),
 
-  down: async query => query.dropTable('Tasks')
+  down: query => query.dropTable('Tasks')
 }

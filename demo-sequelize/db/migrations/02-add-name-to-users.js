@@ -1,5 +1,5 @@
 export default {
-  up: async (query, DataTypes) => query.addColumn(
+  up: (query, DataTypes) => query.addColumn(
     'Users',
     'name',
     {
@@ -7,5 +7,5 @@ export default {
     }
   ),
 
-  down: async query => query.removeColumn('Users', 'name')
+  down: query => query.removeColumn('Users', 'name')
 }
