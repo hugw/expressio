@@ -248,7 +248,11 @@ export default ({ sequelize: config, env, root }) => {
   /**
    * Truncate
    */
-  database.truncate = async () => sequelize.truncate()
+  database.truncate = async () => {
+    const models = Object.values(database.models)
+    const truncateModels = models.map(model => model.destroy({ truncate: true }))
+    return Promise.all(truncateModels)
+  }
 
   database.instance = sequelize
 
