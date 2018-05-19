@@ -42,16 +42,17 @@ export const sanitizeData = (data, options) => Object.keys(data).reduce((obj, ke
  *
  * Request body/param/query validator
  */
-export const validateRequest = async (schema, data, type) => {
-  const labels = mapValues(schema, item => item.label)
+export const validateRequest = async (schema, rawData, type) => {
+  const labels = mapValues(schema, item => item.label || '')
   const sanitize = mapValues(schema, item => item.sanitize || { trim: false, lowercase: false })
-  const constrains = mapValues(schema, item => item.validate)
+  const constrains = mapValues(schema, item => item.validate || {})
 
   try {
-    const attr = await validatejs.async(sanitizeData(data, sanitize), constrains)
+    const cleanAttrs = validatejs.cleanAttributes(rawData, mapValues(schema, () => true))
+    const data = await validatejs.async(sanitizeData(cleanAttrs, sanitize), constrains)
 
     return {
-      data: attr,
+      data,
       labels,
       constrains,
       type
