@@ -245,6 +245,11 @@ export default ({ sequelize: config, env, root }) => {
     await database.migrations.up()
   }
 
+  /**
+   * Truncate
+   */
+  database.truncate = async () => sequelize.truncate()
+
   database.instance = sequelize
 
   return database

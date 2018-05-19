@@ -63,6 +63,7 @@ describe('Expressio / Sequelize API', () => {
       'seed',
       'disconnect',
       'reset',
+      'truncate',
       'instance',
     ])
   })
