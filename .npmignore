@@ -1,0 +1,10 @@
+.babelrc
+.editorconfig
+.eslintrc
+.gitignore
+.nvmrc
+
+# Folders
+.vscode
+**/tmp/**
+**/__test__/**

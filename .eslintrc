@@ -1,17 +1,3 @@
 {
-  "extends": "airbnb-base",
-  "env": {
-    "node": true,
-    "amd": true,
-    "es6": true,
-    "jest": true
-  },
-  "rules": {
-    "semi": ["error", "never"],
-    "comma-dangle": "off",
-    "max-len": "off",
-    "consistent-return": "off",
-    "global-require": "off",
-    "import/no-dynamic-require": "off"
-  }
+  "extends": "@hugw/node"
 }
