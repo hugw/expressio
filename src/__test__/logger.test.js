@@ -1,31 +1,38 @@
-/**
- * Logger test coverage
- *
- * @copyright Copyright (c) 2018, hugw.io
- * @author Hugo W - me@hugw.io
- * @license MIT
- */
+import logger from '@/logger'
 
-import logger, { loggerMiddleware } from '../logger'
+describe('Expressio / Logger initializer', () => {
+  const use = jest.fn()
 
-describe('Expressio / Logger', () => {
-  describe('#logger', () => {
-    it('should expose a logging api', () => {
-      expect(logger.info).toBeDefined()
-      expect(logger.error).toBeDefined()
-      expect(logger.warn).toBeDefined()
-      expect(logger.debug).toBeDefined()
-    })
+  const config = {
+    silent: false,
+    level: 'info',
+    prettify: true,
+  }
 
-    it('should have its default level set to "info"', () => {
-      expect(logger.level).toEqual('info')
-    })
+  afterEach(() => {
+    use.mockClear()
   })
 
-  describe('#loggerMiddleware', () => {
-    it('should exist', () => {
-      expect(loggerMiddleware).toBeDefined()
-      expect(loggerMiddleware).toBeInstanceOf(Function)
-    })
+  it('should load the initializer and expose an api to the server', () => {
+    const server = { use }
+    logger(server, config)
+
+    expect(Object.keys(server.logger)).toEqual(expect.arrayContaining(['error', 'info', 'warn', 'debug']))
+    expect(use).toHaveBeenCalledTimes(2)
+  })
+
+  it('given no "silent" config, it should throw an error with proper message', () => {
+    const fn = () => logger({}, { ...config, silent: undefined })
+    expect(fn).toThrow('Invalid Logger config: "silent" is required')
+  })
+
+  it('given no "level" config, it should throw an error with proper message', () => {
+    const fn = () => logger({}, { ...config, level: undefined })
+    expect(fn).toThrow('Invalid Logger config: "level" is required')
+  })
+
+  it('given no "prettify" config, it should throw an error with proper message', () => {
+    const fn = () => logger({}, { ...config, prettify: undefined })
+    expect(fn).toThrow('Invalid Logger config: "prettify" is required')
   })
 })
