@@ -12,8 +12,7 @@ app.get('/private', (req, res) => {
 })
 
 app.get('/public', (req, res) => {
-  res.status(204)
-  res.json()
+  res.status(204).json()
 })
 
 
