@@ -80,5 +80,5 @@ export default (server, config) => {
   })
 
   // Register error handler
-  server.on('registerErrorHandler', () => server.use(errorHandler))
+  server.on('preStart', () => server.use(errorHandler))
 }
