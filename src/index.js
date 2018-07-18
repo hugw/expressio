@@ -75,6 +75,10 @@ export default function expressio(opts) {
   server.initialize('mailer', mailer)
   server.initialize('jwt', jwt)
 
+  // Set server instance
+  // initial value
+  server.instance = null
+
   /**
    * Start server
    */

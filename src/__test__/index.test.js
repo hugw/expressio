@@ -36,4 +36,29 @@ describe('Expressio', () => {
     expressio({ root: `${__dirname}/fixtures/core` })
     expect(process.env.LOADED).toEqual('yep')
   })
+
+  it('should start the server properly and emit related events', async () => {
+    const fn = jest.fn()
+    const app = expressio()
+    app.on('preStart', fn)
+    app.on('postStart', fn)
+
+    expect(app.instance).toBeNull()
+    await app.start()
+    expect(app.instance).toBeDefined()
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('should stop the server properly and emit related events', async () => {
+    const fn = jest.fn()
+    const app = expressio()
+    app.on('preStop', fn)
+    app.on('postStop', fn)
+
+    await app.start()
+    expect(app.instance).toBeDefined()
+    app.stop()
+    expect(app.instance).toBeNull()
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
 })
