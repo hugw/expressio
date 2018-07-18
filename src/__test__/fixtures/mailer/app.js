@@ -1,8 +1,8 @@
-import expressio, { controller } from '@'
+import expressio from '@'
 
 const app = expressio()
 
-app.get('/dispatch', controller(async (req, res) => {
+app.get('/dispatch', async (req, res) => {
   const template = {
     to: 'someone@domain.com',
     subject: 'Subject',
@@ -11,6 +11,6 @@ app.get('/dispatch', controller(async (req, res) => {
 
   await req.mailer.dispatch(template)
   res.status(204).json()
-}))
+})
 
 export default app

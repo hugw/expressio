@@ -84,5 +84,5 @@ describe('Expressio / Mailer Demo', () => {
   it('(GET /public) should dispatch an email successfully', async () => {
     const response = await request(app).get('/dispatch')
     expect(response.status).toBe(204)
-  })
+  }, 10000)
 })

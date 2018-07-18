@@ -1,7 +1,9 @@
+import request from 'supertest'
 import ndtk from 'ndtk'
 import Joi from 'joi'
 
 import core from '@/core'
+import app from './fixtures/core/app'
 
 describe('Expressio / Utils', () => {
   describe('#initialize', () => {
@@ -239,6 +241,38 @@ describe('Expressio / Utils', () => {
         status: 500,
         type: 'INTERNAL_SERVER_ERROR',
       })
+    })
+  })
+})
+
+describe('Expressio / Core Demo', () => {
+  beforeAll(async () => {
+    await app.start()
+  })
+
+  afterAll(() => {
+    app.stop()
+  })
+
+  it('(GET /sync) should get a proper error from a sync route', async () => {
+    const response = await request(app).get('/sync')
+
+    expect(response.status).toBe(400)
+    expect(response.body).toEqual({
+      message: 'Ops from sync route',
+      status: 400,
+      type: 'BAD_REQUEST',
+    })
+  })
+
+  it('(GET /async) should get a proper error from an async route', async () => {
+    const response = await request(app).get('/async')
+
+    expect(response.status).toBe(400)
+    expect(response.body).toEqual({
+      message: 'Ops from async route',
+      status: 400,
+      type: 'BAD_REQUEST',
     })
   })
 })
