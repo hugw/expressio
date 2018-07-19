@@ -1,61 +1,69 @@
-/**
- * Config test coverage
- *
- * @copyright Copyright (c) 2018, hugw.io
- * @author Hugo W - me@hugw.io
- * @license MIT
- */
+import config from '@/config'
 
-import config from '../config'
-
-describe('Expressio / Config', () => {
+describe('Expressio / Configs', () => {
   it('should match a valid config object', () => {
     expect(config).toEqual({
-      base: {
+      default: {
+        app: {},
         address: '127.0.0.1',
-        logLevel: 'info',
         port: '4000',
+        engine: 8.11,
         env: 'test',
-        public: 'public',
         cors: {
           origin: '*',
           methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
           preflightContinue: false,
-          optionsSuccessStatus: 204
+          optionsSuccessStatus: 204,
         },
-        secret: 'Default secret key',
-        mongo: {
-          connection: 'mongodb://localhost:27017/development',
-          seed: null
+        logger: {
+          silent: false,
+          level: 'info',
+          prettify: true,
         },
-        sequelize: {
-          folder: {
-            models: 'models',
-            db: 'db',
-          },
-          seed: null,
-          connection: {
-            database: null,
-            username: null,
-            password: null,
-            host: null,
-            dialect: 'sqlite',
-            storage: 'development.sqlite'
-          },
-          config: {}
+        jwt: {
+          enabled: true,
+          expiresIn: '7d',
+          algorithm: 'HS256',
+          secret: process.env.SECRET || 'cAQk{m04|:b&MCkD2T0S3C!Da$dko7{EN/gtoH{UO:EM`zdGc-~O>U@$yhz.UDA',
         },
-        reqNode: { minor: 6, major: 8 },
         mailer: {
-          host: 'smtp.ethereal.email',
-          port: 587,
-          auth: {
-            user: 'yrhxokkz4da2rtlw@ethereal.email',
-            pass: 'Eu7ZNpyZYKUyyJNzk9'
-          }
-        }
+          enabled: true,
+          transport: {
+            host: 'smtp.ethereal.email',
+            port: 587,
+            auth: {
+              user: 'ifzm25yindrz6qe3@ethereal.email',
+              pass: 'HnUBg7NPc2vaCA79FR',
+            },
+          },
+          defaults: {
+            from: '"Expressio App" <expressio@domain.com>',
+          },
+        },
+        database: {
+          enabled: false,
+          dialect: 'sqlite',
+          connection: 'development.sqlite',
+        },
       },
-      test: {},
-      production: {}
+      test: {
+        port: null,
+        logger: {
+          silent: true,
+        },
+        database: {
+          connection: 'test.sqlite',
+        },
+      },
+      production: {
+        logger: {
+          level: 'error',
+          prettify: false,
+        },
+        database: {
+          connection: 'production.sqlite',
+        },
+      },
     })
   })
 })

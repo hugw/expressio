@@ -1,74 +1,94 @@
 /**
- * Config variables
+ * Default config
  *
- * @copyright Copyright (c) 2017, hugw.io
- * @author Hugo W - me@hugw.io
+ * @copyright Copyright (c) 2018, hugw.io
+ * @author Hugo W - contact@hugw.io
  * @license MIT
  */
 
-import { CURRENT_ENV } from 'isenv'
+import { ENV } from 'ndtk'
 
 export default {
-  base: {
-    // Server
+  default: {
+    // Application settings
+    app: {},
+
+    // Host
     address: process.env.SERVER_ADDRESS || '127.0.0.1',
-    logLevel: 'info',
     port: process.env.PORT || '4000',
-    env: CURRENT_ENV,
 
-    // Public folder for static files
-    // Define a folder name or null to disable it
-    public: 'public',
+    // Required Node version
+    engine: 8.11,
 
-    // Security
+    // Current environment
+    env: ENV,
+
+    // CORS
     cors: {
       origin: '*',
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       preflightContinue: false,
-      optionsSuccessStatus: 204
-    },
-    secret: process.env.SECRET || 'Default secret key',
-
-    // Databases
-    mongo: {
-      connection: 'mongodb://localhost:27017/development',
-      seed: null
+      optionsSuccessStatus: 204,
     },
 
-    sequelize: {
-      folder: {
-        models: 'models',
-        db: 'db',
-      },
-      seed: null,
-      connection: {
-        database: null,
-        username: null,
-        password: null,
-        host: null,
-        dialect: 'sqlite',
-        storage: 'development.sqlite'
-      },
-      config: {}
+    // Logger
+    logger: {
+      silent: false,
+      level: 'info',
+      prettify: true,
     },
 
-    // Required Node version
-    reqNode: { minor: 6, major: 8 },
+    // JWT authentication
+    jwt: {
+      enabled: true,
+      expiresIn: '7d',
+      algorithm: 'HS256',
+      secret: process.env.SECRET || 'cAQk{m04|:b&MCkD2T0S3C!Da$dko7{EN/gtoH{UO:EM`zdGc-~O>U@$yhz.UDA',
+    },
 
     // Mailer
     mailer: {
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-        user: 'yrhxokkz4da2rtlw@ethereal.email',
-        pass: 'Eu7ZNpyZYKUyyJNzk9'
-      }
-    }
+      enabled: true,
+      transport: {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+          user: 'ifzm25yindrz6qe3@ethereal.email',
+          pass: 'HnUBg7NPc2vaCA79FR',
+        },
+      },
+      defaults: {
+        from: '"Expressio App" <expressio@domain.com>',
+      },
+    },
+
+    // Sequelize adapter
+    database: {
+      enabled: false,
+      dialect: 'sqlite', // "sqlite" or "postgres",
+      connection: 'development.sqlite',
+    },
   },
 
-  // Test
-  test: {},
+  // Test environment
+  test: {
+    port: null, // Enable autobind ports to avoid colisions
+    logger: {
+      silent: true,
+    },
+    database: {
+      connection: 'test.sqlite',
+    },
+  },
 
-  // Production
-  production: {}
+  // Production environment
+  production: {
+    logger: {
+      level: 'error',
+      prettify: false,
+    },
+    database: {
+      connection: 'production.sqlite',
+    },
+  },
 }
