@@ -1,6 +1,6 @@
 import events from '@/events'
 
-describe('Expressio / Events initializer', () => {
+describe('Expressio / Events Initializer', () => {
   const fn = jest.fn()
 
   afterEach(() => {

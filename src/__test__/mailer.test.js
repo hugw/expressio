@@ -3,7 +3,7 @@ import request from 'supertest'
 import mailer from '@/mailer'
 import app from './fixtures/mailer/app'
 
-describe('Expressio / Mailer initializer', () => {
+describe('Expressio / Mailer Initializer', () => {
   const use = jest.fn()
 
   const config = {

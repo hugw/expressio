@@ -3,7 +3,7 @@ import request from 'supertest'
 import jwt from '@/jwt'
 import app from './fixtures/jwt/app'
 
-describe('Expressio / JWT initializer', () => {
+describe('Expressio / JWT Initializer', () => {
   const use = jest.fn()
   const on = jest.fn()
 

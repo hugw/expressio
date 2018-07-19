@@ -29,6 +29,7 @@ const schema = Joi.object({
 
 export default (server, config) => {
   const {
+    // @TODO Move secret outside of jwt config object
     secret,
     expiresIn,
     algorithm,

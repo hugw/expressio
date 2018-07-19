@@ -1,6 +1,6 @@
 import logger from '@/logger'
 
-describe('Expressio / Logger initializer', () => {
+describe('Expressio / Logger Initializer', () => {
   const use = jest.fn()
 
   const config = {

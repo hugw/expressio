@@ -20,8 +20,6 @@ const config = (name, defaults) => ndtk.config(ndtk.req(name), ndtk.req(defaults
 /**
  * Validate object schemas
  * using Joi validator
- *
- * @TODO Add tests
  */
 const sanitize = (object, schema, message) => {
   // Ensure schema is a valid Joi object
