@@ -21,6 +21,7 @@ import mailer from '@/mailer'
 import core from '@/core'
 import jwt from '@/jwt'
 import events from '@/events'
+import database from '@/database'
 
 /**
  * Expressio
@@ -58,6 +59,7 @@ export default function expressio(opts) {
 
   // Define the server environment
   server.set('env', config.env)
+  server.env = config.env
 
   // Parse incoming requests
   // to JSON format
@@ -74,11 +76,11 @@ export default function expressio(opts) {
   server.use(cors(config.cors))
 
   // Add core initializers
-  // @TODO Organize iniializers in their own folder (plugins?)
   server.initialize('logger', logger)
   server.initialize('events', events)
   server.initialize('mailer', mailer)
   server.initialize('jwt', jwt)
+  server.initialize('database', database)
 
   // Set server instance
   // initial value
@@ -90,44 +92,52 @@ export default function expressio(opts) {
   server.start = async () => {
     if (server.instance) return
 
-    // Ensure not found routes
-    // are handled properly
-    server.use(core.notFoundHandler)
+    try {
+      // Ensure not found routes
+      // are handled properly
+      server.use(core.notFoundHandler)
 
-    // Emit "preStart" events
-    // to possibly register custom
-    // error handlers
-    await server.events.emit('preStart')
+      // Emit "preStart" events
+      // to possibly register custom
+      // error handlers
+      await server.events.emit('preStart')
 
-    server.use(core.generalErrorHandler)
+      server.use(core.generalErrorHandler)
 
-    await new Promise((res) => {
-      // Start a new server instance
-      server.instance = server.listen(config.port, config.address, async () => {
-        const { address, port } = server.instance.address()
-        server.logger.info(`Server running → ${address}:${port} @ ${config.env}`)
+      await new Promise((res) => {
+        // Start a new server instance
+        server.instance = server.listen(config.port, config.address, async () => {
+          const { address, port } = server.instance.address()
+          server.logger.info(`Server running → ${address}:${port} @ ${config.env}`)
 
-        // Emit "postStart" events
-        await server.events.emit('postStart')
+          // Emit "postStart" events
+          await server.events.emit('postStart')
 
-        res()
+          res()
+        })
       })
-    })
+    } catch (err) {
+      server.logger.error(err)
+    }
   }
 
   /**
    * Stop server
    */
   server.stop = async () => {
-    if (!server.instance) return
-    // Emit "preStop" events
-    await server.events.emit('preStop')
-    // Close server instance
-    server.instance.close()
-    // Emit "postStop" events
-    await server.events.emit('postStop')
-    // Reset server instance
-    server.instance = null
+    try {
+      if (!server.instance) return
+      // Emit "preStop" events
+      await server.events.emit('preStop')
+      // Close server instance
+      server.instance.close()
+      // Emit "postStop" events
+      await server.events.emit('postStop')
+      // Reset server instance
+      server.instance = null
+    } catch (err) {
+      ndtk.assert(false, err)
+    }
   }
 
   return server
