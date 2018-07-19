@@ -18,6 +18,7 @@ describe('Expressio', () => {
     expect(app.jwt).toBeDefined()
     expect(app.logger).toBeDefined()
     expect(app.mailer).toBeDefined()
+    expect(app.events).toBeDefined()
   })
 
   it('given no root path is found or provided, it should throw an error', () => {
@@ -40,8 +41,8 @@ describe('Expressio', () => {
   it('should start the server properly and emit related events', async () => {
     const fn = jest.fn()
     const app = expressio()
-    app.on('preStart', fn)
-    app.on('postStart', fn)
+    app.events.on('preStart', fn)
+    app.events.on('postStart', fn)
 
     expect(app.instance).toBeNull()
     await app.start()
@@ -52,12 +53,12 @@ describe('Expressio', () => {
   it('should stop the server properly and emit related events', async () => {
     const fn = jest.fn()
     const app = expressio()
-    app.on('preStop', fn)
-    app.on('postStop', fn)
+    app.events.on('preStop', fn)
+    app.events.on('postStop', fn)
 
     await app.start()
     expect(app.instance).toBeDefined()
-    app.stop()
+    await app.stop()
     expect(app.instance).toBeNull()
     expect(fn).toHaveBeenCalledTimes(2)
   })

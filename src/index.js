@@ -20,6 +20,7 @@ import logger from '@/logger'
 import mailer from '@/mailer'
 import core from '@/core'
 import jwt from '@/jwt'
+import events from '@/events'
 
 /**
  * Expressio
@@ -52,6 +53,9 @@ export default function expressio(opts) {
   // Expose config object
   server.config = config
 
+  // Expose root path
+  server.root = root
+
   // Define the server environment
   server.set('env', config.env)
 
@@ -72,6 +76,7 @@ export default function expressio(opts) {
   // Add core initializers
   // @TODO Organize iniializers in their own folder (plugins?)
   server.initialize('logger', logger)
+  server.initialize('events', events)
   server.initialize('mailer', mailer)
   server.initialize('jwt', jwt)
 
@@ -92,18 +97,18 @@ export default function expressio(opts) {
     // Emit "preStart" events
     // to possibly register custom
     // error handlers
-    server.emit('preStart')
+    await server.events.emit('preStart')
 
     server.use(core.generalErrorHandler)
 
     await new Promise((res) => {
       // Start a new server instance
-      server.instance = server.listen(config.port, config.address, () => {
+      server.instance = server.listen(config.port, config.address, async () => {
         const { address, port } = server.instance.address()
         server.logger.info(`Server running → ${address}:${port} @ ${config.env}`)
 
         // Emit "postStart" events
-        server.emit('postStart')
+        await server.events.emit('postStart')
 
         res()
       })
@@ -113,14 +118,14 @@ export default function expressio(opts) {
   /**
    * Stop server
    */
-  server.stop = () => {
+  server.stop = async () => {
     if (!server.instance) return
     // Emit "preStop" events
-    server.emit('preStop')
+    await server.events.emit('preStop')
     // Close server instance
     server.instance.close()
     // Emit "postStop" events
-    server.emit('postStop')
+    await server.events.emit('postStop')
     // Reset server instance
     server.instance = null
   }

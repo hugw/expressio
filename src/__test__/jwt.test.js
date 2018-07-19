@@ -20,7 +20,7 @@ describe('Expressio / JWT initializer', () => {
   })
 
   it('should load the initializer and expose an api to the server', () => {
-    const server = { use, on }
+    const server = { use, events: { on } }
     jwt(server, config)
 
     expect(Object.keys(server.jwt)).toEqual(['sign', 'setup'])
@@ -29,7 +29,7 @@ describe('Expressio / JWT initializer', () => {
   })
 
   it('should not load the initializer and expose an api to the server if enabled is set to "false"', () => {
-    const server = { use, on }
+    const server = { use, events: { on } }
     jwt(server, { ...config, enabled: false })
 
     expect(server.jwt).toBeFalsy()

@@ -5,7 +5,7 @@ import Joi from 'joi'
 import core from '@/core'
 import app from './fixtures/core/app'
 
-describe('Expressio / Utils', () => {
+describe('Expressio / Core Initializer', () => {
   describe('#initialize', () => {
     const fn = jest.fn()
 
