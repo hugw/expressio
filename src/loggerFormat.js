@@ -79,7 +79,9 @@ const formatters = {
 
     const { time, size, type } = info.req
 
-    const extras = chalk.gray(`${time}ms / ${size}b / ${type}`)
+    const sizeLabel = size ? `/ ${size}b` : ''
+    const typeLabel = type ? `/ ${type}` : ''
+    const extras = chalk.gray(`${time}ms ${sizeLabel} ${typeLabel}`)
     return { ...info, req: { ...info.req, extras } }
   }),
 
