@@ -115,9 +115,10 @@ export default (server, config) => {
   const dir = getDirs(root, dialect === 'sqlite')
 
   // Setup connection signature
+  const psqlPrefix = connection.indexOf('postgres://') === -1 ? `${dialect}://` : ''
   const conn = dialect === 'sqlite'
     ? `${dialect}:${dir.sqlite}/${connection}`
-    : `${dialect}://${connection}`
+    : `${psqlPrefix}${connection}`
 
   // Create new Sequelize instance
   const sequelize = new Sequelize(conn, {
