@@ -1,6 +1,6 @@
 {
   "name": "expressio",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "description": "",
   "author": "Hugo W. <contact@hugw.io>",
   "main": "./lib/index.js",
