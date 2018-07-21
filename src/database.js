@@ -43,7 +43,7 @@ function getModels(dir, sequelize) {
  *   /migrations
  *   /sqlite
  */
-function getDirs(root) {
+function getDirs(root, isSqlite) {
   const models = path.join(root, 'models')
   const db = path.join(root, 'db')
   const migrations = path.join(db, 'migrations') // eslint-disable-line
@@ -51,7 +51,7 @@ function getDirs(root) {
 
   if (!ndtk.isDir(models)) fs.mkdirSync(models)
   if (!ndtk.isDir(db)) fs.mkdirSync(db)
-  if (!ndtk.isDir(sqlite)) fs.mkdirSync(sqlite)
+  if (!ndtk.isDir(sqlite) && isSqlite) fs.mkdirSync(sqlite)
   if (!ndtk.isDir(migrations)) fs.mkdirSync(migrations)
 
   return {
@@ -96,6 +96,7 @@ const schema = Joi.object({
   enabled: Joi.boolean().required(),
   dialect: Joi.string().trim().valid(['sqlite', 'postgres']).required(),
   connection: Joi.string().required(),
+  ssl: Joi.boolean().required(),
 })
 
 export default (server, config) => {
@@ -103,6 +104,7 @@ export default (server, config) => {
     enabled,
     dialect,
     connection,
+    ssl,
   } = utils.sanitize(config, schema, 'Invalid Database config')
 
   if (!enabled) return
@@ -110,15 +112,18 @@ export default (server, config) => {
   const { logger, root } = server
 
   // Get / Create directories
-  const dir = getDirs(root)
+  const dir = getDirs(root, dialect === 'sqlite')
 
   // Setup connection signature
-  const conn = dialect === 'sqlite' ? `${dir.sqlite}/${connection}` : connection
+  const conn = dialect === 'sqlite'
+    ? `${dialect}:${dir.sqlite}/${connection}`
+    : `${dialect}://${connection}`
 
   // Create new Sequelize instance
-  const sequelize = new Sequelize(`${dialect}:${conn}`, {
+  const sequelize = new Sequelize(conn, {
     operatorsAliases: false,
     logging: msg => msg.indexOf('SequelizeMeta') === -1 && logger.info(msg),
+    dialectOptions: { ssl },
   })
 
   // Setup models

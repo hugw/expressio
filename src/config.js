@@ -67,6 +67,7 @@ export default {
       enabled: false,
       dialect: 'sqlite', // "sqlite" or "postgres",
       connection: 'development.sqlite',
+      ssl: false, // For postgres adapter
     },
   },
 
