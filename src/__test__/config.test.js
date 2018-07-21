@@ -44,6 +44,7 @@ describe('Expressio / Configs', () => {
           enabled: false,
           dialect: 'sqlite',
           connection: 'development.sqlite',
+          ssl: false,
         },
       },
       test: {

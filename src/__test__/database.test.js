@@ -11,6 +11,7 @@ describe('Expressio / Database Initializer', () => {
     enabled: true,
     dialect: 'sqlite',
     connection: 'development.sqlite',
+    ssl: false,
   }
 
   const extras = {
@@ -52,6 +53,11 @@ describe('Expressio / Database Initializer', () => {
   it('given no "enabled" config, it should throw an error with proper message', () => {
     const fn = () => database({}, { ...config, enabled: undefined })
     expect(fn).toThrow('Invalid Database config: "enabled" is required')
+  })
+
+  it('given no "ssl" config, it should throw an error with proper message', () => {
+    const fn = () => database({}, { ...config, ssl: undefined })
+    expect(fn).toThrow('Invalid Database config: "ssl" is required')
   })
 
   it('given no "dialect" config, it should throw an error with proper message', () => {
