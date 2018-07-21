@@ -195,10 +195,11 @@ export default (server, config) => {
   /**
    * Run
    */
-  const run = (cmd) => {
+  const run = async (cmd) => {
     const tasks = { seed, reset, truncate }
-    if (['up', 'down', 'prev', 'next'].includes(cmd)) migrate.run(cmd)
-    if (['seed', 'reset', 'truncate'].includes(cmd)) tasks[cmd]()
+    if (['up', 'down', 'prev', 'next'].includes(cmd)) await migrate.run(cmd)
+    if (['seed', 'reset', 'truncate'].includes(cmd)) await tasks[cmd]()
+    process.exit(0)
   }
 
   // Expose Database Api to the server object
