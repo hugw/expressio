@@ -121,7 +121,11 @@ const formatters = {
       response,
     } = info.req
 
-    const message = `${method} ${path}  ${status}  ${extras} ${payload} ${response}`
+    const { env } = info.options
+
+    const message = env !== 'production'
+      ? `${method} ${path}  ${status}  ${extras} ${payload} ${response}`
+      : `${method} ${path}  ${status}  ${extras}`
 
     return { ...info, message }
   }),

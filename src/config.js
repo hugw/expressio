@@ -84,7 +84,6 @@ export default {
   // Production environment
   production: {
     logger: {
-      level: 'error',
       prettify: false,
     },
     database: {
