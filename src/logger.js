@@ -34,7 +34,7 @@ export default (server, config) => {
 
   logger.level = level
   logger.silent = silent
-  logger.options = { prettify }
+  logger.options = { prettify, env: server.env }
 
   // Expose Logger API to the server object
   server.logger = logger

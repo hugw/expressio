@@ -214,7 +214,7 @@ describe('Expressio / Core Initializer', () => {
     it('given an http error object, it should send the proper status code and error output', () => {
       const error = ndtk.httpError(404)
       core.generalErrorHandler(error, req, res)
-      expect(logError).toHaveBeenCalled()
+      expect(logError).not.toHaveBeenCalled()
       expect(status).toHaveBeenCalledWith(404)
       expect(json).toHaveBeenCalledWith(error.output)
     })

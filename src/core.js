@@ -86,8 +86,8 @@ const generalErrorHandler = (err, req, res, next) => { // eslint-disable-line
   // For the purpose of logging at least a message
   err.message = err.message || 'Something bad happened'
 
-  req.logger.error(err)
   const { output } = err.isHttp ? err : ndtk.httpError()
+  if (output.status >= 500) req.logger.error(err)
 
   res.status(output.status)
   res.json({ ...output })
