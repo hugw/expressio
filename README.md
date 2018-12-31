@@ -5,7 +5,7 @@
 ## Install
 
 ```
-$ npm install ndtk
+$ npm install expressio
 ```
 
 ## How to use
