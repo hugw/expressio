@@ -12,8 +12,6 @@
     "dev": "nodemon -w ./src --inspect --exec \"babel-node ./src\"",
     "dev:jwt": "nodemon -w ./src --inspect --exec \"babel-node ./src/__test__/fixtures/jwt\"",
     "dev:core": "nodemon -w ./src --inspect --exec \"babel-node ./src/__test__/fixtures/core\"",
-    "dev:database": "nodemon -w ./src --inspect --exec \"babel-node ./src/__test__/fixtures/database\"",
-    "dev:database:tasks": "babel-node ./src/__test__/fixtures/database/db/tasks",
     "lint": "eslint ./src",
     "prepublishOnly": "npm run lint && npm run test && npm run clean && npm run build",
     "test": "jest ./src --verbose --colors --detectOpenHandles  --forceExit",
@@ -32,11 +30,6 @@
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.10",
     "ndtk": "^0.7.1",
-    "pg": "^7.4.3",
-    "pg-hstore": "^2.3.2",
-    "sequelize": "^4.38.0",
-    "sqlite3": "^4.0.2",
-    "umzug": "^2.1.0",
     "winston": "^3.0.0"
   },
   "devDependencies": {

@@ -45,14 +45,6 @@ export default {
       algorithm: 'HS256',
       secret: process.env.SECRET || 'cAQk{m04|:b&MCkD2T0S3C!Da$dko7{EN/gtoH{UO:EM`zdGc-~O>U@$yhz.UDA',
     },
-
-    // Sequelize adapter
-    database: {
-      enabled: false,
-      dialect: 'sqlite', // "sqlite" or "postgres",
-      connection: 'development.sqlite',
-      ssl: false, // For postgres adapter
-    },
   },
 
   // Test environment
@@ -61,18 +53,12 @@ export default {
     logger: {
       silent: true,
     },
-    database: {
-      connection: 'test.sqlite',
-    },
   },
 
   // Production environment
   production: {
     logger: {
       prettify: false,
-    },
-    database: {
-      connection: 'production.sqlite',
     },
   },
 }

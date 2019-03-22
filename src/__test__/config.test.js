@@ -26,28 +26,16 @@ describe('Expressio / Configs', () => {
           algorithm: 'HS256',
           secret: process.env.SECRET || 'cAQk{m04|:b&MCkD2T0S3C!Da$dko7{EN/gtoH{UO:EM`zdGc-~O>U@$yhz.UDA',
         },
-        database: {
-          enabled: false,
-          dialect: 'sqlite',
-          connection: 'development.sqlite',
-          ssl: false,
-        },
       },
       test: {
         port: null,
         logger: {
           silent: true,
         },
-        database: {
-          connection: 'test.sqlite',
-        },
       },
       production: {
         logger: {
           prettify: false,
-        },
-        database: {
-          connection: 'production.sqlite',
         },
       },
     })

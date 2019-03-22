@@ -5,5 +5,4 @@ dist
 lib
 tmp
 *.env
-*.sqlite
 *.DS_Store

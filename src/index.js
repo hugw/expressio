@@ -20,7 +20,6 @@ import logger from '@/logger'
 import core from '@/core'
 import jwt from '@/jwt'
 import events from '@/events'
-import database from '@/database'
 
 /**
  * Expressio
@@ -78,7 +77,6 @@ export default function expressio(opts) {
   server.initialize('logger', logger)
   server.initialize('events', events)
   server.initialize('jwt', jwt)
-  server.initialize('database', database)
 
   // Set server instance
   // initial value
