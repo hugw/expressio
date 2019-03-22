@@ -26,20 +26,6 @@ describe('Expressio / Configs', () => {
           algorithm: 'HS256',
           secret: process.env.SECRET || 'cAQk{m04|:b&MCkD2T0S3C!Da$dko7{EN/gtoH{UO:EM`zdGc-~O>U@$yhz.UDA',
         },
-        mailer: {
-          enabled: true,
-          transport: {
-            host: 'smtp.ethereal.email',
-            port: 587,
-            auth: {
-              user: 'yrrp5yl7ssz4dohq@ethereal.email',
-              pass: 'pFG8jc3HS2RdbAUvbv',
-            },
-          },
-          defaults: {
-            from: '"Expressio App" <expressio@domain.com>',
-          },
-        },
         database: {
           enabled: false,
           dialect: 'sqlite',

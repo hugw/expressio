@@ -17,7 +17,6 @@ describe('Expressio', () => {
     expect(app.initialize).toBeDefined()
     expect(app.jwt).toBeDefined()
     expect(app.logger).toBeDefined()
-    expect(app.mailer).toBeDefined()
     expect(app.events).toBeDefined()
   })
 

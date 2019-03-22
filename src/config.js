@@ -46,22 +46,6 @@ export default {
       secret: process.env.SECRET || 'cAQk{m04|:b&MCkD2T0S3C!Da$dko7{EN/gtoH{UO:EM`zdGc-~O>U@$yhz.UDA',
     },
 
-    // Mailer
-    mailer: {
-      enabled: true,
-      transport: {
-        host: 'smtp.ethereal.email',
-        port: 587,
-        auth: {
-          user: 'yrrp5yl7ssz4dohq@ethereal.email',
-          pass: 'pFG8jc3HS2RdbAUvbv',
-        },
-      },
-      defaults: {
-        from: '"Expressio App" <expressio@domain.com>',
-      },
-    },
-
     // Sequelize adapter
     database: {
       enabled: false,

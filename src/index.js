@@ -17,7 +17,6 @@ import dotenv from 'dotenv'
 
 import utils from '@/utils'
 import logger from '@/logger'
-import mailer from '@/mailer'
 import core from '@/core'
 import jwt from '@/jwt'
 import events from '@/events'
@@ -78,7 +77,6 @@ export default function expressio(opts) {
   // Add core initializers
   server.initialize('logger', logger)
   server.initialize('events', events)
-  server.initialize('mailer', mailer)
   server.initialize('jwt', jwt)
   server.initialize('database', database)
 
