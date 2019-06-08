@@ -7,7 +7,7 @@ describe('Expressio / Configs', () => {
         app: {},
         address: '127.0.0.1',
         port: '4000',
-        engine: 8.11,
+        engine: 10.16,
         env: 'test',
         cors: {
           origin: '*',
@@ -19,12 +19,6 @@ describe('Expressio / Configs', () => {
           silent: false,
           level: 'info',
           prettify: true,
-        },
-        jwt: {
-          enabled: true,
-          expiresIn: '7d',
-          algorithm: 'HS256',
-          secret: process.env.SECRET || 'cAQk{m04|:b&MCkD2T0S3C!Da$dko7{EN/gtoH{UO:EM`zdGc-~O>U@$yhz.UDA',
         },
       },
       test: {

@@ -15,7 +15,6 @@ describe('Expressio', () => {
     expect(app.stop).toBeDefined()
     expect(app.config).toBeDefined()
     expect(app.initialize).toBeDefined()
-    expect(app.jwt).toBeDefined()
     expect(app.logger).toBeDefined()
     expect(app.events).toBeDefined()
   })

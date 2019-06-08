@@ -10,7 +10,6 @@
     "build": "babel ./src --ignore '__test__' -s -D -d lib",
     "clean": "rimraf lib",
     "dev": "nodemon -w ./src --inspect --exec \"babel-node ./src\"",
-    "dev:jwt": "nodemon -w ./src --inspect --exec \"babel-node ./src/__test__/fixtures/jwt\"",
     "dev:core": "nodemon -w ./src --inspect --exec \"babel-node ./src/__test__/fixtures/core\"",
     "lint": "eslint ./src",
     "prepublishOnly": "npm run lint && npm run test && npm run clean && npm run build",
@@ -24,10 +23,8 @@
     "cors": "^2.8.4",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
-    "express-jwt": "^5.3.1",
     "helmet": "^3.12.1",
     "joi": "^13.4.0",
-    "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.10",
     "ndtk": "^0.7.1",
     "winston": "^3.0.0"

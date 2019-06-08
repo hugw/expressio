@@ -18,7 +18,6 @@ import dotenv from 'dotenv'
 import utils from '@/utils'
 import logger from '@/logger'
 import core from '@/core'
-import jwt from '@/jwt'
 import events from '@/events'
 
 /**
@@ -76,7 +75,6 @@ export default function expressio(opts) {
   // Add core initializers
   server.initialize('logger', logger)
   server.initialize('events', events)
-  server.initialize('jwt', jwt)
 
   // Set server instance
   // initial value
