@@ -91,10 +91,10 @@ export default function expressio(opts) {
       // are handled properly
       server.use(core.notFoundHandler)
 
-      // Emit "preStart" events
+      // Emit "beforeStart" events
       // to possibly register custom
       // error handlers
-      await server.events.emit('preStart')
+      await server.events.emit('beforeStart')
 
       server.use(core.generalErrorHandler)
 
@@ -104,8 +104,8 @@ export default function expressio(opts) {
           const { address, port } = server.instance.address()
           server.logger.info(`Server running → ${address}:${port} @ ${config.env}`)
 
-          // Emit "postStart" events
-          await server.events.emit('postStart')
+          // Emit "afterStart" events
+          await server.events.emit('afterStart')
 
           res()
         })
@@ -121,12 +121,12 @@ export default function expressio(opts) {
   server.stop = async () => {
     try {
       if (!server.instance) return
-      // Emit "preStop" events
-      await server.events.emit('preStop')
+      // Emit "beforeStop" events
+      await server.events.emit('beforeStop')
       // Close server instance
       server.instance.close()
-      // Emit "postStop" events
-      await server.events.emit('postStop')
+      // Emit "afterStop" events
+      await server.events.emit('afterStop')
       // Reset server instance
       server.instance = null
     } catch (err) {

@@ -29,6 +29,7 @@ describe('Expressio / Configs', () => {
       },
       production: {
         logger: {
+          level: 'error',
           prettify: false,
         },
       },

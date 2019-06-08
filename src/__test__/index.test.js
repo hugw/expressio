@@ -39,8 +39,8 @@ describe('Expressio', () => {
   it('should start the server properly and emit related events', async () => {
     const fn = jest.fn()
     const app = expressio()
-    app.events.on('preStart', fn)
-    app.events.on('postStart', fn)
+    app.events.on('beforeStart', fn)
+    app.events.on('afterStart', fn)
 
     expect(app.instance).toBeNull()
     await app.start()
@@ -51,8 +51,8 @@ describe('Expressio', () => {
   it('should stop the server properly and emit related events', async () => {
     const fn = jest.fn()
     const app = expressio()
-    app.events.on('preStop', fn)
-    app.events.on('postStop', fn)
+    app.events.on('beforeStop', fn)
+    app.events.on('afterStop', fn)
 
     await app.start()
     expect(app.instance).toBeDefined()
