@@ -1,13 +1,13 @@
 {
   "presets": [
-    ["env", {
+    ["@babel/preset-env", {
       "targets": {
         "node": "10"
       }
     }]
   ],
   "plugins": [
-    "transform-object-rest-spread",
+    "@babel/plugin-proposal-object-rest-spread",
     ["module-resolver", {
       "alias": {
         "@": "./src"
