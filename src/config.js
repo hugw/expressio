@@ -18,7 +18,7 @@ export default {
     port: process.env.PORT || '4000',
 
     // Required Node version
-    engine: 8.11,
+    engine: 10.16,
 
     // Current environment
     env: ENV,

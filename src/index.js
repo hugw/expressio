@@ -29,7 +29,7 @@ export default function expressio(opts) {
   const defaults = ndtk.merge({ root: null }, opts)
 
   // Attempt to get the current caller
-  // directly if none is provided and use that as the root
+  // directly, if none is provided, and use that as the root
   // of the application to force an opinated folder structure
   const root = defaults.root || ndtk.ccd()
   ndtk.assert(root && ndtk.isDir(root), 'Application root path is invalid.')
