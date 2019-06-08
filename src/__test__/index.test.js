@@ -26,7 +26,7 @@ describe('Expressio', () => {
   })
 
   it('given unmet node version, it should throw an error', () => {
-    const spy = jest.spyOn(ndtk, 'config').mockImplementation(() => ({ engine: 9.10 }))
+    const spy = jest.spyOn(ndtk, 'config').mockImplementation(() => ({ engine: 20.0 }))
     expect(() => expressio()).toThrowError('Current Node version is not supported.')
     spy.mockRestore()
   })

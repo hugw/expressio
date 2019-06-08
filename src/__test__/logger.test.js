@@ -17,7 +17,11 @@ describe('Expressio / Logger Initializer', () => {
     const server = { use }
     logger(server, config)
 
-    expect(Object.keys(server.logger)).toEqual(expect.arrayContaining(['error', 'info', 'warn', 'debug']))
+    expect(server.logger.level).toEqual(config.level)
+    expect(server.logger.error).toBeDefined()
+    expect(server.logger.info).toBeDefined()
+    expect(server.logger.warn).toBeDefined()
+    expect(server.logger.debug).toBeDefined()
     expect(use).toHaveBeenCalledTimes(2)
   })
 
