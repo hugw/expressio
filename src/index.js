@@ -14,6 +14,7 @@ import compress from 'compression'
 import ndtk from 'ndtk'
 import path from 'path'
 import dotenv from 'dotenv'
+import isString from 'lodash/isString'
 
 import utils from '@/utils'
 import logger from '@/logger'
@@ -25,7 +26,7 @@ import events from '@/events'
  */
 export default function expressio(opts) {
   // Load default options if provided
-  const defaults = ndtk.merge({ root: null }, opts)
+  const defaults = ndtk.merge({ root: null, name: null }, opts)
 
   // Attempt to get the current caller
   // directly, if none is provided, and use that as the root
@@ -57,6 +58,11 @@ export default function expressio(opts) {
   // Expose root path
   server.root = root
 
+  // Set other defaults
+  server.parentApp = null
+  server.subApps = {}
+  server.isMounted = false
+
   // Define the server environment
   server.set('env', config.core.env)
   server.env = config.core.env
@@ -75,7 +81,7 @@ export default function expressio(opts) {
   server.use(helmet())
   server.use(cors(config.core.cors))
 
-  // Add core initializers
+  // Load core initializers
   server.initialize('logger', logger)
   server.initialize('events', events)
 
@@ -86,9 +92,35 @@ export default function expressio(opts) {
   // Expose App settings
   server.settings = settings
 
-  server.use((req, res, next) => {
-    req.settings = settings
-    next()
+  /**
+   * Mount event
+   */
+  server.on('mount', (parent) => {
+    const { name } = defaults
+
+    // Mounted app requires a name
+    // to scope settings/fns/configs...
+    ndtk.assert(isString(name) && name.length !== 0, 'Mounted sub apps requires a name.')
+
+    // Check if current name is already in use
+    ndtk.assert(!parent.subApps[name], `Module name "${name}" is already in use.`)
+
+    // Flag the current server as mounted
+    // if installed as a sub app
+    server.isMounted = true
+
+    // Any parent logger configuration
+    // takes place over sub apps setups
+    server.logger = parent.logger
+
+    // Expose references
+    server.parentApp = parent
+    parent.subApps = {
+      ...parent.subApps,
+      [name]: server,
+    }
+
+    server.logger.info(`Sub App "${name}" mounted`)
   })
 
   /**
@@ -98,8 +130,6 @@ export default function expressio(opts) {
     if (server.instance) return
 
     try {
-      // Ensure not found routes
-      // are handled properly
       server.use(core.notFoundHandler)
 
       // Emit "beforeStart" events
@@ -154,11 +184,14 @@ export default function expressio(opts) {
  * functions
  */
 const router = express.Router
-const { httpError } = ndtk
+const { httpError, assert } = ndtk
 const { validate } = core
+const { sanitize } = utils
 
 export {
   router,
   httpError,
   validate,
+  assert,
+  sanitize,
 }

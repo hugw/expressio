@@ -195,7 +195,7 @@ describe('Expressio / Core Initializer', () => {
     const logError = jest.fn()
 
     const res = { status, json }
-    const req = { logger: { error: logError } }
+    const req = { app: { logger: { error: logError } } }
 
     afterEach(() => {
       status.mockClear()
@@ -268,14 +268,10 @@ describe('Expressio / Core Demo', () => {
     })
   })
 
-  it('(GET /settings) should get an env based settings object', async () => {
-    const response = await request(app).get('/settings')
+  it('(GET /sub-app) should get a mounted sub app route', async () => {
+    const response = await request(app).get('/sub-app')
 
     expect(response.status).toBe(200)
-    expect(response.body).toEqual({
-      appName: 'My Test App',
-      appDescription: 'My Test App Description',
-      appVersion: '1.0.0',
-    })
+    expect(response.body).toEqual({})
   })
 })

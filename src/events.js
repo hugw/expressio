@@ -1,5 +1,5 @@
 /**
- * Events
+ * Async Events
  *
  * @copyright Copyright (c) 2018, hugw.io
  * @author Hugo W - contact@hugw.io
@@ -31,7 +31,12 @@ export default (server) => {
     ndtk.assert(isString(event) && event.length !== 0, 'Events error: event is not a string')
 
     const events = stack[event] || []
-    return Promise.all(events.map(fn => fn(server, ...args)))
+
+    // Propagate to sub app events
+    const { subApps } = server
+    const otherEvents = Object.values(subApps).map(app => app.events.emit(event, ...args))
+
+    return Promise.all([...events.map(fn => fn(server, ...args)), ...otherEvents])
   }
 
   // Expose Events Api to the server object

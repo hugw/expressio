@@ -81,11 +81,13 @@ const controller = (resource) => {
  * and return an http error object
  */
 const generalErrorHandler = (err, req, res, next) => { // eslint-disable-line
+  const { logger } = req.app
+
   // For the purpose of logging at least a message
   err.message = err.message || 'Something bad happened'
 
   const { output } = err.isHttp ? err : ndtk.httpError()
-  if (output.status >= 500) req.logger.error(err)
+  if (output.status >= 500) logger.error(err)
 
   res.status(output.status)
   res.json({ ...output })

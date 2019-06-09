@@ -29,7 +29,7 @@ describe('Expressio / Logger Initializer', () => {
     expect(server.logger.info).toBeDefined()
     expect(server.logger.warn).toBeDefined()
     expect(server.logger.debug).toBeDefined()
-    expect(use).toHaveBeenCalledTimes(2)
+    expect(use).toHaveBeenCalledTimes(1)
   })
 
   it('given no "silent" config, it should throw an error with proper message', () => {
