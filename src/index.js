@@ -14,25 +14,23 @@ import compress from 'compression'
 import ndtk from 'ndtk'
 import path from 'path'
 import dotenv from 'dotenv'
+import isString from 'lodash/isString'
 
 import utils from '@/utils'
 import logger from '@/logger'
-import mailer from '@/mailer'
 import core from '@/core'
-import jwt from '@/jwt'
 import events from '@/events'
-import database from '@/database'
 
 /**
  * Expressio
  */
 export default function expressio(opts) {
   // Load default options if provided
-  const defaults = ndtk.merge({ root: null }, opts)
+  const defaults = ndtk.merge({ root: null, name: null }, opts)
 
   // Attempt to get the current caller
-  // directly if none is provided and use that as the root
-  // of the application to force an opinated folder structure
+  // directly, if none is provided, and use that as the root
+  // of the application to enforce an opinated folder structure.
   const root = defaults.root || ndtk.ccd()
   ndtk.assert(root && ndtk.isDir(root), 'Application root path is invalid.')
 
@@ -42,8 +40,11 @@ export default function expressio(opts) {
   // Load config variables
   const config = utils.config(`${root}/config`, './config')
 
+  // Load settings variables
+  const settings = utils.config(`${root}/settings`)
+
   // Ensure the current Node version installed is supported
-  ndtk.assert(ndtk.supported(config.engine), 'Current Node version is not supported.')
+  ndtk.assert(ndtk.supported(config.core.engine), 'Current Node version is not supported.')
 
   // Create a new Express server instance
   const server = express()
@@ -57,9 +58,14 @@ export default function expressio(opts) {
   // Expose root path
   server.root = root
 
+  // Set other defaults
+  server.parentApp = null
+  server.subApps = {}
+  server.isMounted = false
+
   // Define the server environment
-  server.set('env', config.env)
-  server.env = config.env
+  server.set('env', config.core.env)
+  server.env = config.core.env
 
   // Parse incoming requests
   // to JSON format
@@ -73,18 +79,49 @@ export default function expressio(opts) {
   // Security
   // (CORS & HTTP Headers)
   server.use(helmet())
-  server.use(cors(config.cors))
+  server.use(cors(config.core.cors))
 
-  // Add core initializers
+  // Load core initializers
   server.initialize('logger', logger)
   server.initialize('events', events)
-  server.initialize('mailer', mailer)
-  server.initialize('jwt', jwt)
-  server.initialize('database', database)
 
   // Set server instance
   // initial value
   server.instance = null
+
+  // Expose App settings
+  server.settings = settings
+
+  /**
+   * Mount event
+   */
+  server.on('mount', (parent) => {
+    const { name } = defaults
+
+    // Mounted app requires a name
+    // to scope settings/fns/configs...
+    ndtk.assert(isString(name) && name.length !== 0, 'Mounted sub apps requires a name.')
+
+    // Check if current name is already in use
+    ndtk.assert(!parent.subApps[name], `Module name "${name}" is already in use.`)
+
+    // Flag the current server as mounted
+    // if installed as a sub app
+    server.isMounted = true
+
+    // Any parent logger configuration
+    // takes place over sub apps setups
+    server.logger = parent.logger
+
+    // Expose references
+    server.parentApp = parent
+    parent.subApps = {
+      ...parent.subApps,
+      [name]: server,
+    }
+
+    server.logger.info(`Sub App "${name}" mounted`)
+  })
 
   /**
    * Start server
@@ -93,25 +130,23 @@ export default function expressio(opts) {
     if (server.instance) return
 
     try {
-      // Ensure not found routes
-      // are handled properly
       server.use(core.notFoundHandler)
 
-      // Emit "preStart" events
+      // Emit "beforeStart" events
       // to possibly register custom
       // error handlers
-      await server.events.emit('preStart')
+      await server.events.emit('beforeStart')
 
       server.use(core.generalErrorHandler)
 
       await new Promise((res) => {
         // Start a new server instance
-        server.instance = server.listen(config.port, config.address, async () => {
+        server.instance = server.listen(config.core.port, config.core.address, async () => {
           const { address, port } = server.instance.address()
-          server.logger.info(`Server running → ${address}:${port} @ ${config.env}`)
+          server.logger.info(`Server running → ${address}:${port} @ ${server.env}`)
 
-          // Emit "postStart" events
-          await server.events.emit('postStart')
+          // Emit "afterStart" events
+          await server.events.emit('afterStart')
 
           res()
         })
@@ -127,12 +162,12 @@ export default function expressio(opts) {
   server.stop = async () => {
     try {
       if (!server.instance) return
-      // Emit "preStop" events
-      await server.events.emit('preStop')
+      // Emit "beforeStop" events
+      await server.events.emit('beforeStop')
       // Close server instance
       server.instance.close()
-      // Emit "postStop" events
-      await server.events.emit('postStop')
+      // Emit "afterStop" events
+      await server.events.emit('afterStop')
       // Reset server instance
       server.instance = null
     } catch (err) {
@@ -149,11 +184,14 @@ export default function expressio(opts) {
  * functions
  */
 const router = express.Router
-const { httpError } = ndtk
+const { httpError, assert } = ndtk
 const { validate } = core
+const { sanitize } = utils
 
 export {
   router,
   httpError,
   validate,
+  assert,
+  sanitize,
 }

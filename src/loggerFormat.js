@@ -131,25 +131,6 @@ const formatters = {
 
     return { ...info, message }
   }),
-
-  // Mailer
-  mailer: format((info) => {
-    if (!info.mailer) return info
-
-    const { prettify } = info.options
-    const opts = { colors: true, compact: false, ...(!prettify ? { breakLength: Infinity } : {}) }
-
-    // Update inspect colors
-    util.inspect.styles.string = 'white'
-
-    const header = 'Email sent'
-    const response = chalk.gray(`Response → ${util.inspect(info.mailer.response, opts)}`)
-    const debug = chalk.gray(`Debug URL → ${util.inspect(info.mailer.debug, opts)}`)
-    return {
-      ...info,
-      message: `${header} \n ${response} \n ${debug}`,
-    }
-  }),
 }
 
 export default format.combine(
@@ -162,9 +143,6 @@ export default format.combine(
   formatters.reqExtras(),
   formatters.reqBody(),
   formatters.req(),
-
-  // Mailer
-  formatters.mailer(),
 
   // Print message
   format.printf(info => `${info.timestamp} ${info.level} ${info.message}`),

@@ -13,7 +13,7 @@ import format from '@/loggerFormat'
 import utils from '@/utils'
 
 // Setup Winston logger instance
-const logger = createLogger({ level: 'info', format, transports: [new transports.Console()] })
+const createdLogger = createLogger({ level: 'info', format, transports: [new transports.Console()] })
 
 /**
  * Object schemas
@@ -25,61 +25,62 @@ const schema = Joi.object({
   prettify: Joi.boolean().required(),
 })
 
-export default (server, config) => {
+export default (server) => {
+  const { config } = server
+
   const {
     level,
     silent,
     prettify,
-  } = utils.sanitize(config, schema, 'Invalid Logger config')
+  } = utils.sanitize(config.core.logger, schema, 'Invalid Logger config')
 
-  logger.level = level
-  logger.silent = silent
-  logger.options = { prettify, env: server.env }
+  createdLogger.level = level
+  createdLogger.silent = silent
+  createdLogger.options = { prettify, env: server.env }
 
   // Expose Logger API to the server object
-  server.logger = logger
-
-  // Expose Logger API to the request object
-  server.use((req, res, next) => {
-    req.logger = logger
-    next()
-  })
+  server.logger = createdLogger
 
   // Log request/response info
   server.use((req, res, next) => {
-    const startTime = new Date()
+    const { logger, isMounted } = req.app
 
-    const { end } = res
-    res.end = (chunk, encoding) => {
-      res.end = end
-      res.end(chunk, encoding)
+    // Skip sub apps logs
+    if (!isMounted) {
+      const startTime = new Date()
 
-      const { method } = req
-      const payload = req.body
-      const path = req.originalUrl || req.url
-      const time = new Date() - startTime
-      const status = res.statusCode
-      const size = res._headers['content-length'] // eslint-disable-line
-      const type = res._headers['content-type'] // eslint-disable-line
-      const body = chunk
+      const { end } = res
+      res.end = (chunk, encoding) => {
+        res.end = end
+        res.end(chunk, encoding)
 
-      let logLevel = logger.info
-      if (status >= 400) logLevel = logger.warn
-      if (status >= 500) logLevel = logger.error
+        const { method } = req
+        const payload = req.body
+        const path = req.originalUrl || req.url
+        const time = new Date() - startTime
+        const status = res.statusCode
+        const size = res._headers['content-length'] // eslint-disable-line
+        const type = res._headers['content-type'] // eslint-disable-line
+        const body = chunk
 
-      logLevel(null, {
-        req: {
-          method,
-          path,
-          status,
-          time,
-          size,
-          type,
-          payload,
-          response: body,
-        },
-        options: req.logger.options,
-      })
+        let logLevel = logger.info
+        if (status >= 400) logLevel = logger.warn
+        if (status >= 500) logLevel = logger.error
+
+        logLevel(null, {
+          req: {
+            method,
+            path,
+            status,
+            time,
+            size,
+            type,
+            payload,
+            response: body,
+          },
+          options: logger.options,
+        })
+      }
     }
 
     next()

@@ -14,20 +14,12 @@ describe('Expressio / Core Initializer', () => {
     })
 
     const server = {
-      config: {
-        test: { enabled: true },
-      },
       initialize: core.initialize,
     }
 
     it('should load the initializer with proper params', () => {
       server.initialize('test', fn)
-      expect(fn).toHaveBeenCalledWith(server, { enabled: true })
-    })
-
-    it('given a server with invalid configs, it should load the initializer with an empty object as config', () => {
-      server.initialize('misc', fn)
-      expect(fn).toHaveBeenCalledWith(server, {})
+      expect(fn).toHaveBeenCalledWith(server)
     })
 
     it('given an initializer with invalid name, it should throw an error with proper message', () => {
@@ -203,7 +195,7 @@ describe('Expressio / Core Initializer', () => {
     const logError = jest.fn()
 
     const res = { status, json }
-    const req = { logger: { error: logError } }
+    const req = { app: { logger: { error: logError } } }
 
     afterEach(() => {
       status.mockClear()
@@ -274,5 +266,12 @@ describe('Expressio / Core Demo', () => {
       status: 400,
       type: 'BAD_REQUEST',
     })
+  })
+
+  it('(GET /sub-app) should get a mounted sub app route', async () => {
+    const response = await request(app).get('/sub-app')
+
+    expect(response.status).toBe(200)
+    expect(response.body).toEqual({})
   })
 })
