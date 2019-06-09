@@ -17,6 +17,8 @@ describe('Expressio', () => {
     expect(app.initialize).toBeDefined()
     expect(app.logger).toBeDefined()
     expect(app.events).toBeDefined()
+    expect(app.env).toBeDefined()
+    expect(app.settings).toBeDefined()
   })
 
   it('given no root path is found or provided, it should throw an error', () => {
@@ -26,7 +28,7 @@ describe('Expressio', () => {
   })
 
   it('given unmet node version, it should throw an error', () => {
-    const spy = jest.spyOn(ndtk, 'config').mockImplementation(() => ({ engine: 20.0 }))
+    const spy = jest.spyOn(ndtk, 'config').mockImplementation(() => ({ core: { engine: 20.0 } }))
     expect(() => expressio()).toThrowError('Current Node version is not supported.')
     spy.mockRestore()
   })

@@ -21,9 +21,7 @@ function initialize(name, fn) {
   ndtk.assert(isString(name) && name.length !== 0, 'Initialize error: name is not a string')
   ndtk.assert(isFunction(fn), `Initialize error: "${name}" has not a valid function`)
 
-  // If no valid config is found, then return
-  // an empty object as the second arg
-  fn(server, server.config[name] || {})
+  fn(server)
 }
 
 /**

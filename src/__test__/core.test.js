@@ -14,20 +14,12 @@ describe('Expressio / Core Initializer', () => {
     })
 
     const server = {
-      config: {
-        test: { enabled: true },
-      },
       initialize: core.initialize,
     }
 
     it('should load the initializer with proper params', () => {
       server.initialize('test', fn)
-      expect(fn).toHaveBeenCalledWith(server, { enabled: true })
-    })
-
-    it('given a server with invalid configs, it should load the initializer with an empty object as config', () => {
-      server.initialize('misc', fn)
-      expect(fn).toHaveBeenCalledWith(server, {})
+      expect(fn).toHaveBeenCalledWith(server)
     })
 
     it('given an initializer with invalid name, it should throw an error with proper message', () => {
@@ -273,6 +265,17 @@ describe('Expressio / Core Demo', () => {
       message: 'Ops from async route',
       status: 400,
       type: 'BAD_REQUEST',
+    })
+  })
+
+  it('(GET /settings) should get an env based settings object', async () => {
+    const response = await request(app).get('/settings')
+
+    expect(response.status).toBe(200)
+    expect(response.body).toEqual({
+      appName: 'My Test App',
+      appDescription: 'My Test App Description',
+      appVersion: '1.0.0',
     })
   })
 })

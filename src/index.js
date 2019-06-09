@@ -29,7 +29,7 @@ export default function expressio(opts) {
 
   // Attempt to get the current caller
   // directly, if none is provided, and use that as the root
-  // of the application to force an opinated folder structure
+  // of the application to enforce an opinated folder structure.
   const root = defaults.root || ndtk.ccd()
   ndtk.assert(root && ndtk.isDir(root), 'Application root path is invalid.')
 
@@ -39,8 +39,11 @@ export default function expressio(opts) {
   // Load config variables
   const config = utils.config(`${root}/config`, './config')
 
+  // Load settings variables
+  const settings = utils.config(`${root}/settings`)
+
   // Ensure the current Node version installed is supported
-  ndtk.assert(ndtk.supported(config.engine), 'Current Node version is not supported.')
+  ndtk.assert(ndtk.supported(config.core.engine), 'Current Node version is not supported.')
 
   // Create a new Express server instance
   const server = express()
@@ -55,8 +58,8 @@ export default function expressio(opts) {
   server.root = root
 
   // Define the server environment
-  server.set('env', config.env)
-  server.env = config.env
+  server.set('env', config.core.env)
+  server.env = config.core.env
 
   // Parse incoming requests
   // to JSON format
@@ -70,7 +73,7 @@ export default function expressio(opts) {
   // Security
   // (CORS & HTTP Headers)
   server.use(helmet())
-  server.use(cors(config.cors))
+  server.use(cors(config.core.cors))
 
   // Add core initializers
   server.initialize('logger', logger)
@@ -79,6 +82,14 @@ export default function expressio(opts) {
   // Set server instance
   // initial value
   server.instance = null
+
+  // Expose App settings
+  server.settings = settings
+
+  server.use((req, res, next) => {
+    req.settings = settings
+    next()
+  })
 
   /**
    * Start server
@@ -100,9 +111,9 @@ export default function expressio(opts) {
 
       await new Promise((res) => {
         // Start a new server instance
-        server.instance = server.listen(config.port, config.address, async () => {
+        server.instance = server.listen(config.core.port, config.core.address, async () => {
           const { address, port } = server.instance.address()
-          server.logger.info(`Server running → ${address}:${port} @ ${config.env}`)
+          server.logger.info(`Server running → ${address}:${port} @ ${server.env}`)
 
           // Emit "afterStart" events
           await server.events.emit('afterStart')

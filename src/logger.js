@@ -25,12 +25,14 @@ const schema = Joi.object({
   prettify: Joi.boolean().required(),
 })
 
-export default (server, config) => {
+export default (server) => {
+  const { config } = server
+
   const {
     level,
     silent,
     prettify,
-  } = utils.sanitize(config, schema, 'Invalid Logger config')
+  } = utils.sanitize(config.core.logger, schema, 'Invalid Logger config')
 
   logger.level = level
   logger.silent = silent
