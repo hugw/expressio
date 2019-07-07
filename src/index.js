@@ -40,9 +40,6 @@ export default function expressio(opts) {
   // Load config variables
   const config = utils.config(`${root}/config`, './config')
 
-  // Load settings variables
-  const settings = utils.config(`${root}/settings`)
-
   // Ensure the current Node version installed is supported
   ndtk.assert(ndtk.supported(config.core.engine), 'Current Node version is not supported.')
 
@@ -88,9 +85,6 @@ export default function expressio(opts) {
   // Set server instance
   // initial value
   server.instance = null
-
-  // Expose App settings
-  server.settings = settings
 
   /**
    * Mount event

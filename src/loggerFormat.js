@@ -95,7 +95,12 @@ const formatters = {
     const response = parseJSON(info.req.response)
 
     const { prettify } = info.options
-    const opts = { colors: true, compact: false, ...(!prettify ? { breakLength: Infinity } : {}) }
+    const opts = {
+      colors: true,
+      depth: null,
+      compact: false,
+      ...(!prettify ? { breakLength: Infinity } : {}),
+    }
 
     // Update inspect colors
     util.inspect.styles.string = 'white'

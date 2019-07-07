@@ -26,7 +26,6 @@ describe('Expressio', () => {
     expect(app.logger).toBeDefined()
     expect(app.events).toBeDefined()
     expect(app.env).toBeDefined()
-    expect(app.settings).toBeDefined()
     expect(app.parentApp).toBeDefined()
     expect(app.isMounted).toBeDefined()
     expect(app.subApps).toBeDefined()
