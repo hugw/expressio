@@ -9,6 +9,7 @@
 import ndtk from 'ndtk'
 import isFunction from 'lodash/isFunction'
 import isString from 'lodash/isString'
+import isPlainObject from 'lodash/isPlainObject'
 import Joi from '@hapi/joi'
 import Layer from 'express/lib/router/layer'
 
@@ -32,8 +33,9 @@ function initialize(name, fn) {
 const validate = (source, schema) => {
   ndtk.assert(isString(source), 'Validate error: source is not a string')
 
-  // Ensure schema is a valid Joi object
-  ndtk.assert(schema && schema.isJoi, 'Validate error: schema provided is not a valid Joi schema')
+  // Ensure schema is a valid object
+  ndtk.assert((schema && schema.isJoi) || isPlainObject(schema), 'Validate error: schema provided is not an object')
+  const validSchema = schema.isJoi ? schema : Joi.object(schema)
 
   const validSource = ['body', 'params', 'query'].includes(source)
   ndtk.assert(validSource, 'Validate error: bad validation source, possible options are "body", "params", "query"')
@@ -42,7 +44,7 @@ const validate = (source, schema) => {
     // First check for empty payloads
     if (!req[source]) throw ndtk.httpError(422, { message: `Request ${source} data is missing`, type: 'VALIDATION' })
 
-    const result = Joi.validate(req[source], schema, { stripUnknown: true, abortEarly: false })
+    const result = Joi.validate(req[source], validSchema, { stripUnknown: true, abortEarly: false })
 
     if (result.error) {
       const { details } = result.error

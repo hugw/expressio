@@ -84,11 +84,32 @@ describe('Expressio / Core Initializer', () => {
       next.mockClear()
     })
 
-    it('given a request with good payload, it should reassign the sanitized data to the request object', () => {
+    it('given a request with good payload and Joi schema, it should reassign the sanitized data to the request object', () => {
       const schema = Joi.object({
         foo: Joi.boolean().required(),
         bar: Joi.string().trim().required(),
       })
+
+      const req = {
+        body: {
+          foo: true,
+          bar: ' bar ',
+          extra: '...',
+        },
+      }
+
+      const handler = core.validate('body', schema)
+      handler(req, null, next)
+
+      expect(next).toHaveBeenCalled()
+      expect(req.body).toEqual({ foo: true, bar: 'bar' })
+    })
+
+    it('given a request with good payload and plain object schema, it should reassign the sanitized data to the request object', () => {
+      const schema = {
+        foo: Joi.boolean().required(),
+        bar: Joi.string().trim().required(),
+      }
 
       const req = {
         body: {
@@ -115,7 +136,11 @@ describe('Expressio / Core Initializer', () => {
     })
 
     it('given an invalid schema, it should throw an error with proper message', () => {
-      expect(() => core.validate('body', {})).toThrow('Validate error: schema provided is not a valid Joi schema')
+      expect(() => core.validate('body')).toThrow('Validate error: schema provided is not an object')
+      expect(() => core.validate('body', null)).toThrow('Validate error: schema provided is not an object')
+      expect(() => core.validate('body', undefined)).toThrow('Validate error: schema provided is not an object')
+      expect(() => core.validate('body', true)).toThrow('Validate error: schema provided is not an object')
+      expect(() => core.validate('body', [])).toThrow('Validate error: schema provided is not an object')
     })
 
     it('given a not allowed source, it should throw an error with proper message', () => {
