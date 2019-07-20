@@ -1,6 +1,6 @@
 import request from 'supertest'
 import ndtk from 'ndtk'
-import Joi from 'joi'
+import Joi from '@hapi/joi'
 
 import core from '@/core'
 import app from './fixtures/core/app'

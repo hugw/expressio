@@ -9,7 +9,7 @@
 import ndtk from 'ndtk'
 import isString from 'lodash/isString'
 import isPlainObject from 'lodash/isPlainObject'
-import Joi from 'joi'
+import Joi from '@hapi/joi'
 
 /**
  * Helper for loading

@@ -7,7 +7,7 @@
  */
 
 import { createLogger, transports } from 'winston'
-import Joi from 'joi'
+import Joi from '@hapi/joi'
 
 import format from '@/loggerFormat'
 import utils from '@/utils'

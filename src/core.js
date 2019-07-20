@@ -9,7 +9,7 @@
 import ndtk from 'ndtk'
 import isFunction from 'lodash/isFunction'
 import isString from 'lodash/isString'
-import Joi from 'joi'
+import Joi from '@hapi/joi'
 import Layer from 'express/lib/router/layer'
 
 /**
