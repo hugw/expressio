@@ -15,6 +15,7 @@ import ndtk from 'ndtk'
 import path from 'path'
 import dotenv from 'dotenv'
 import isString from 'lodash/isString'
+import semver from 'semver'
 
 import utils from '@/utils'
 import logger from '@/logger'
@@ -41,7 +42,7 @@ export default function expressio(opts) {
   const config = utils.config(`${root}/config`, './config')
 
   // Ensure the current Node version installed is supported
-  ndtk.assert(ndtk.supported(config.core.engine), 'Current Node version is not supported.')
+  ndtk.assert(semver.gte(process.version, semver.coerce(config.core.engine)), 'Current Node version is not supported.')
 
   // Create a new Express server instance
   const server = express()
