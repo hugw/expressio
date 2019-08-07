@@ -10,6 +10,8 @@ import { format } from 'winston'
 import chalk from 'chalk'
 import util from 'util'
 
+const isError = e => e && e.stack && e.message && typeof e.stack === 'string' && typeof e.message === 'string'
+
 function parseJSON(string) {
   try {
     const content = JSON.parse(string)
@@ -44,7 +46,7 @@ const formatters = {
 
   // Errors
   error: format((info) => {
-    if (info instanceof Error) {
+    if (isError(info)) {
       const message = chalk.red(info.message)
 
       // Remove first line (duplicate of message)
