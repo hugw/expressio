@@ -40,7 +40,7 @@ export default {
     core: {
       port: null, // Enable autobind ports to avoid colisions
       logger: {
-        silent: true,
+        level: 'error',
       },
     },
   },

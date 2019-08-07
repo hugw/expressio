@@ -26,7 +26,7 @@ describe('Expressio / Configs', () => {
         core: {
           port: null,
           logger: {
-            silent: true,
+            level: 'error',
           },
         },
       },
