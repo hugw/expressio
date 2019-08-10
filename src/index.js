@@ -36,7 +36,7 @@ export default function expressio(opts) {
   ndtk.assert(root && ndtk.isDir(root), 'Application root path is invalid.')
 
   // Load environment variables
-  dotenv.config({ path: path.join(root, '.env') })
+  dotenv.config()
 
   // Load config variables
   const config = utils.config(`${root}/config`, './config')
