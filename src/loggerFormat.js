@@ -9,6 +9,7 @@
 import { format } from 'winston'
 import chalk from 'chalk'
 import util from 'util'
+import isObject from 'lodash/isObject'
 
 const isError = e => e && e.stack && e.message && typeof e.stack === 'string' && typeof e.message === 'string'
 
@@ -130,13 +131,27 @@ const formatters = {
       response,
     } = info.req
 
-    const { env } = info.options
-
-    const message = env !== 'production'
-      ? `${method} ${path}  ${status}  ${extras} ${payload} ${response}`
-      : `${method} ${path}  ${status}  ${extras}`
+    const message = `${method} ${path}  ${status}  ${extras} ${payload} ${response}`
 
     return { ...info, message }
+  }),
+
+  // Request
+  object: format((info) => {
+    if (isObject(info.message)) {
+      const opts = {
+        colors: true,
+        depth: null,
+        compact: false,
+      }
+
+      // Update inspect colors
+      util.inspect.styles.string = 'white'
+
+      return { ...info, message: chalk.gray(util.inspect(info.message, opts)) }
+    }
+
+    return info
   }),
 }
 
@@ -150,6 +165,7 @@ export default format.combine(
   formatters.reqExtras(),
   formatters.reqBody(),
   formatters.req(),
+  formatters.object(),
 
   // Print message
   format.printf(info => `${info.timestamp} ${info.level} ${info.message}`),
