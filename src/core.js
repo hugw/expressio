@@ -109,6 +109,7 @@ const notFoundHandler = (req, res, next) => next(ndtk.httpError(404))
  * @link https://github.com/davidbanham/express-async-errors
  */
 Object.defineProperty(Layer.prototype, 'handle', {
+  configurable: true,
   get() { return this.fn },
   set(fn) {
     // Ignore error handlers and non async functions
