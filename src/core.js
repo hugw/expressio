@@ -11,7 +11,8 @@ import isFunction from 'lodash/isFunction'
 import isString from 'lodash/isString'
 import isPlainObject from 'lodash/isPlainObject'
 import Joi from '@hapi/joi'
-import Layer from 'express/lib/router/layer'
+
+import './asyncErrors'
 
 /**
  * Load initializers
@@ -65,20 +66,6 @@ const validate = (source, schema) => {
 }
 
 /**
- * Controller middleware
- * to handle async errors
- */
-const controller = (resource) => {
-  ndtk.assert(isFunction(resource), 'Controller error: resource is not a function')
-
-  return async (req, res, next) => {
-    try {
-      await resource(req, res, next)
-    } catch (e) { next(e) }
-  }
-}
-
-/**
  * Format all caught errors
  * and return an http error object
  */
@@ -101,25 +88,8 @@ const generalErrorHandler = (err, req, res, next) => { // eslint-disable-line
  */
 const notFoundHandler = (req, res, next) => next(ndtk.httpError(404))
 
-/**
- * Auto asyncfy all routes
- * instead of having to rely on
- * using "controller" manually
- *
- * @link https://github.com/davidbanham/express-async-errors
- */
-Object.defineProperty(Layer.prototype, 'handle', {
-  configurable: true,
-  get() { return this.fn },
-  set(fn) {
-    // Ignore error handlers and non async functions
-    this.fn = (fn.length !== 4 && fn.constructor.name === 'AsyncFunction') ? controller(fn) : fn
-  },
-})
-
 export default {
   initialize,
-  controller,
   generalErrorHandler,
   notFoundHandler,
   validate,

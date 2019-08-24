@@ -39,44 +39,6 @@ describe('Expressio / Core Initializer', () => {
     })
   })
 
-  describe('#controller', () => {
-    const resource = jest.fn().mockResolvedValue()
-    const badResource = jest.fn().mockRejectedValue('Ops')
-    const next = jest.fn()
-
-    afterEach(() => {
-      resource.mockClear()
-      next.mockClear()
-      badResource.mockClear()
-    })
-
-    it('should execute a valid async route', async () => {
-      const route = core.controller(resource)
-      await route(null, null, next)
-
-      expect(resource).toHaveBeenCalledWith(null, null, next)
-    })
-
-    it('should execute and catch errors thrown from a bad async route', async () => {
-      const route = core.controller(badResource)
-      await route(null, null, next)
-
-      expect(badResource).toHaveBeenCalledWith(null, null, next)
-      expect(next).toHaveBeenCalledWith('Ops')
-    })
-
-    it('given an invalid resource, it should throw an error with proper message', () => {
-      expect(() => core.controller()).toThrow('Controller error: resource is not a function')
-      expect(() => core.controller(null)).toThrow('Controller error: resource is not a function')
-      expect(() => core.controller(undefined)).toThrow('Controller error: resource is not a function')
-      expect(() => core.controller(true)).toThrow('Controller error: resource is not a function')
-      expect(() => core.controller(10)).toThrow('Controller error: resource is not a function')
-      expect(() => core.controller({})).toThrow('Controller error: resource is not a function')
-      expect(() => core.controller([])).toThrow('Controller error: resource is not a function')
-      expect(() => core.controller('string')).toThrow('Controller error: resource is not a function')
-    })
-  })
-
   describe('#validate', () => {
     const next = jest.fn()
 
