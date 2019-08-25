@@ -28,9 +28,10 @@ export default {
 
       // Logger
       logger: {
-        silent: false,
         level: 'info',
+        silent: false,
         prettify: true,
+        transports: ['console', 'file'],
       },
     },
   },
@@ -49,7 +50,6 @@ export default {
   production: {
     core: {
       logger: {
-        level: 'error',
         prettify: false,
       },
     },

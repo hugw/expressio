@@ -17,7 +17,7 @@ import isString from 'lodash/isString'
 import semver from 'semver'
 
 import utils from '@/utils'
-import logger from '@/logger'
+import logger from '@/logger/initializer'
 import core from '@/core'
 import events from '@/events'
 

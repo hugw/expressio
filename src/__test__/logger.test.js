@@ -1,4 +1,4 @@
-import logger from '@/logger'
+import logger from '@/logger/initializer'
 
 describe('Expressio / Logger Initializer', () => {
   const use = jest.fn()
@@ -10,6 +10,7 @@ describe('Expressio / Logger Initializer', () => {
           silent: false,
           level: 'info',
           prettify: true,
+          transports: ['console', 'file'],
           ...attrs,
         },
       },
@@ -24,7 +25,7 @@ describe('Expressio / Logger Initializer', () => {
     const server = { use, ...config() }
     logger(server)
 
-    expect(server.logger.level).toEqual('info')
+    expect(server.logger.instance.level).toEqual('info')
     expect(server.logger.error).toBeDefined()
     expect(server.logger.info).toBeDefined()
     expect(server.logger.warn).toBeDefined()
@@ -45,5 +46,15 @@ describe('Expressio / Logger Initializer', () => {
   it('given no "prettify" config, it should throw an error with proper message', () => {
     const fn = () => logger(config({ prettify: undefined }))
     expect(fn).toThrow('Invalid Logger config: "prettify" is required')
+  })
+
+  it('given no "transports" config, it should throw an error with proper message', () => {
+    const fn = () => logger(config({ transports: undefined }))
+    expect(fn).toThrow('Invalid Logger config: "transports" is required')
+  })
+
+  it('given invalid "transports" config, it should throw an error with proper message', () => {
+    const fn = () => logger(config({ transports: [123] }))
+    expect(fn).toThrow('Invalid Logger config: "0" must be a string')
   })
 })

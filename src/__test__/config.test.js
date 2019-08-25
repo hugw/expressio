@@ -19,6 +19,7 @@ describe('Expressio / Configs', () => {
             silent: false,
             level: 'info',
             prettify: true,
+            transports: ['console', 'file'],
           },
         },
       },
@@ -33,7 +34,6 @@ describe('Expressio / Configs', () => {
       production: {
         core: {
           logger: {
-            level: 'error',
             prettify: false,
           },
         },
