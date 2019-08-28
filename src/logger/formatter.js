@@ -86,7 +86,7 @@ export default (info, { prettify }) => {
   /**
    * Request
    */
-  if (info.isReq) {
+  if (isObject(info) && info.isReq) {
     const status = reqStatus(info)
     const extras = reqExtras(info)
     const response = reqRes(info, prettify)
