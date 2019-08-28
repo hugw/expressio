@@ -7,15 +7,8 @@ describe('Expressio / Events Initializer', () => {
     fn.mockClear()
   })
 
-  const subServer = { subApps: {} }
+  const server = {}
 
-  const server = {
-    subApps: {
-      subServer,
-    },
-  }
-
-  events(subServer)
   events(server)
 
   it('should load the initializer and expose an api to the server', () => {
@@ -71,10 +64,8 @@ describe('Expressio / Events Initializer', () => {
       server.events.on('onEmit3', () => prom)
       server.events.on('onEmit3', () => Promise.resolve('foo'))
       server.events.on('onEmit3', () => 'bar')
-      subServer.events.on('onEmit3', () => 'bar from sub app')
-      subServer.events.on('onEmit3', () => Promise.resolve('foo from sub app'))
       const res = await server.events.emit('onEmit3')
-      expect(res).toEqual([[], true, 'I am late', 'foo', 'bar', ['bar from sub app', 'foo from sub app']])
+      expect(res).toEqual([[], true, 'I am late', 'foo', 'bar'])
     })
 
     it('given an invalid event, it should throw an error with proper message', () => {

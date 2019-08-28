@@ -12,8 +12,6 @@ import isString from 'lodash/isString'
 import isPlainObject from 'lodash/isPlainObject'
 import Joi from '@hapi/joi'
 
-import './asyncErrors'
-
 /**
  * Load initializers
  */

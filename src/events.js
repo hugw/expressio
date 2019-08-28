@@ -32,11 +32,7 @@ export default (server) => {
 
     const events = stack[event] || []
 
-    // Propagate to sub app events
-    const { subApps } = server
-    const otherEvents = Object.values(subApps).map(app => app.events.emit(event, ...args))
-
-    return Promise.all([...events.map(fn => fn(server, ...args)), ...otherEvents])
+    return Promise.all(events.map(fn => fn(server, ...args)))
   }
 
   // Expose Events Api to the server object

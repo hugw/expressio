@@ -254,11 +254,4 @@ describe('Expressio / Core Demo', () => {
       type: 'BAD_REQUEST',
     })
   })
-
-  it('(GET /sub-app) should get a mounted sub app route', async () => {
-    const response = await request(app).get('/sub-app')
-
-    expect(response.status).toBe(200)
-    expect(response.body).toEqual({})
-  })
 })

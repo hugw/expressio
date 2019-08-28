@@ -13,8 +13,9 @@ import cors from 'cors'
 import compress from 'compression'
 import ndtk from 'ndtk'
 import dotenv from 'dotenv'
-import isString from 'lodash/isString'
 import semver from 'semver'
+
+import 'express-async-errors'
 
 import utils from '@/utils'
 import logger from '@/logger/initializer'
@@ -55,11 +56,6 @@ export default function expressio(opts) {
   // Expose root path
   server.root = root
 
-  // Set other defaults
-  server.parentApp = null
-  server.subApps = {}
-  server.isMounted = false
-
   // Define the server environment
   server.set('env', config.core.env)
   server.env = config.core.env
@@ -85,37 +81,6 @@ export default function expressio(opts) {
   // Set server instance
   // initial value
   server.instance = null
-
-  /**
-   * Mount event
-   */
-  server.on('mount', (parent) => {
-    const { name } = defaults
-
-    // Mounted app requires a name
-    // to scope settings/fns/configs...
-    ndtk.assert(isString(name) && name.length !== 0, 'Mounted sub apps requires a name.')
-
-    // Check if current name is already in use
-    ndtk.assert(!parent.subApps[name], `Module name "${name}" is already in use.`)
-
-    // Flag the current server as mounted
-    // if installed as a sub app
-    server.isMounted = true
-
-    // Any parent logger configuration
-    // takes place over sub apps setups
-    server.logger = parent.logger
-
-    // Expose references
-    server.parentApp = parent
-    parent.subApps = {
-      ...parent.subApps,
-      [name]: server,
-    }
-
-    server.logger.info(`Sub App "${name}" mounted`)
-  })
 
   /**
    * Start server
