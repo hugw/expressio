@@ -27,7 +27,7 @@
     "express-async-errors": "^3.1.1",
     "helmet": "^3.18.0",
     "lodash": "^4.17.15",
-    "ndtk": "^0.7.1",
+    "ndtk": "^1.0.0",
     "redact-secrets": "^1.0.0",
     "semver": "^6.2.0",
     "winston": "^3.2.1"
@@ -39,13 +39,13 @@
     "@babel/preset-env": "^7.4.5",
     "@hugw/eslint-config-node": "git+https://github.com/hugw/eslint-config-node.git",
     "babel-plugin-module-resolver": "^3.2.0",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint": "^6.2.2",
+    "eslint-config-airbnb-base": "^13.0.0",
     "eslint-import-resolver-babel-module": "^5.1.0",
     "eslint-plugin-import": "^2.17.3",
     "jest": "^24.8.0",
     "nodemon": "^1.19.1",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "supertest": "4.0.2"
   },
   "jest": {
