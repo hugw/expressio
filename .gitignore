@@ -6,4 +6,4 @@ lib
 tmp
 *.env
 *.DS_Store
-*.log
+logs

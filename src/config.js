@@ -31,7 +31,10 @@ export default {
         level: 'info',
         silent: false,
         prettify: true,
-        transports: ['console', 'file'],
+        transports: {
+          console: true,
+          file: true,
+        },
       },
     },
   },

@@ -8,7 +8,6 @@
 
 import * as winston from 'winston'
 import Joi from '@hapi/joi'
-import ndtk from 'ndtk'
 
 import utils from '@/utils'
 import formatter from './formatter'
@@ -23,7 +22,10 @@ const schema = Joi.object({
   level: Joi.string().required(), // @TODO Allow only npm level strings
   silent: Joi.boolean().required(),
   prettify: Joi.boolean().required(),
-  transports: Joi.array().items(Joi.string().required()).required(),
+  transports: Joi.object({
+    file: Joi.boolean().required(),
+    console: Joi.boolean().required(),
+  }).required(),
 })
 
 export default (server) => {
@@ -42,18 +44,15 @@ export default (server) => {
     format: output,
   })
 
-  // Define available transports
-  const availableTransports = {
-    console: new winston.transports.Console(),
-    file: new winston.transports.File({ filename: `logs/${server.env}.log` }),
+  // Setup console transport
+  if (transports.console) {
+    instance.add(new winston.transports.Console())
   }
 
-  // Add allowed transports to Winston
-  transports.forEach((name) => {
-    const transport = availableTransports[name]
-    ndtk.assert(transport, `Logger Error: Transport "${transport}" not found.`)
-    instance.add(transport)
-  })
+  // Setup file transport
+  if (transports.file) {
+    instance.add(new winston.transports.File({ filename: `logs/${server.env}.log` }))
+  }
 
   // Setup Winston configs
   instance.level = level

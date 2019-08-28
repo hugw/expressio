@@ -10,7 +10,10 @@ describe('Expressio / Logger Initializer', () => {
           silent: false,
           level: 'info',
           prettify: true,
-          transports: ['console', 'file'],
+          transports: {
+            console: true,
+            file: true,
+          },
           ...attrs,
         },
       },
@@ -51,10 +54,5 @@ describe('Expressio / Logger Initializer', () => {
   it('given no "transports" config, it should throw an error with proper message', () => {
     const fn = () => logger(config({ transports: undefined }))
     expect(fn).toThrow('Invalid Logger config: "transports" is required')
-  })
-
-  it('given invalid "transports" config, it should throw an error with proper message', () => {
-    const fn = () => logger(config({ transports: [123] }))
-    expect(fn).toThrow('Invalid Logger config: "0" must be a string')
   })
 })
