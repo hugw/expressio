@@ -40,6 +40,166 @@ describe('Expressio / Core Initializer', () => {
   })
 
   describe('#validate', () => {
+    it('given an invalid schema, it should throw an error with proper message', () => {
+      expect(() => core.validate()).toThrow('Validate error: the schema provided is not a valid object')
+      expect(() => core.validate(null, null)).toThrow('Validate error: the schema provided is not a valid object')
+      expect(() => core.validate(null, undefined)).toThrow('Validate error: the schema provided is not a valid object')
+      expect(() => core.validate(null, true)).toThrow('Validate error: the schema provided is not a valid object')
+      expect(() => core.validate(null, [])).toThrow('Validate error: the schema provided is not a valid object')
+    })
+
+    it('should accept plain objects as valid schema', () => {
+      const schema = {
+        foo: Joi.boolean().required(),
+      }
+
+      expect(core.validate({ foo: true }, schema)).toHaveProperty('value')
+    })
+
+    it('should accept joi objects as valid schema', () => {
+      const schema = Joi.object({
+        foo: Joi.boolean().required(),
+      })
+
+      expect(core.validate({ foo: true }, schema)).toHaveProperty('value')
+    })
+
+    it('given a schema and valid values, it should return sanitized data', () => {
+      const schema = Joi.object({
+        bool: Joi.boolean().required(),
+        string: Joi.string().required(),
+        number: Joi.number().required(),
+      })
+
+      const values = {
+        bool: true,
+        string: 'a string',
+        number: 10,
+        other: 'should be removed',
+      }
+
+      expect(core.validate(values, schema)).toEqual({
+        value: {
+          bool: true,
+          string: 'a string',
+          number: 10,
+        },
+      })
+    })
+
+    it('given a schema and invalid values, it should return a formatted error object', () => {
+      const schema = Joi.object({
+        bool: Joi.boolean().required(),
+        string: Joi.string().required(),
+        number: Joi.number().required(),
+      })
+
+      const values = {
+        bool: 'hey',
+        string: 10,
+        number: 'not a number',
+      }
+
+      expect(core.validate(values, schema)).toEqual({
+        error: {
+          bool: {
+            message: 'bool must be a boolean',
+            type: 'boolean.base',
+          },
+          string: {
+            message: 'string must be a string',
+            type: 'string.base',
+          },
+          number: {
+            message: 'number must be a number',
+            type: 'number.base',
+          },
+        },
+      })
+    })
+
+    it('given a complex schema and invalid values, it should return a formatted error object', () => {
+      const schema = Joi.object({
+        bool: Joi.boolean().required(),
+        string: Joi.string().required(),
+        number: Joi.number().required(),
+        array: Joi.array().items({
+          arrayBool: Joi.boolean().required(),
+          arrayString: Joi.string().required(),
+          arrayNumber: Joi.number().required(),
+        }).required(),
+        object: Joi.object({
+          objectBool: Joi.boolean().required(),
+          objectString: Joi.string().required(),
+          objectNumber: Joi.number().required(),
+        }).required(),
+      })
+
+      const values = {
+        bool: 'hey',
+        string: 10,
+        array: [{
+          arrayBool: true,
+          arrayString: 'string',
+          arrayNumber: 'not a number',
+        }, {
+          arrayBool: 'not a boolean',
+          arrayNumber: 10,
+        }],
+        object: {
+          objectBool: true,
+          objectNumber: 'not a number',
+        },
+      }
+
+      expect(core.validate(values, schema)).toEqual({
+        error: {
+          bool: {
+            message: 'bool must be a boolean',
+            type: 'boolean.base',
+          },
+          string: {
+            message: 'string must be a string',
+            type: 'string.base',
+          },
+          number: {
+            message: 'number is required',
+            type: 'any.required',
+          },
+          array: {
+            '[0]': {
+              arrayNumber: {
+                message: 'arrayNumber must be a number',
+                type: 'number.base',
+              },
+            },
+            '[1]': {
+              arrayBool: {
+                message: 'arrayBool must be a boolean',
+                type: 'boolean.base',
+              },
+              arrayString: {
+                message: 'arrayString is required',
+                type: 'any.required',
+              },
+            },
+          },
+          object: {
+            objectNumber: {
+              message: 'objectNumber must be a number',
+              type: 'number.base',
+            },
+            objectString: {
+              message: 'objectString is required',
+              type: 'any.required',
+            },
+          },
+        },
+      })
+    })
+  })
+
+  describe('#validateRequest', () => {
     const next = jest.fn()
 
     afterEach(() => {
@@ -60,7 +220,7 @@ describe('Expressio / Core Initializer', () => {
         },
       }
 
-      const handler = core.validate('body', schema)
+      const handler = core.validateRequest('body', schema)
       handler(req, null, next)
 
       expect(next).toHaveBeenCalled()
@@ -81,7 +241,7 @@ describe('Expressio / Core Initializer', () => {
         },
       }
 
-      const handler = core.validate('body', schema)
+      const handler = core.validateRequest('body', schema)
       handler(req, null, next)
 
       expect(next).toHaveBeenCalled()
@@ -89,28 +249,20 @@ describe('Expressio / Core Initializer', () => {
     })
 
     it('given an invalid source, it should throw an error with proper message', () => {
-      expect(() => core.validate()).toThrow('Validate error: source is not a string')
-      expect(() => core.validate(null)).toThrow('Validate error: source is not a string')
-      expect(() => core.validate(undefined)).toThrow('Validate error: source is not a string')
-      expect(() => core.validate(true)).toThrow('Validate error: source is not a string')
-      expect(() => core.validate({})).toThrow('Validate error: source is not a string')
-      expect(() => core.validate([])).toThrow('Validate error: source is not a string')
-    })
-
-    it('given an invalid schema, it should throw an error with proper message', () => {
-      expect(() => core.validate('body')).toThrow('Validate error: schema provided is not an object')
-      expect(() => core.validate('body', null)).toThrow('Validate error: schema provided is not an object')
-      expect(() => core.validate('body', undefined)).toThrow('Validate error: schema provided is not an object')
-      expect(() => core.validate('body', true)).toThrow('Validate error: schema provided is not an object')
-      expect(() => core.validate('body', [])).toThrow('Validate error: schema provided is not an object')
+      expect(() => core.validateRequest()).toThrow('Validate error: source is not a string')
+      expect(() => core.validateRequest(null)).toThrow('Validate error: source is not a string')
+      expect(() => core.validateRequest(undefined)).toThrow('Validate error: source is not a string')
+      expect(() => core.validateRequest(true)).toThrow('Validate error: source is not a string')
+      expect(() => core.validateRequest({})).toThrow('Validate error: source is not a string')
+      expect(() => core.validateRequest([])).toThrow('Validate error: source is not a string')
     })
 
     it('given a not allowed source, it should throw an error with proper message', () => {
-      expect(() => core.validate('', Joi.string().required())).toThrow('Validate error: bad validation source, possible options are "body", "params", "query"')
+      expect(() => core.validateRequest('', Joi.string().required())).toThrow('Validate error: bad validation source, possible options are "body", "params", "query"')
     })
 
     it('given a request with empty payloads, it should throw an http error with proper information', () => {
-      const handler = core.validate('body', Joi.string().required())
+      const handler = core.validateRequest('body', Joi.string().required())
       try {
         handler({}, null, null)
       } catch (err) {
@@ -130,7 +282,7 @@ describe('Expressio / Core Initializer', () => {
         bar: Joi.string().required(),
       })
 
-      const handler = core.validate('params', schema)
+      const handler = core.validateRequest('params', schema)
       try {
         handler({ params: {} }, null, null)
       } catch (err) {

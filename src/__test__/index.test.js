@@ -5,6 +5,7 @@ import expressio, {
   validate,
   assert,
   sanitize,
+  validateRequest,
 } from '@'
 
 describe('Expressio', () => {
@@ -12,6 +13,7 @@ describe('Expressio', () => {
     expect(httpError).toBeDefined()
     expect(router).toBeDefined()
     expect(validate).toBeDefined()
+    expect(validateRequest).toBeDefined()
     expect(assert).toBeDefined()
     expect(sanitize).toBeDefined()
   })

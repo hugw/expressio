@@ -144,13 +144,14 @@ export default function expressio(opts) {
  */
 const router = express.Router
 const { httpError, assert } = ndtk
-const { validate } = core
+const { validate, validateRequest } = core
 const { sanitize } = utils
 
 export {
   router,
   httpError,
   validate,
+  validateRequest,
   assert,
   sanitize,
 }
